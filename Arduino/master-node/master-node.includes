@@ -4,3 +4,4 @@ src
 ../libraries/common-node
 /usr/share/arduino/hardware/arduino/cores/arduino
 /usr/share/arduino/hardware/tools/avr/lib/avr/include
+/usr/share/arduino/libraries/SoftwareSerial

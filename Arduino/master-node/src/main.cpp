@@ -10,6 +10,8 @@
 #include "config.h"
 #include "button.h"
 
+#include <SoftwareSerial.h>
+
 #define CAN0_INT 2
 MCP_CAN CAN0(9);     // Set CS to pin 9
 
@@ -20,6 +22,7 @@ CanMessage msg;
 CanMessage answer;
 Button btn1(7);
 Button btn2(6);
+SoftwareSerial btSerial(10, 4, 0);
 
 void setup()
 {
@@ -58,6 +61,10 @@ void setup()
     pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
     btn1.setup();
     btn2.setup();
+
+    // set the data rate for the SoftwareSerial port
+    btSerial.begin(9600);
+    btSerial.println("Hello, World!");
 }
 
 void setWaterSwitch(uint8_t state, unsigned long addrId)
@@ -86,6 +93,13 @@ void setWaterSwitch(uint8_t state, unsigned long addrId)
 
 void loop()
 {
+    if (btSerial.available()) {
+        Serial.write(btSerial.read());
+    }
+    if (Serial.available()) {
+        btSerial.write(Serial.read());
+    }
+
     btn1.loop();
     if (btn1.changed())
     {

@@ -1,0 +1,35 @@
+Commands over Bluetooth.
+Version 0.1.
+
+
+Errorcodes:
+    0 - no errors
+    1 - unknown command
+    2 - command timeout (slave node did not respond)
+    3 - slave node with given address doesn't exist
+
+
+Command:
+    AT+WATER=<address>,<state>
+Description:
+    Turns off or on the water switch.
+Answer:
+    OK or
+    ERROR <errcode>
+Params:
+    <address> - address of the slave node, dec format
+    <state> - 0 for off, 1 for on
+
+
+
+Command:
+    AT+WATER=<address>?
+Description:
+    Returns state of water switch on node with address <address>.
+Answer:
+    +WATER <state> or
+    ERROR <errcode>
+Params:
+    <address> - address of the slave node, dec format
+    <state> - 0 for off, 1 for on
+

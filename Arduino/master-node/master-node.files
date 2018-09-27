@@ -1,4 +1,6 @@
 Makefile
+src/bt_commands.cpp
+src/bt_commands.h
 src/main.cpp
 src/config.h
 src/button.cpp

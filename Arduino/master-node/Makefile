@@ -6,7 +6,7 @@ LOCAL_CPP_SRCS  ?= $(wildcard src/*.cpp)
 
 ARDUINO_SKETCHBOOK = .
 USER_LIB_PATH = $(realpath ../libraries)
-ARDUINO_LIBS = MCP_CAN SPI CRC common-node
+ARDUINO_LIBS = SoftwareSerial MCP_CAN SPI CRC common-node
 
 include /usr/share/arduino/Arduino.mk
 
