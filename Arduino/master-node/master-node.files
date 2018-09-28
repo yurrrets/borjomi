@@ -1,4 +1,5 @@
 Makefile
+bt_protocol.txt
 src/bt_commands.cpp
 src/bt_commands.h
 src/main.cpp
