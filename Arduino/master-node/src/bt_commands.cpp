@@ -1,18 +1,30 @@
 #include "bt_commands.h"
 #include "cmd_codes.h"
 #include "config.h"
-
+#include "stream_ext.h"
 
 class ReadFinisher
 {
 private:
-    Stream &stream;
+    StreamExt &stream;
 public:
-    ReadFinisher(Stream &stream) : stream(stream) { }
-    ~ReadFinisher() { while (stream.available()) stream.read(); }
+    ReadFinisher(StreamExt &stream) : stream(stream) { }
+    ~ReadFinisher() {
+//        Serial.print("_last readed (in hex): ");
+//        Serial.print(stream.lastReaded(), 16);
+        if (stream.lastReaded() != '\n')
+        {
+            /*size_t len = */ stream.readUntil('\n');
+//            Serial.print(" readed next len: ");
+//            Serial.print(len);
+        }
+//        Serial.println();
+//        while (stream.available())
+//            stream.read();
+    }
 };
 
-BTCommandParser::BTCommandParser(Stream &stream)
+BTCommandParser::BTCommandParser(StreamExt &stream)
     : stream(stream)
 {
 }
@@ -31,47 +43,54 @@ BTCommand BTCommandParser::read()
     ReadFinisher rdFinisher(stream);
 
     res.errcode = BTERR_NO_ERROR;
-    char buf[16];
+    char buf[32];
 
-//    int c = stream.read();
-//    if (c < 0)
-//    {
-//        res.errcode = BTERR_NO_CMD;
-//        return res;
-//    }
-
-//    Serial.print("num: ");
-//    Serial.println(c);
-
-//    buf[0] = (char)c;
-    size_t len = stream.readBytesUntil('=', buf, 16);
-//    len++;
-    buf[len] = '\0';
+    static const char Terminators[] = { '=', '?' };
+    StreamExt::ReadResult rr = stream.readBytesUntilOneOf(Terminators, sizeof(Terminators), buf, sizeof(buf));
+    buf[rr.sz] = '\0';
     if (!strcmp("AT+WATER", buf))
     {
-        res.address = stream.parseInt();
-        len = stream.readBytes(buf, 1);
-        if (len < 1)
+        if (stream.lastReaded() == '?')
         {
-            res.errcode = BTERR_TIMEOUT;
-            return res;
-        }
-        if (buf[0] == '?')
-        {
+            // GET_WATER_SWITCH command
+            // so read an address and return
             res.cmd = CMD_GET_WATER_SWITCH;
+            res.address = stream.parseInt();
             return res;
         }
-        if (buf[0] == ',')
-        {
-            res.value = stream.parseInt();
+        else if (stream.lastReaded() == '=')
             res.cmd = CMD_SET_WATER_SWITCH;
+        else
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
             return res;
         }
+        // SET_WATER_SWITCH command
+        // first read address
+        res.address = stream.parseInt();
+        // ensure that next char is comma
+        if (stream.readNext() != ',')
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+        // and read value that should be set
+        res.value = stream.parseInt();
+        return res;
     }
 
 #ifdef DEBUG
     Serial.print("BT Received cmd: ");
-    Serial.println(buf);
+    Serial.print(buf);
+    Serial.print(" len: ");
+    Serial.print(rr.sz);
+    Serial.print(" hex bytes: ");
+    for (uint8_t i = 0; i < rr.sz; i++)
+    {
+        Serial.print((int)buf[i], 16);
+        Serial.print(" ");
+    }
+    Serial.println();
 #endif
     res.errcode = BTERR_UNKNOWN_CMD;
     return res;
@@ -97,40 +116,3 @@ void BTCommandParser::answerWaterState(uint8_t state)
 
 
 
-DbgStream::DbgStream(Stream &wrk)
-    : wrk(wrk)
-{
-}
-
-size_t DbgStream::write(uint8_t val)
-{
-#ifdef DEBUG
-    Serial.write(val);
-#endif
-    return wrk.write(val);
-}
-
-int DbgStream::available()
-{
-    return wrk.available();
-}
-
-int DbgStream::read()
-{
-    int res = wrk.read();
-#ifdef DEBUG
-    if (res >= 0)
-        Serial.write(res);
-#endif
-    return res;
-}
-
-int DbgStream::peek()
-{
-    return wrk.peek();
-}
-
-void DbgStream::flush()
-{
-    wrk.flush();
-}

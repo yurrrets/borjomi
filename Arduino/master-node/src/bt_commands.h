@@ -2,6 +2,7 @@
 #define BT_COMMANDS_H
 
 #include <Arduino.h>
+#include "config.h"
 
 // Error codes
 
@@ -36,38 +37,19 @@ struct BTCommand
     uint32_t value;
 };
 
+class StreamExt;
+
 class BTCommandParser
 {
 public:
-    BTCommandParser(Stream &stream);
+    BTCommandParser(StreamExt &stream);
     BTCommand read();
     void answerError(uint8_t errcode);
     void answerOK();
     void answerWaterState(uint8_t state);
 
 private:
-    Stream &stream;
-};
-
-
-class DbgStream : public Stream
-{
-public:
-    DbgStream(Stream &wrk);
-
-    // Print interface
-public:
-    size_t write(uint8_t val);
-
-    // Stream interface
-public:
-    int available();
-    int read();
-    int peek();
-    void flush();
-
-private:
-    Stream &wrk;
+    StreamExt &stream;
 };
 
 #endif // BT_COMMANDS_H

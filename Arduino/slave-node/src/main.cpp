@@ -139,6 +139,9 @@ void loop()
             case CMD_SET_WATER_SWITCH:
                 answer = cmdSetWaterSwitch(msg);
                 break;
+            case CMD_GET_WATER_SWITCH:
+                answer = cmdGetWaterSwitch(msg);
+                break;
             default:
                 break;
             }

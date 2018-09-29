@@ -23,7 +23,7 @@ Params:
 
 
 Command:
-    AT+WATER=<address>?
+    AT+WATER?<address>
 Description:
     Returns state of water switch on node with address <address>.
 Answer:

@@ -3,24 +3,29 @@
 
 #include <SoftwareSerial.h>
 
-#include <cmd_codes.h>
-#include <can_message.h>
-
 #include "config.h"
+#include "stream_ext.h"
+#include "cmd_codes.h"
+#include "can_message.h"
+
 #include "button.h"
 #include "bt_commands.h"
 #include "can_commands.h"
 
+#define BT_RX_PIN   (4)
+#define BT_TX_PIN   (10)
+#define CAN_CS_PIN  (9)
+#define CMD_ANSWER_TIMEOUT (1000)
+
 Button btn1(7);
 Button btn2(6);
-SoftwareSerial btSerial(4, 10, 0);
-DbgStream btDbgSerial(btSerial);
-BTCommandParser  btCommandIO(btDbgSerial);
-CanCommands canCommands(9);
+SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
+StreamExt btExtSerial(btSerial);
+BTCommandParser btCommandIO(btExtSerial);
+CanCommands canCommands(CAN_CS_PIN);
 
 bool lastCommandAnswered;
 unsigned long lastCommandMillis;
-#define CMD_ANSWER_TIMEOUT (1000)
 
 
 
@@ -67,6 +72,7 @@ void loop()
             // process bt command
             switch (btCmd.cmd) {
             case CMD_SET_WATER_SWITCH:
+            case CMD_GET_WATER_SWITCH:
                 canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
                 break;
             default:
@@ -111,7 +117,17 @@ void loop()
                 canCommands.getAnswer().code == CMD_OK)
             {
                 // switch reaction depending on command
-                btCommandIO.answerOK();
+                switch (canCommands.getRequest().code) {
+                case CMD_SET_WATER_SWITCH:
+                    btCommandIO.answerOK();
+                    break;
+                case CMD_GET_WATER_SWITCH:
+                    btCommandIO.answerWaterState(canCommands.getAnswer().value);
+                    break;
+                default:
+                    btCommandIO.answerError(BTERR_UNKNOWN_CMD);
+                    break;
+                }
             }
             else
                 btCommandIO.answerError(BTERR_INVALID_ANSWER);
