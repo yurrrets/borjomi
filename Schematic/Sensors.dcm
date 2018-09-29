@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP MH-Series
+D Hygrometer module for soil moisture detection
+K hygrometer humidity soil moisture
+F https://ru.aliexpress.com/item/1pcs-lot-soil-the-hygrometer-detection-module-soil-moisture-sensor-Robot-smart-car/32826425650.html?spm=a2g0v.10010108.1000016.1.7ca9471dkqoaPU&isOrigTitle=true
+$ENDCMP
+#
+#End Doc Library

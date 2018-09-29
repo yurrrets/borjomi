@@ -1,0 +1,345 @@
+EESchema Schematic File Version 4
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "My Scheme"
+Date ""
+Rev ""
+Comp "Home"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L MCU_Module:Arduino_Nano_v3.x A1
+U 1 1 5B6D71E4
+P 4550 2750
+F 0 "A1" H 4850 1750 50  0000 C CNN
+F 1 "Arduino_Nano" H 5050 1650 50  0000 C CNN
+F 2 "Module:Arduino_Nano" H 4700 1800 50  0001 L CNN
+F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 4550 1750 50  0001 C CNN
+	1    4550 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L CAN:MCP2515-TJA1050 U1
+U 1 1 5B6F5288
+P 7600 2350
+F 0 "U1" H 7600 3128 50  0000 C CNN
+F 1 "MCP2515-TJA1050" H 7600 3037 50  0000 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7600 1450 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/21801e.pdf" H 7700 1550 50  0001 C CNN
+	1    7600 2350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3850 1450 3850 2350
+Wire Wire Line
+	3850 2350 4050 2350
+Wire Wire Line
+	7000 2200 5800 2200
+Wire Wire Line
+	5800 2200 5800 4250
+Wire Wire Line
+	5800 4250 3900 4250
+Wire Wire Line
+	3900 4250 3900 3450
+Wire Wire Line
+	3900 3450 4050 3450
+Wire Wire Line
+	7000 2300 5950 2300
+Wire Wire Line
+	5950 4350 3800 4350
+Wire Wire Line
+	3800 4350 3800 3250
+Wire Wire Line
+	3800 3250 4050 3250
+Wire Wire Line
+	5950 2300 5950 4350
+Wire Wire Line
+	7000 2400 6100 2400
+Wire Wire Line
+	6100 2400 6100 4450
+Wire Wire Line
+	6100 4450 3700 4450
+Wire Wire Line
+	3700 3350 4050 3350
+Wire Wire Line
+	3700 3350 3700 4450
+Wire Wire Line
+	7000 2500 6250 2500
+Wire Wire Line
+	6250 2500 6250 4550
+Wire Wire Line
+	6250 4550 3600 4550
+Wire Wire Line
+	3600 4550 3600 3050
+Wire Wire Line
+	3600 3050 4050 3050
+Wire Wire Line
+	7000 2100 5800 2100
+Wire Wire Line
+	5800 2100 5800 1450
+Wire Wire Line
+	5800 1450 3850 1450
+Wire Wire Line
+	4750 1750 6200 1750
+Wire Wire Line
+	7600 4150 7600 2800
+$Comp
+L Connector:Screw_Terminal_01x02 J1
+U 1 1 5B6F66B3
+P 1550 1850
+F 0 "J1" H 1470 1525 50  0000 C CNN
+F 1 "Vin 12V" H 1470 1616 50  0000 C CNN
+F 2 "" H 1550 1850 50  0001 C CNN
+F 3 "~" H 1550 1850 50  0001 C CNN
+	1    1550 1850
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector:Screw_Terminal_01x02 J2
+U 1 1 5B6F678B
+P 1550 2300
+F 0 "J2" H 1470 1975 50  0000 C CNN
+F 1 "Vout 12V" H 1470 2066 50  0000 C CNN
+F 2 "" H 1550 2300 50  0001 C CNN
+F 3 "~" H 1550 2300 50  0001 C CNN
+	1    1550 2300
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4650 3750 4650 4150
+Wire Wire Line
+	4650 4150 7600 4150
+$Comp
+L power:GND #PWR04
+U 1 1 5B6F6C10
+P 4550 3900
+F 0 "#PWR04" H 4550 3650 50  0001 C CNN
+F 1 "GND" H 4555 3727 50  0000 C CNN
+F 2 "" H 4550 3900 50  0001 C CNN
+F 3 "" H 4550 3900 50  0001 C CNN
+	1    4550 3900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4550 3750 4550 3900
+$Comp
+L power:GND #PWR01
+U 1 1 5B6F704F
+P 2250 2350
+F 0 "#PWR01" H 2250 2100 50  0001 C CNN
+F 1 "GND" H 2255 2177 50  0000 C CNN
+F 2 "" H 2250 2350 50  0001 C CNN
+F 3 "" H 2250 2350 50  0001 C CNN
+	1    2250 2350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1750 1850 2250 1850
+Wire Wire Line
+	2250 1850 2250 2300
+Wire Wire Line
+	1750 2300 2250 2300
+Connection ~ 2250 2300
+Wire Wire Line
+	2250 2300 2250 2350
+Wire Wire Line
+	1750 2200 2100 2200
+Wire Wire Line
+	2100 2200 2100 1750
+Wire Wire Line
+	2100 1750 1750 1750
+$Comp
+L Connector_Generic:Conn_01x05 J4
+U 1 1 5B6F8A1D
+P 1550 4100
+F 0 "J4" H 1470 3675 50  0000 C CNN
+F 1 "Data in" H 1470 3766 50  0000 C CNN
+F 2 "" H 1550 4100 50  0001 C CNN
+F 3 "~" H 1550 4100 50  0001 C CNN
+	1    1550 4100
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x05 J5
+U 1 1 5B6F8AB0
+P 1550 3250
+F 0 "J5" H 1470 2825 50  0000 C CNN
+F 1 "Data out" H 1470 2916 50  0000 C CNN
+F 2 "" H 1550 3250 50  0001 C CNN
+F 3 "~" H 1550 3250 50  0001 C CNN
+	1    1550 3250
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1750 4300 1900 4300
+Wire Wire Line
+	1900 4300 1900 3450
+Wire Wire Line
+	1900 3450 1750 3450
+Wire Wire Line
+	1750 4200 1950 4200
+Wire Wire Line
+	1950 4200 1950 3350
+Wire Wire Line
+	1950 3350 1750 3350
+Wire Wire Line
+	1750 4100 2000 4100
+Wire Wire Line
+	2000 4100 2000 3250
+Wire Wire Line
+	2000 3250 1750 3250
+Wire Wire Line
+	1750 4000 2050 4000
+Wire Wire Line
+	2050 4000 2050 3150
+Wire Wire Line
+	2050 3150 1750 3150
+Wire Wire Line
+	1750 3900 2100 3900
+Wire Wire Line
+	2100 3900 2100 3050
+Wire Wire Line
+	2100 3050 1750 3050
+Text Label 1800 3050 0    50   ~ 0
+shield
+Wire Wire Line
+	1950 4200 1950 4750
+Wire Wire Line
+	8200 4750 8200 2600
+Connection ~ 1950 4200
+Wire Wire Line
+	8200 2500 8300 2500
+Wire Wire Line
+	8300 2500 8300 4800
+Wire Wire Line
+	1900 4800 1900 4300
+Connection ~ 1900 4300
+$Comp
+L Relay:SANYOU_SRD_Form_C K1
+U 1 1 5B6FFEB6
+P 2900 2850
+F 0 "K1" H 2470 2804 50  0000 R CNN
+F 1 "SRD-5VDC-SL-C" H 2470 2895 50  0000 R CNN
+F 2 "Relay_THT:Relay_SPDT_SANYOU_SRD_Series_Form_C" H 3350 2800 50  0001 L CNN
+F 3 "http://www.sanyourelay.ca/public/products/pdf/SRD.pdf" H 2900 2850 50  0001 C CNN
+	1    2900 2850
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2100 1750 2400 1750
+Connection ~ 2100 1750
+Wire Wire Line
+	1950 4750 8200 4750
+Wire Wire Line
+	1900 4800 8300 4800
+$Comp
+L power:GND #PWR03
+U 1 1 5B7075AE
+P 3100 3500
+F 0 "#PWR03" H 3100 3250 50  0001 C CNN
+F 1 "GND" H 3105 3327 50  0000 C CNN
+F 2 "" H 3100 3500 50  0001 C CNN
+F 3 "" H 3100 3500 50  0001 C CNN
+	1    3100 3500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3100 3150 3100 3500
+Wire Wire Line
+	3100 2550 3100 2450
+Wire Wire Line
+	3100 2450 4050 2450
+$Comp
+L Connector:Screw_Terminal_01x02 J3
+U 1 1 5B709E73
+P 2700 1100
+F 0 "J3" V 2700 900 50  0000 C CNN
+F 1 "Water Switch 12V" V 2550 600 50  0000 C CNN
+F 2 "" H 2700 1100 50  0001 C CNN
+F 3 "~" H 2700 1100 50  0001 C CNN
+	1    2700 1100
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR02
+U 1 1 5B70B3E3
+P 2800 1400
+F 0 "#PWR02" H 2800 1150 50  0001 C CNN
+F 1 "GND" H 2805 1227 50  0000 C CNN
+F 2 "" H 2800 1400 50  0001 C CNN
+F 3 "" H 2800 1400 50  0001 C CNN
+	1    2800 1400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2800 1300 2800 1400
+Wire Wire Line
+	2700 1300 2700 2550
+Wire Wire Line
+	2400 1750 2400 3400
+Wire Wire Line
+	2400 3400 2600 3400
+Wire Wire Line
+	2600 3400 2600 3150
+Connection ~ 2400 1750
+Wire Wire Line
+	2400 1750 4450 1750
+$Comp
+L Sensors:MH-Series U2
+U 1 1 5B713FC4
+P 6600 1150
+F 0 "U2" H 6600 1525 50  0000 C CNN
+F 1 "MH-Series" H 6600 1434 50  0000 C CNN
+F 2 "Package_DFN_QFN:AMS_QFN-4-1EP_2x2mm_P0.95mm_EP0.7x1.6mm" H 6600 750 50  0001 C CNN
+F 3 "https://ru.aliexpress.com/item/1pcs-lot-soil-the-hygrometer-detection-module-soil-moisture-sensor-Robot-smart-car/32826425650.html?spm=a2g0v.10010108.1000016.1.7ca9471dkqoaPU&isOrigTitle=true" H 6500 1150 50  0001 C CNN
+	1    6600 1150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR05
+U 1 1 5B7140ED
+P 6050 1400
+F 0 "#PWR05" H 6050 1150 50  0001 C CNN
+F 1 "GND" H 6055 1227 50  0000 C CNN
+F 2 "" H 6050 1400 50  0001 C CNN
+F 3 "" H 6050 1400 50  0001 C CNN
+	1    6050 1400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6200 1200 6050 1200
+Wire Wire Line
+	6050 1200 6050 1400
+Wire Wire Line
+	6200 1300 6200 1750
+Connection ~ 6200 1750
+Wire Wire Line
+	6200 1750 7600 1750
+Wire Wire Line
+	5050 2750 5600 2750
+Wire Wire Line
+	5600 2750 5600 1000
+Wire Wire Line
+	5600 1000 6200 1000
+$Comp
+L Connector_Generic:Conn_01x02 J6
+U 1 1 5B71928D
+P 8450 1200
+F 0 "J6" H 8530 1192 50  0000 L CNN
+F 1 "Conn_01x02" H 8530 1101 50  0000 L CNN
+F 2 "" H 8450 1200 50  0001 C CNN
+F 3 "~" H 8450 1200 50  0001 C CNN
+	1    8450 1200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7000 1200 8250 1200
+Wire Wire Line
+	8250 1300 7000 1300
+$EndSCHEMATC
