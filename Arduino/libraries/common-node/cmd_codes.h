@@ -17,13 +17,13 @@
 #define CMD_OK                   (1)
 #define CVAL_ACCEPTED            (0)
 
-/// When send to node 0x0, this means multicast message.
+/// When send to node 0x0 (MULTICAST_NODE), this means multicast message.
 /// And every slave node in this case should answer with CMD_PONG.
 /// Otherwise react only if node address matches, as always.
-/// Value c
 #define CMD_PING                 (2)
 
 /// This is the answer to ping command (CMD_PING)
+/// Value of command answer is slave node's address.
 #define CMD_PONG                 (3)
 
 /// Sets state of water switch.

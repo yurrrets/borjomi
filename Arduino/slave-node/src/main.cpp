@@ -126,7 +126,8 @@ void loop()
             Serial.println();
 #endif
 
-            if (rxId != nodeID.nodeId)
+            if ((rxId != nodeID.nodeId && msg.code != CMD_PING) ||
+                    (msg.code == CMD_PING && rxId != MULTICAST_NODE && rxId != nodeID.nodeId))
             {
 #ifdef DEBUG
 //                Serial.println(" Alien module id, ignoring cmd");
@@ -141,6 +142,11 @@ void loop()
                 break;
             case CMD_GET_WATER_SWITCH:
                 answer = cmdGetWaterSwitch(msg);
+                break;
+            case CMD_PING:
+                if (rxId == MULTICAST_NODE) // need to wait some time to avoid collisions
+                    delay(nodeID.nodeId);
+                answer = cmdPing(msg, nodeID.nodeId);
                 break;
             default:
                 break;

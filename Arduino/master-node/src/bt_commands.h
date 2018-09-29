@@ -47,6 +47,7 @@ public:
     void answerError(uint8_t errcode);
     void answerOK();
     void answerWaterState(unsigned long addrId, uint8_t state);
+    void answerPong(unsigned long addrId);
 
 private:
     StreamExt &stream;

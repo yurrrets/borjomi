@@ -11,6 +11,7 @@
 #include "button.h"
 #include "bt_commands.h"
 #include "can_commands.h"
+#include "nodes.h"
 
 #define BT_RX_PIN   (4)
 #define BT_TX_PIN   (10)
@@ -75,6 +76,11 @@ void loop()
             case CMD_GET_WATER_SWITCH:
                 canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
                 break;
+            case CMD_PING:
+                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
+                if (btCmd.address == MULTICAST_NODE)
+                    lastCommandAnswered = true; // we don't know the exact number of answers
+                break;
             default:
                 btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
                 lastCommandAnswered = true;
@@ -113,8 +119,15 @@ void loop()
 //            Serial.print(lastProcessCommand);
 //            Serial.print(" answer.code: ");
 //            Serial.println(canCommands.getAnswer().code);
+
             if (canCommands.getAnswer().num == canCommands.getRequest().num &&
-                canCommands.getAnswer().code == CMD_OK)
+                    canCommands.getRequest().code == CMD_PING &&
+                    canCommands.getAnswer().code == CMD_PONG)
+            {
+                btCommandIO.answerPong(canCommands.getAnswer().value);
+            }
+            else if (canCommands.getAnswer().num == canCommands.getRequest().num &&
+                    canCommands.getAnswer().code == CMD_OK)
             {
                 // switch reaction depending on command
                 switch (canCommands.getRequest().code) {
@@ -132,6 +145,13 @@ void loop()
             else
                 btCommandIO.answerError(BTERR_INVALID_ANSWER);
             lastCommandAnswered = true;
+        }
+        else if (canCommands.getRequest().code == CMD_PING &&
+                 canCommands.getLastRequestAddress() == MULTICAST_NODE &&
+                 canCommands.getAnswer().num == canCommands.getRequest().num &&
+                 canCommands.getAnswer().code == CMD_PONG)
+        {
+            btCommandIO.answerPong(canCommands.getAnswer().value);
         }
         break;
     }

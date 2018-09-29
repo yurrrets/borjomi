@@ -29,3 +29,15 @@ CanMessage cmdGetWaterSwitch(const CanMessage &msg)
     res.updateCrc();
     return res;
 }
+
+CanMessage cmdPing(const CanMessage &msg, unsigned long thisNodeId)
+{
+    CanMessage res;
+    res.num = msg.num;
+    res.code = CMD_PONG;
+    res.pin = 0;
+    res.value = thisNodeId;
+
+    res.updateCrc();
+    return res;
+}

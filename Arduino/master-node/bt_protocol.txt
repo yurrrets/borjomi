@@ -33,3 +33,27 @@ Params:
     <address> - address of the slave node, dec format
     <state> - 0 for off, 1 for on
 
+
+
+Command:
+    AT+PING?<address>
+Description:
+    Ping the node with address <address>.
+Answer:
+    +PONG=<address> or
+    ERROR <errcode>
+Params:
+    <address> - address of the slave node, dec format
+
+
+
+Command:
+    AT+PING*
+Description:
+    Ping and list all slave nodes. Each node responces with pong, and each answer places on one line. The number of lines equals to number of active nodes. Each line appears with some delay, and the entire time could be relatively long (a second and more, depending on node configuration).
+Answer:
+    +PONG=<address_1>
+    +PONG=<address_2>
+    ...
+Params:
+    <address_x> - address of the slave node, dec format

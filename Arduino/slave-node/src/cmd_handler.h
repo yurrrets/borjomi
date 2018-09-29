@@ -5,5 +5,6 @@
 
 CanMessage cmdSetWaterSwitch(const CanMessage &msg);
 CanMessage cmdGetWaterSwitch(const CanMessage &msg);
+CanMessage cmdPing(const CanMessage &msg, unsigned long thisNodeId);
 
 #endif // CMD_HANDLER_H

@@ -4,7 +4,7 @@
 
 
 CanCommands::CanCommands(uint8_t pinCS)
-    : CAN0(pinCS)
+    : CAN0(pinCS), lastAddrId(0)
 {
 }
 

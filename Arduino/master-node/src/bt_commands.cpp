@@ -45,7 +45,7 @@ BTCommand BTCommandParser::read()
     res.errcode = BTERR_NO_ERROR;
     char buf[32];
 
-    static const char Terminators[] = { '=', '?' };
+    static const char Terminators[] = { '=', '?', '*', '\n' };
     StreamExt::ReadResult rr = stream.readBytesUntilOneOf(Terminators, sizeof(Terminators), buf, sizeof(buf));
     buf[rr.sz] = '\0';
     if (!strcmp("AT+WATER", buf))
@@ -76,6 +76,23 @@ BTCommand BTCommandParser::read()
         }
         // and read value that should be set
         res.value = stream.parseInt();
+        return res;
+    }
+
+    if (!strcmp("AT+PING", buf))
+    {
+        res.cmd = CMD_PING;
+        if (stream.lastReaded() == '*')
+        {
+            res.address = 0;
+            return res;
+        }
+        if (stream.lastReaded() != '?')
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+        res.address = stream.parseInt();
         return res;
     }
 
@@ -113,6 +130,12 @@ void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t state)
     stream.print(addrId);
     stream.print(",");
     stream.println(state);
+}
+
+void BTCommandParser::answerPong(unsigned long addrId)
+{
+    stream.print("+PONG=");
+    stream.println(addrId);
 }
 
 

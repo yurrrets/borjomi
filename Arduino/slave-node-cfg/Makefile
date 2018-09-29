@@ -6,7 +6,7 @@ LOCAL_CPP_SRCS  ?= $(wildcard src/*.cpp)
 
 ARDUINO_SKETCHBOOK = .
 USER_LIB_PATH = $(realpath ../libraries)
-ARDUINO_LIBS = MCP_CAN SPI CRC EEPROM common-node
+ARDUINO_LIBS = ArduinoSTL MCP_CAN SPI CRC EEPROM common-node
 
 include /usr/share/arduino/Arduino.mk
 
