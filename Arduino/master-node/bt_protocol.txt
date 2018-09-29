@@ -27,7 +27,7 @@ Command:
 Description:
     Returns state of water switch on node with address <address>.
 Answer:
-    +WATER <state> or
+    +WATER=<address>,<state> or
     ERROR <errcode>
 Params:
     <address> - address of the slave node, dec format

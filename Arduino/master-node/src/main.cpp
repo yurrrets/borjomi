@@ -122,7 +122,7 @@ void loop()
                     btCommandIO.answerOK();
                     break;
                 case CMD_GET_WATER_SWITCH:
-                    btCommandIO.answerWaterState(canCommands.getAnswer().value);
+                    btCommandIO.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
                     break;
                 default:
                     btCommandIO.answerError(BTERR_UNKNOWN_CMD);

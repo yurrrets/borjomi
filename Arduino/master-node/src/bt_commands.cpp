@@ -107,9 +107,11 @@ void BTCommandParser::answerOK()
     stream.println("OK");
 }
 
-void BTCommandParser::answerWaterState(uint8_t state)
+void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t state)
 {
-    stream.print("+WATER ");
+    stream.print("+WATER=");
+    stream.print(addrId);
+    stream.print(",");
     stream.println(state);
 }
 

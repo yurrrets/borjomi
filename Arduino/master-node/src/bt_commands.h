@@ -46,7 +46,7 @@ public:
     BTCommand read();
     void answerError(uint8_t errcode);
     void answerOK();
-    void answerWaterState(uint8_t state);
+    void answerWaterState(unsigned long addrId, uint8_t state);
 
 private:
     StreamExt &stream;

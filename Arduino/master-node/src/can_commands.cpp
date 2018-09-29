@@ -84,6 +84,7 @@ CanCommands::ReadStatus CanCommands::read()
 
 uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint32_t value)
 {
+    lastAddrId = addrId;
     ++request.num;
     request.code = command;
     request.value = value;

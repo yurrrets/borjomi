@@ -22,12 +22,14 @@ public:
     CanCommands(uint8_t pinCS);
     void setup();
     ReadStatus read();
+    unsigned long getLastRequestAddress() const { return lastAddrId; }
     const CanMessage &getRequest() const { return request; }
     const CanMessage &getAnswer() const { return answer; }
     uint8_t sendRequest(unsigned long addrId, uint8_t command, uint32_t value);
 
 private:
     MCP_CAN CAN0;
+    unsigned long lastAddrId;
     CanMessage request;
     CanMessage answer;
 };
