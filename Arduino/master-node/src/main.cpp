@@ -1,7 +1,6 @@
 // CAN Send Example
 //
 
-#include <mcp_can.h>
 #include <SoftwareSerial.h>
 
 #include <cmd_codes.h>
@@ -10,23 +9,15 @@
 #include "config.h"
 #include "button.h"
 #include "bt_commands.h"
+#include "can_commands.h"
 
-
-#define CAN0_INT 2
-MCP_CAN CAN0(9);     // Set CS to pin 9
-
-long unsigned int rxId;
-unsigned char len = 0;
-
-CanMessage msg;
-CanMessage answer;
 Button btn1(7);
 Button btn2(6);
 SoftwareSerial btSerial(4, 10, 0);
 DbgStream btDbgSerial(btSerial);
 BTCommandParser  btCommandIO(btDbgSerial);
+CanCommands canCommands(9);
 
-int lastProcessCommand;
 bool lastCommandAnswered;
 unsigned long lastCommandMillis;
 #define CMD_ANSWER_TIMEOUT (1000)
@@ -39,35 +30,8 @@ void setup()
     Serial.begin(9600);
 #endif
 
-    // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
-    if(CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
-    {
-#ifdef DEBUG
-        Serial.println("MCP2515 Initialized Successfully!");
-#endif
-    }
-    else
-    {
-#ifdef DEBUG
-        Serial.println("Error Initializing MCP2515...");
-#endif
-    }
+    lastCommandAnswered = true;
 
-    // Change to normal mode to allow messages to be transmitted
-    if (CAN0.setMode(MCP_NORMAL) == MCP2515_OK)
-    {
-#ifdef DEBUG
-        Serial.println("setMode Successful");
-#endif
-    }
-    else
-    {
-#ifdef DEBUG
-        Serial.println("setMode failed");
-#endif
-    }
-
-    pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
     btn1.setup();
     btn2.setup();
 
@@ -75,48 +39,15 @@ void setup()
     btSerial.begin(9600);
 //    btSerial.println("Hello, World!");
 
-    lastProcessCommand = CMD_INVALID;
-    lastCommandAnswered = true;
+    canCommands.setup();
 }
 
-void setWaterSwitch(uint8_t state, unsigned long addrId)
-{
-    ++msg.num;
-    msg.code = CMD_SET_WATER_SWITCH;
-    msg.value = state;
-    msg.updateCrc();
-
-    // send data:  ID = 0x100, Standard CAN Frame, Data length = 8 bytes, 'data' = array of data bytes to send
-    byte sndStat = CAN0.sendMsgBuf(addrId, 0, 8, (byte *)&msg);
-    if(sndStat == CAN_OK)
-    {
-#ifdef DEBUG
-        Serial.println("Message Sent Successfully!");
-#endif
-    }
-    else
-    {
-#ifdef DEBUG
-        Serial.print("Error Sending Message: ");
-        Serial.println((int)sndStat);
-#endif
-//        btCommandIO.answerError(BTERR_INVALID_SLAVE_NODE);
-//        lastCommandAnswered = true;
-    }
-}
 
 void loop()
 {
-//    if (btSerial.available()) {
-//        Serial.write(btSerial.read());
-//    }
-//    if (Serial.available()) {
-//        btSerial.write(Serial.read());
-//    }
-
     if (!lastCommandAnswered && (millis() - lastCommandMillis > CMD_ANSWER_TIMEOUT))
     {
-        btCommandIO.answerError(BTERR_INVALID_SLAVE_NODE);
+        btCommandIO.answerError(BTERR_TIMEOUT);
         lastCommandAnswered = true;
     }
 
@@ -130,14 +61,13 @@ void loop()
         }
         else
         {
-            lastProcessCommand = btCmd.cmd;
             lastCommandAnswered = false;
             lastCommandMillis = millis();
 
             // process bt command
             switch (btCmd.cmd) {
             case CMD_SET_WATER_SWITCH:
-                setWaterSwitch(btCmd.value, btCmd.address);
+                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
                 break;
             default:
                 btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
@@ -146,54 +76,60 @@ void loop()
         }
     }
 
+    // send can msg error
+    //        btCommandIO.answerError(BTERR_INVALID_SLAVE_NODE);
+    //        lastCommandAnswered = true;
+
     btn1.loop();
     if (btn1.changed())
     {
-        setWaterSwitch(btn1.val() == HIGH ? CVAL_CLOSED : CVAL_OPENED, 0x140);
+        canCommands.sendRequest(10, CMD_SET_WATER_SWITCH,
+                                btn1.val() == HIGH ? CVAL_CLOSED : CVAL_OPENED);
     }
 
     btn2.loop();
     if (btn2.changed())
     {
-        setWaterSwitch(btn2.val() == HIGH ? CVAL_CLOSED : CVAL_OPENED, 0x141);
+        canCommands.sendRequest(20, CMD_SET_WATER_SWITCH,
+                                btn1.val() == HIGH ? CVAL_CLOSED : CVAL_OPENED);
     }
 //    delay(100);   // send data per 100ms
 
-    if(!digitalRead(CAN0_INT))
+    switch (canCommands.read()) {
+    case CanCommands::S_NO_DATA:
+    case CanCommands::S_OTHER_NODE:
+        break;
+    case CanCommands::S_OK:
     {
-        CAN0.readMsgBuf(&rxId, &len, (byte *)&answer);      // Read data: len = data length
-        if (len != sizeof(CanMessage))
+        if (!lastCommandAnswered)
         {
-            Serial.println("Invalid CAN msg");
-            if (!lastCommandAnswered)
+//            Serial.print("lastProcessCommand: ");
+//            Serial.print(lastProcessCommand);
+//            Serial.print(" answer.code: ");
+//            Serial.println(canCommands.getAnswer().code);
+            if (canCommands.getAnswer().num == canCommands.getRequest().num &&
+                canCommands.getAnswer().code == CMD_OK)
             {
-                btCommandIO.answerError(BTERR_TIMEOUT);
-                lastCommandAnswered = true;
+                // switch reaction depending on command
+                btCommandIO.answerOK();
             }
+            else
+                btCommandIO.answerError(BTERR_INVALID_ANSWER);
+            lastCommandAnswered = true;
         }
-        else
+        break;
+    }
+    case CanCommands::S_INVALID_MSG:
+    case CanCommands::S_INVALID_CRC:
+    default:
+    {
+        if (!lastCommandAnswered)
         {
-            bool crcOK = answer.checkCrc();
-            Serial.print(" Answer Crc: ");
-            Serial.print(crcOK ? "ok" : "failed");
-            Serial.print(" AnswerNo: ");
-            Serial.print(msg.num);
-            Serial.print(" AnswerCode: ");
-            Serial.print(msg.code);
-            Serial.println();
-
-            if (!lastCommandAnswered)
-            {
-                if (lastProcessCommand == msg.code)
-                {
-                    // switch reaction
-                    btCommandIO.answerOK();
-                }
-                else
-                    btCommandIO.answerError(BTERR_TIMEOUT);
-                lastCommandAnswered = true;
-            }
+            btCommandIO.answerError(BTERR_INVALID_ANSWER);
+            lastCommandAnswered = true;
         }
+        break;
+    }
     }
 }
 

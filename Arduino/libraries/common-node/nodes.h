@@ -5,8 +5,9 @@
 #include "tools.h"
 
 #define MULTICAST_NODE    (0)
-#define UNKNOWN_NODE      (0x100)
-#define MASTER_NODE       (0x101)
+#define UNKNOWN_NODE      (1)
+#define MASTER_NODE       (8)
+// SLAVE_NODE should be (n*10), where n == 1, 2, 3, ...
 
 
 #pragma pack(push, 1)
