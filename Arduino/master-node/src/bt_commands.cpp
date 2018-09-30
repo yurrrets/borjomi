@@ -96,6 +96,32 @@ BTCommand BTCommandParser::read()
         return res;
     }
 
+    if (!strcmp("AT+ANALOG", buf))
+    {
+        if (stream.lastReaded() == '?')
+        {
+            res.cmd = CMD_ANALOG_READ;
+            // first read address
+            res.address = stream.parseInt();
+            // ensure that next char is comma
+            if (stream.readNext() != ',')
+            {
+                res.errcode = BTERR_UNKNOWN_CMD;
+                return res;
+            }
+            // and read pin no
+            res.pin = stream.parseInt();
+            return res;
+        }
+        else
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+        res.address = stream.parseInt();
+        return res;
+    }
+
 #ifdef DEBUG
     Serial.print("BT Received cmd: ");
     Serial.print(buf);
@@ -136,6 +162,14 @@ void BTCommandParser::answerPong(unsigned long addrId)
 {
     stream.print("+PONG=");
     stream.println(addrId);
+}
+
+void BTCommandParser::answerAnalogRead(unsigned long addrId, uint16_t val)
+{
+    stream.print("+ANALOG=");
+    stream.print(addrId);
+    stream.print(",");
+    stream.println(val);
 }
 
 

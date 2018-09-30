@@ -41,10 +41,44 @@
 //#define CVAL_CLOSING             (3)
 //#define CVAL_OPENING             (4)
 
-/// Reads the value of analog input pin
-#define CMD_READ_ANALOG          (6)
-
-/// Reads soil moisture value
-/// CommandPin parameter is ignored, instead always is used PIN_SOIL_MOISTURE
-#define CMD_READ_SOIL_MOISTURE   (7)
+/// Reads soil moisture value.
+/// The same as CMD_ANALOG_READ command, but
+/// commandPin parameter is ignored, instead always is used PIN_SOIL_MOISTURE
+#define CMD_READ_SOIL_MOISTURE   (6)
 #define PIN_SOIL_MOISTURE        (0) // soil moisture sensor is on analog pin 0
+
+/// Returns current version of firmware.
+/// Answer is CMD_OK, and value is in format <major>.<minor>.
+/// High 16 bits of value is <major>, and low 16 bits are for <minor>.
+#define CMD_VERSION              (7)
+#define MAKE_VERSION(mj,mn)      ((((uint32_t)mj & 0xFFFF) << 16) | ((uint32_t)mn & 0xFFFF))
+
+/// Calls analogWrite Arduino function. Uses commandPin part of message.
+/// Answers with CMD_OK, value equals to value parameter of input messge.
+#define CMD_ANALOG_WRITE         (32)
+
+/// Reads the value of analog input pin. Uses commandPin part of message.
+/// Just calls analogRead Arduino function, and return the value.
+#define CMD_ANALOG_READ          (33)
+
+
+
+/// Next functions should be used carefully.
+/// Remember that function do not perform any checks.
+/// However, pins 0,1 are usually used as RX,TX pin on built-in COM port.
+/// Pins 2,9,11,12,13 are used for SPI bus for CAN module.
+/// Pin 3 is used for Water Switch.
+/// Avoid using this pins directly with next functions.
+
+
+/// Calls digitalWrite Arduino function. Uses commandPin part of message.
+/// Answers with CMD_OK, value equals to value parameter of input messge.
+#define CMD_DIGITAL_WRITE        (34)
+
+/// Calls digitalRead Arduino function. Uses commandPin part of message.
+/// Answers with CMD_OK, value equals to result of digitalRead call.
+#define CMD_DIGITAL_READ         (35)
+
+/// Calls pinMode Arduino function. Uses commandPin part of message.
+/// Answers with CMD_OK, value equals to CVAL_ACCEPTED.
+#define CMD_DIGITAL_PIN_MODE     (36)

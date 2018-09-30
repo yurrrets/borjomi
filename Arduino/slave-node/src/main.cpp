@@ -137,6 +137,9 @@ void loop()
 
             CanMessage answer;
             switch (msg.code) {
+            case CMD_VERSION:
+                answer = cmdVersion(msg);
+                break;
             case CMD_SET_WATER_SWITCH:
                 answer = cmdSetWaterSwitch(msg);
                 break;
@@ -147,6 +150,24 @@ void loop()
                 if (rxId == MULTICAST_NODE) // need to wait some time to avoid collisions
                     delay(nodeID.nodeId);
                 answer = cmdPing(msg, nodeID.nodeId);
+                break;
+            case CMD_READ_SOIL_MOISTURE:
+                answer = cmdReadSoilMoisture(msg);
+                break;
+            case CMD_ANALOG_WRITE:
+                answer = cmdAnalogWrite(msg);
+                break;
+            case CMD_ANALOG_READ:
+                answer = cmdAnalogRead(msg);
+                break;
+            case CMD_DIGITAL_WRITE:
+                answer = cmdDigitalWrite(msg);
+                break;
+            case CMD_DIGITAL_READ:
+                answer = cmdDigitalRead(msg);
+                break;
+            case CMD_DIGITAL_PIN_MODE:
+                answer = cmdDigitalPinMode(msg);
                 break;
             default:
                 break;

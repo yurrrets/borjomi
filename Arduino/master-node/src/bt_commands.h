@@ -30,10 +30,11 @@
 
 struct BTCommand
 {
+    BTCommand() : errcode(0), cmd(0), pin(0), address(0), value(0) { }
     uint8_t errcode;
-    unsigned long address;
     uint8_t cmd; // from cmd_codes.h
-//    uint8_t pin;
+    uint8_t pin;
+    unsigned long address;
     uint32_t value;
 };
 
@@ -48,6 +49,7 @@ public:
     void answerOK();
     void answerWaterState(unsigned long addrId, uint8_t state);
     void answerPong(unsigned long addrId);
+    void answerAnalogRead(unsigned long addrId, uint16_t val);
 
 private:
     StreamExt &stream;

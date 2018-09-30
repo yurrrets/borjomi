@@ -81,6 +81,9 @@ void loop()
                 if (btCmd.address == MULTICAST_NODE)
                     lastCommandAnswered = true; // we don't know the exact number of answers
                 break;
+            case CMD_ANALOG_READ:
+                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
+                break;
             default:
                 btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
                 lastCommandAnswered = true;
@@ -136,6 +139,9 @@ void loop()
                     break;
                 case CMD_GET_WATER_SWITCH:
                     btCommandIO.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    break;
+                case CMD_ANALOG_READ:
+                    btCommandIO.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
                     break;
                 default:
                     btCommandIO.answerError(BTERR_UNKNOWN_CMD);

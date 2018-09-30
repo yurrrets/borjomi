@@ -57,3 +57,17 @@ Answer:
     ...
 Params:
     <address_x> - address of the slave node, dec format
+
+
+
+Command:
+    AT+ANALOG?<address>,<pin>
+Description:
+    Reads analog input on pin <pin> on device with given <address>.
+Answer:
+    +ANALOG=<address>,<value> or
+    ERROR <errcode>
+Params:
+    <address> - address of the slave node, dec format
+    <pin> - analog pin number, 0..7
+    <value> - number in range 0..1023
