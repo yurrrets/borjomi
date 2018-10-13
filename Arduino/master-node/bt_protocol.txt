@@ -1,38 +1,13 @@
 Commands over Bluetooth.
-Version 0.1.
+Version 0.2.
 
 
 Errorcodes:
     0 - no errors
     1 - unknown command
-    2 - command timeout (slave node did not respond)
-    3 - slave node with given address doesn't exist
-
-
-Command:
-    AT+WATER=<address>,<state>
-Description:
-    Turns off or on the water switch.
-Answer:
-    OK or
-    ERROR <errcode>
-Params:
-    <address> - address of the slave node, dec format
-    <state> - 0 for off, 1 for on
-
-
-
-Command:
-    AT+WATER?<address>
-Description:
-    Returns state of water switch on node with address <address>.
-Answer:
-    +WATER=<address>,<state> or
-    ERROR <errcode>
-Params:
-    <address> - address of the slave node, dec format
-    <state> - 0 for off, 1 for on
-
+    2 - command timeout (node did not respond)
+    3 - node with given address doesn't exist
+    4 - invalid <num> parameter provided, sensor/switch with given num doesn't exist
 
 
 Command:
@@ -43,31 +18,208 @@ Answer:
     +PONG=<address> or
     ERROR <errcode>
 Params:
-    <address> - address of the slave node, dec format
+    <address> - address of the node, dec format
 
 
 
 Command:
     AT+PING*
 Description:
-    Ping and list all slave nodes. Each node responces with pong, and each answer places on one line. The number of lines equals to number of active nodes. Each line appears with some delay, and the entire time could be relatively long (a second and more, depending on node configuration).
+    Ping and list all nodes. Each node responces with pong, and each answer places on one line. The number of lines equals to number of active nodes. Each line appears with some delay, and the entire time could be relatively long (a second and more, depending on node configuration).
 Answer:
     +PONG=<address_1>
     +PONG=<address_2>
     ...
 Params:
-    <address_x> - address of the slave node, dec format
+    <address_x> - address of the node, dec format
+
+
+
+Command:
+    AT+VERSION?<address>
+Description:
+    Gets firmware version of the node with given <address>.
+Answer:
+    +VERSION=<address>,<value> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <value> - version in format <major>.<minor>
+
+
+
+Command:
+    AT+CAPABILITIES?<address>
+Description:
+    Gets all capabilities of the node with given <address>.
+Answer:
+    +CAPABILITIES=[<c1>:<c1_cnt>;[<c2>:<c2_cnt>;[...]]] or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <c1>,<c2>,... - capability name; see Remarks section
+    <c1_cnt>,<c2_cnt>,... - number of available capabilities of given type (switches/sensors/etc.)
+Remarks:
+    Avalable capabilities are:
+      WATER - water switch
+      SOIL - soil moisture sensor
+      PRESSURE - water pressure sensor
+      CURRENT - current sensor
+      VOLTAGE - voltage sensor
+      DCADAPTER - DC adapter switch
+      PUMP - pump switch
+    All this capabilities can be managed via AT+XXX commands. See this doc below.
+
+
+
+Command:
+    AT+WATER=<address>,<num>,<state>
+Description:
+    Turns off or on the water switch with given logical number <num> on the node with given <address>.
+Answer:
+    OK or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of water switch
+    <state> - 0 for off, 1 for on
+
+
+
+Command:
+    AT+WATER?<address>,<num>
+Description:
+    Returns state of water switch with logical number <num> on the node with address <address>.
+Answer:
+    +WATER=<address>,<num>,<state> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of water switch
+    <state> - 0 for off, 1 for on
+
+
+
+Command:
+    AT+SOIL?<address>,<num>
+Description:
+    Gets level of soil moisture sensor with logical number <num> on the node with given <address>.
+Answer:
+    +SOIL=<address>,<num>,<value> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of soil moisture sensor
+    <value> - number in range 0..1023
+
+
+
+Command:
+    AT+PRESSURE?<address>,<num>
+Description:
+    Gets value of water pressure sensor with logical number <num> on the node with given <address>.
+Answer:
+    +PRESSURE=<address>,<num>,<value> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of water pressure sensor
+    <value> - float number meaning pressure, in Bars
+
+
+
+Command:
+    AT+CURRENT?<address>,<num>
+Description:
+    Gets value of current sensor with logical number <num> on the node with given <address>.
+Answer:
+    +CURRENT=<address>,<num>,<value> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of electric current sensor
+    <value> - float number meaning electric current, in Amperes
+
+
+
+Command:
+    AT+VOLTAGE?<address>,<num>
+Description:
+    Gets value of voltage sensor with logical number <num> on the node with given <address>.
+Answer:
+    +VOLTAGE=<address>,<num>,<value> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of voltage sensor
+    <value> - float number meaning voltage, in Volts
+
+
+
+Command:
+    AT+DCADAPTER=<address>,<num>,<state>
+Description:
+    Turns off or on the DC adapter with logical number <num> on the node with given <address>.
+Answer:
+    OK or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of DC adaptor
+    <state> - 0 for off, 1 for on
+
+
+
+Command:
+    AT+DCADAPTER?<address>,<num>
+Description:
+    Returns state of DC adapter with logical number <num> on the node with address <address>.
+Answer:
+    +WATER=<address>,<num>,<state> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of DC adaptor
+    <state> - 0 for off, 1 for on
+
+
+
+Command:
+    AT+PUMP=<address>,<num>,<state>
+Description:
+    Turns off or on the pump switch with given logical <num> on the node with address <address>.
+Answer:
+    OK or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of pump switch
+    <state> - 0 for off, 1 for on
+
+
+
+Command:
+    AT+PUMP?<address>,<num>
+Description:
+    Returns state of water switch with logical number <num> on the node with address <address>.
+Answer:
+    +WATER=<address>,<num>,<state> or
+    ERROR <errcode>
+Params:
+    <address> - address of the node, dec format
+    <num> - number of pump switch
+    <state> - 0 for off, 1 for on
 
 
 
 Command:
     AT+ANALOG?<address>,<pin>
 Description:
-    Reads analog input on pin <pin> on device with given <address>.
+    Reads analog input on pin <pin> on the node with given <address>.
 Answer:
     +ANALOG=<address>,<value> or
     ERROR <errcode>
 Params:
-    <address> - address of the slave node, dec format
+    <address> - address of the node, dec format
     <pin> - analog pin number, 0..7
     <value> - number in range 0..1023

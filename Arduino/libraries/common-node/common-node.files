@@ -1,5 +1,6 @@
 can_message.h
 can_message.cpp
+capabilities.h
 cmd_codes.h
 nodes.h
 stream_ext.cpp
