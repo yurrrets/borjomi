@@ -18,8 +18,6 @@
 #define CAN_CS_PIN  (9)
 #define CMD_ANSWER_TIMEOUT (1000)
 
-Button btn1(7);
-Button btn2(6);
 SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
 StreamExt btExtSerial(btSerial);
 BTCommandParser btCommandIO(btExtSerial);
@@ -37,9 +35,6 @@ void setup()
 #endif
 
     lastCommandAnswered = true;
-
-    btn1.setup();
-    btn2.setup();
 
     // set the data rate for the SoftwareSerial port
     btSerial.begin(9600);
@@ -72,17 +67,17 @@ void loop()
 
             // process bt command
             switch (btCmd.cmd) {
+            case CMD_CAPABILITIES:
             case CMD_SET_WATER_SWITCH:
             case CMD_GET_WATER_SWITCH:
-                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
+            case CMD_READ_SOIL_MOISTURE:
+            case CMD_ANALOG_READ:
+                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
                 break;
             case CMD_PING:
-                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
+                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
                 if (btCmd.address == MULTICAST_NODE)
                     lastCommandAnswered = true; // we don't know the exact number of answers
-                break;
-            case CMD_ANALOG_READ:
-                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.value);
                 break;
             default:
                 btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
@@ -94,21 +89,6 @@ void loop()
     // send can msg error
     //        btCommandIO.answerError(BTERR_INVALID_SLAVE_NODE);
     //        lastCommandAnswered = true;
-
-    btn1.loop();
-    if (btn1.changed())
-    {
-        canCommands.sendRequest(10, CMD_SET_WATER_SWITCH,
-                                btn1.val() == HIGH ? CVAL_CLOSED : CVAL_OPENED);
-    }
-
-    btn2.loop();
-    if (btn2.changed())
-    {
-        canCommands.sendRequest(20, CMD_SET_WATER_SWITCH,
-                                btn1.val() == HIGH ? CVAL_CLOSED : CVAL_OPENED);
-    }
-//    delay(100);   // send data per 100ms
 
     switch (canCommands.read()) {
     case CanCommands::S_NO_DATA:
@@ -123,25 +103,30 @@ void loop()
 //            Serial.print(" answer.code: ");
 //            Serial.println(canCommands.getAnswer().code);
 
-            if (canCommands.getAnswer().num == canCommands.getRequest().num &&
+            if (canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
                     canCommands.getRequest().code == CMD_PING &&
                     canCommands.getAnswer().code == CMD_PONG)
             {
                 btCommandIO.answerPong(canCommands.getAnswer().value);
             }
-            else if (canCommands.getAnswer().num == canCommands.getRequest().num &&
+            else if (canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
                     canCommands.getAnswer().code == CMD_OK)
             {
                 // switch reaction depending on command
                 switch (canCommands.getRequest().code) {
+                case CMD_CAPABILITIES:
+                    btCommandIO.answerCapabilities(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    break;
                 case CMD_SET_WATER_SWITCH:
                     btCommandIO.answerOK();
                     break;
                 case CMD_GET_WATER_SWITCH:
-                    btCommandIO.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    btCommandIO.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                     break;
+                case CMD_READ_SOIL_MOISTURE:
+                    btCommandIO.answerSoilMoisture(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                 case CMD_ANALOG_READ:
-                    btCommandIO.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    btCommandIO.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                     break;
                 default:
                     btCommandIO.answerError(BTERR_UNKNOWN_CMD);
@@ -154,7 +139,7 @@ void loop()
         }
         else if (canCommands.getRequest().code == CMD_PING &&
                  canCommands.getLastRequestAddress() == MULTICAST_NODE &&
-                 canCommands.getAnswer().num == canCommands.getRequest().num &&
+                 canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
                  canCommands.getAnswer().code == CMD_PONG)
         {
             btCommandIO.answerPong(canCommands.getAnswer().value);

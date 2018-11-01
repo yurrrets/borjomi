@@ -10,6 +10,7 @@
 #include "can_message.h"
 #include "cmd_codes.h"
 #include "nodes.h"
+#include "capabilities.h"
 #include "tools.h"
 
 #include "cmd_handler.h"
@@ -26,7 +27,7 @@ MCP_CAN CAN0(9);                               // Set CS to pin 10
 
 
 CanMessage msg;
-SlaveNodeID nodeID;
+SlaveNodeID NodeConfig;
 
 
 void setup()
@@ -40,20 +41,22 @@ void setup()
 
 
 
-    EEPROM.get(0, nodeID);
-    if (nodeID.checkCrc() && nodeID.nodeId) // nodeId != 0
+    EEPROM.get(0, NodeConfig);
+    if (NodeConfig.checkCrc() && NodeConfig.nodeId) // nodeId != 0
     {
 #ifdef DEBUG
-    Serial.print("I'm the Slave Node ID 0x");
-    Serial.println(nodeID.nodeId, HEX);
+        Serial.print("I'm the Slave Node ID 0x");
+        Serial.println(NodeConfig.nodeId, HEX);
 #endif
+        NodeConfig.waterSwitchCount = max(NodeConfig.waterSwitchCount, 1);
+        NodeConfig.soilMoistureCount = max(NodeConfig.soilMoistureCount, 1);
     }
     else
     {
 #ifdef DEBUG
         Serial.println("I'm the Slave Node with UNDEFINED ID!");
 #endif
-        nodeID.nodeId = UNKNOWN_NODE;
+        NodeConfig.nodeId = UNKNOWN_NODE;
     }
 
     // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
@@ -73,7 +76,8 @@ void setup()
     CAN0.setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 
     pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
-    pinMode(PIN_WATER_SWITCH, OUTPUT);
+    pinMode(PINS_WATER_SWITCH[0], OUTPUT);
+    digitalWrite(PINS_WATER_SWITCH[0], LOW);
 }
 
 void loop()
@@ -120,14 +124,14 @@ void loop()
             Serial.print(" Crc: ");
             Serial.print(crcOK ? "ok" : "failed");
             Serial.print(" MsgNo: ");
-            Serial.print(msg.num);
+            Serial.print(msg.msgno);
             Serial.print(" MsgCode: ");
             Serial.print(msg.code);
             Serial.println();
 #endif
 
-            if ((rxId != nodeID.nodeId && msg.code != CMD_PING) ||
-                    (msg.code == CMD_PING && rxId != MULTICAST_NODE && rxId != nodeID.nodeId))
+            if ((rxId != NodeConfig.nodeId && msg.code != CMD_PING) ||
+                    (msg.code == CMD_PING && rxId != MULTICAST_NODE && rxId != NodeConfig.nodeId))
             {
 #ifdef DEBUG
 //                Serial.println(" Alien module id, ignoring cmd");
@@ -140,6 +144,9 @@ void loop()
             case CMD_VERSION:
                 answer = cmdVersion(msg);
                 break;
+            case CMD_CAPABILITIES:
+                answer = cmdCapabilities(msg);
+                break;
             case CMD_SET_WATER_SWITCH:
                 answer = cmdSetWaterSwitch(msg);
                 break;
@@ -148,8 +155,8 @@ void loop()
                 break;
             case CMD_PING:
                 if (rxId == MULTICAST_NODE) // need to wait some time to avoid collisions
-                    delay(nodeID.nodeId);
-                answer = cmdPing(msg, nodeID.nodeId);
+                    delay(NodeConfig.nodeId);
+                answer = cmdPing(msg);
                 break;
             case CMD_READ_SOIL_MOISTURE:
                 answer = cmdReadSoilMoisture(msg);

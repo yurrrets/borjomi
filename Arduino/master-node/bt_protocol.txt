@@ -53,7 +53,7 @@ Command:
 Description:
     Gets all capabilities of the node with given <address>.
 Answer:
-    +CAPABILITIES=[<c1>:<c1_cnt>;[<c2>:<c2_cnt>;[...]]] or
+    +CAPABILITIES=<address>,[<c1>:<c1_cnt>;[<c2>:<c2_cnt>;[...]]] or
     ERROR <errcode>
 Params:
     <address> - address of the node, dec format
@@ -217,7 +217,7 @@ Command:
 Description:
     Reads analog input on pin <pin> on the node with given <address>.
 Answer:
-    +ANALOG=<address>,<value> or
+    +ANALOG=<address>,<pin>,<value> or
     ERROR <errcode>
 Params:
     <address> - address of the node, dec format

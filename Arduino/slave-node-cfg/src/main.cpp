@@ -7,7 +7,7 @@
 #include "nodes.h"
 
 
-SlaveNodeID nodeID;
+SlaveNodeID NodeConfig;
 
 
 void setup()
@@ -17,10 +17,12 @@ void setup()
         ; // wait for serial port to connect. Needed for native USB port only
     }
 
-    nodeID.nodeId = SLAVE_NODE_ID;
-    nodeID.updateCrc();
+    NodeConfig.nodeId = SLAVE_NODE_ID;
+    NodeConfig.waterSwitchCount = 1;
+    NodeConfig.soilMoistureCount = SOIL_MOISTURE_COUNT;
+    NodeConfig.updateCrc();
 
-    EEPROM.put(0, nodeID);
+    EEPROM.put(0, NodeConfig);
 }
 
 void loop()

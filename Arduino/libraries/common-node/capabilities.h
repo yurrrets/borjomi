@@ -11,53 +11,27 @@
 #define CB_VOLTAGE_SENSOR      (6)
 #define CB_PUMP_SWITCH         (7)
 
+static const uint8_t PINS_WATER_SWITCH[] = { 5 }; // digital pins
+static const uint8_t PINS_SOIL_MOISTURE[] = { 0 }; // analog pins
+
 #pragma pack(push, 1)
-
-struct CapabilityInfo
-{
-    uint8_t capability;
-    uint8_t count;
-};
-
-struct CbWaterSwitchInfo
-{
-    uint8_t pin; // digital pin
-};
-
-struct CbSoilMoistureSensorInfo
-{
-    uint8_t pin; // analog pin
-};
 
 struct CbPressureSensorInfo
 {
-    uint8_t pin; // analog pin
     float A;
     float B;
 };
 
 struct CbCurrentSensorInfo
 {
-    uint8_t pin; // analog pin
     float A;
     float B;
-};
-
-struct CbDcAdapterSwitchInfo
-{
-    uint8_t pin; // digital pin
 };
 
 struct CbVoltageSensorInfo
 {
-    uint8_t pin; // analog pin
     float A;
     float B;
-};
-
-struct CbPumpSwitchInfo
-{
-    uint8_t pin; // digital pin
 };
 
 #pragma pack(pop)

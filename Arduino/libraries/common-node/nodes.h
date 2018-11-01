@@ -16,6 +16,8 @@ struct SlaveNodeID
 {
     uint8_t crc;
     long unsigned int nodeId;
+    uint8_t waterSwitchCount;
+    uint8_t soilMoistureCount;
 
     void updateCrc() { crc = Crc8Partial(*this); }
     bool checkCrc() const { return crc == Crc8Partial(*this); }

@@ -4,14 +4,18 @@
 //   0          CRC8 of next 7 bytes
 //   1          Command No
 //   2          Command code CMD_XXX
-//   3          Command pin (if any)
+//   3          Command device num (pin num or ordinal device num [water switch num, soil moisture num, etc.)
 //   4-7        Value
 
 
 #define CMD_INVALID              (0)
+#define CMD_ERROR                (-1)
+
+#define CVAL_ERR_NO_ERROR        (0)
+#define CVAL_ERR_INVALID_DEV_NO  (1)
 
 /// This is the answer for most commands (except PING).
-/// Keep CommandNo and CommandPin.
+/// Keep CommandNo and CommandDevNo.
 /// Value in answer depends on command type.
 /// For CMD_SET_XXX is usually CVAL_ACCEPTED
 #define CMD_OK                   (1)
@@ -30,7 +34,6 @@
 /// Value is CVAL_CLOSED or CVAL_OPENED
 /// CommandPin parameter is ignored, instead always is used PIN_WATER_SWITCH
 #define CMD_SET_WATER_SWITCH     (4)
-#define PIN_WATER_SWITCH         (5) // water switch is on digital pin 5
 #define CVAL_CLOSED              (0)
 #define CVAL_OPENED              (1)
 
@@ -45,13 +48,22 @@
 /// The same as CMD_ANALOG_READ command, but
 /// commandPin parameter is ignored, instead always is used PIN_SOIL_MOISTURE
 #define CMD_READ_SOIL_MOISTURE   (6)
-#define PIN_SOIL_MOISTURE        (0) // soil moisture sensor is on analog pin 0
 
 /// Returns current version of firmware.
 /// Answer is CMD_OK, and value is in format <major>.<minor>.
 /// High 16 bits of value is <major>, and low 16 bits are for <minor>.
 #define CMD_VERSION              (7)
 #define MAKE_VERSION(mj,mn)      ((((uint32_t)mj & 0xFFFF) << 16) | ((uint32_t)mn & 0xFFFF))
+
+/// Returns capabilities of the node.
+/// Answer is CMD_OK.
+/// Value consist of 8 group by 4 bits.
+/// Every group correspond to one of CB_XXX const.
+/// Rule: CB_WATER_SWITCH == 1, and group is first 4 bits.
+/// CB_SOIL_MOISTURE == 2, and group is second 4 bits. And so on.
+#define CMD_CAPABILITIES         (8)
+
+
 
 /// Calls analogWrite Arduino function. Uses commandPin part of message.
 /// Answers with CMD_OK, value equals to value parameter of input messge.
@@ -67,7 +79,7 @@
 /// Remember that function do not perform any checks.
 /// However, pins 0,1 are usually used as RX,TX pin on built-in COM port.
 /// Pins 2,9,11,12,13 are used for SPI bus for CAN module.
-/// Pin 3 is used for Water Switch.
+/// Pin 5 is used for Water Switch.
 /// Avoid using this pins directly with next functions.
 
 

@@ -2,6 +2,8 @@
 #include "cmd_codes.h"
 #include "config.h"
 #include "stream_ext.h"
+#include "capabilities.h"
+
 
 class ReadFinisher
 {
@@ -48,35 +50,20 @@ BTCommand BTCommandParser::read()
     static const char Terminators[] = { '=', '?', '*', '\n' };
     StreamExt::ReadResult rr = stream.readBytesUntilOneOf(Terminators, sizeof(Terminators), buf, sizeof(buf));
     buf[rr.sz] = '\0';
-    if (!strcmp("AT+WATER", buf))
+
+    if (!strcmp("AT+CAPABILITIES", buf))
     {
         if (stream.lastReaded() == '?')
         {
-            // GET_WATER_SWITCH command
-            // so read an address and return
-            res.cmd = CMD_GET_WATER_SWITCH;
+            res.cmd = CMD_ANALOG_READ;
             res.address = stream.parseInt();
             return res;
         }
-        else if (stream.lastReaded() == '=')
-            res.cmd = CMD_SET_WATER_SWITCH;
         else
         {
             res.errcode = BTERR_UNKNOWN_CMD;
             return res;
         }
-        // SET_WATER_SWITCH command
-        // first read address
-        res.address = stream.parseInt();
-        // ensure that next char is comma
-        if (stream.readNext() != ',')
-        {
-            res.errcode = BTERR_UNKNOWN_CMD;
-            return res;
-        }
-        // and read value that should be set
-        res.value = stream.parseInt();
-        return res;
     }
 
     if (!strcmp("AT+PING", buf))
@@ -96,6 +83,75 @@ BTCommand BTCommandParser::read()
         return res;
     }
 
+    if (!strcmp("AT+WATER", buf))
+    {
+        if (stream.lastReaded() == '?')
+        {
+            // GET_WATER_SWITCH command
+            // so read an address and return
+            res.cmd = CMD_GET_WATER_SWITCH;
+            res.address = stream.parseInt();
+            if (stream.readNext() != ',')
+            {
+                res.errcode = BTERR_UNKNOWN_CMD;
+                return res;
+            }
+            res.devno = stream.parseInt();
+            return res;
+        }
+        else if (stream.lastReaded() == '=')
+            res.cmd = CMD_SET_WATER_SWITCH;
+        else
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+        // SET_WATER_SWITCH command
+        // first read address
+        res.address = stream.parseInt();
+        // ensure that next char is comma
+        if (stream.readNext() != ',')
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+        // then read water switch num
+        res.devno = stream.parseInt();
+        // ensure that next char is comma
+        if (stream.readNext() != ',')
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+        // and read value that should be set
+        res.value = stream.parseInt();
+        return res;
+    }
+
+    if (!strcmp("AT+SOIL", buf))
+    {
+        if (stream.lastReaded() == '?')
+        {
+            res.cmd = CMD_READ_SOIL_MOISTURE;
+            // first read address
+            res.address = stream.parseInt();
+            // ensure that next char is comma
+            if (stream.readNext() != ',')
+            {
+                res.errcode = BTERR_UNKNOWN_CMD;
+                return res;
+            }
+            // and read soil moisture no
+            res.devno = stream.parseInt();
+            return res;
+        }
+        else
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+    }
+
     if (!strcmp("AT+ANALOG", buf))
     {
         if (stream.lastReaded() == '?')
@@ -110,7 +166,7 @@ BTCommand BTCommandParser::read()
                 return res;
             }
             // and read pin no
-            res.pin = stream.parseInt();
+            res.devno = stream.parseInt();
             return res;
         }
         else
@@ -118,8 +174,6 @@ BTCommand BTCommandParser::read()
             res.errcode = BTERR_UNKNOWN_CMD;
             return res;
         }
-        res.address = stream.parseInt();
-        return res;
     }
 
 #ifdef DEBUG
@@ -150,10 +204,58 @@ void BTCommandParser::answerOK()
     stream.println("OK");
 }
 
-void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t state)
+void BTCommandParser::answerCapabilities(unsigned long addrId, uint32_t val)
+{
+    stream.print("+CAPABILITIES=");
+    stream.print(addrId);
+    stream.print(",");
+    uint8_t cap = 1;
+    while (val)
+    {
+        uint8_t cnt = val & 0x0F;
+        if (cnt)
+        {
+            switch (cap) {
+            case CB_WATER_SWITCH:
+                stream.print("WATER:");
+                break;
+            case CB_SOIL_MOISTURE:
+                stream.print("SOIL:");
+                break;
+            case CB_PRESSURE_SENSOR:
+                stream.print("PRESSURE:");
+                break;
+            case CB_CURRENT_SENSOR:
+                stream.print("CURRENT:");
+                break;
+            case CB_DC_ADAPTER_SWITCH:
+                stream.print("DCADAPTER:");
+                break;
+            case CB_VOLTAGE_SENSOR:
+                stream.print("VOLTAGE:");
+                break;
+            case CB_PUMP_SWITCH:
+                stream.print("PUMP:");
+                break;
+            default:
+                stream.print("???:");
+                break;
+            }
+            stream.print(cnt);
+            stream.print(";");
+        }
+        val = val >> 4;
+        ++cap;
+    }
+    stream.println();
+}
+
+void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state)
 {
     stream.print("+WATER=");
     stream.print(addrId);
+    stream.print(",");
+    stream.print(devNo);
     stream.print(",");
     stream.println(state);
 }
@@ -164,14 +266,22 @@ void BTCommandParser::answerPong(unsigned long addrId)
     stream.println(addrId);
 }
 
-void BTCommandParser::answerAnalogRead(unsigned long addrId, uint16_t val)
+void BTCommandParser::answerSoilMoisture(unsigned long addrId, uint8_t devNo, uint16_t val)
 {
-    stream.print("+ANALOG=");
+    stream.print("+SOIL=");
     stream.print(addrId);
+    stream.print(",");
+    stream.print(devNo);
     stream.print(",");
     stream.println(val);
 }
 
-
-
-
+void BTCommandParser::answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint16_t val)
+{
+    stream.print("+ANALOG=");
+    stream.print(addrId);
+    stream.print(",");
+    stream.print(pinNo);
+    stream.print(",");
+    stream.println(val);
+}

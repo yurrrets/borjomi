@@ -4,10 +4,11 @@
 #include "can_message.h"
 
 CanMessage cmdVersion(const CanMessage &msg);
+CanMessage cmdCapabilities(const CanMessage &msg);
 
 CanMessage cmdSetWaterSwitch(const CanMessage &msg);
 CanMessage cmdGetWaterSwitch(const CanMessage &msg);
-CanMessage cmdPing(const CanMessage &msg, unsigned long thisNodeId);
+CanMessage cmdPing(const CanMessage &msg);
 CanMessage cmdReadSoilMoisture(const CanMessage &msg);
 
 CanMessage cmdAnalogWrite(const CanMessage &msg);

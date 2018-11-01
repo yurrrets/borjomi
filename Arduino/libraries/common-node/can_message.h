@@ -10,13 +10,13 @@
 struct CanMessage
 {
     uint8_t crc;
-    uint8_t num;
+    uint8_t msgno;
     uint8_t code;
-    uint8_t pin;
+    uint8_t devno; ///< pin num or other device ordinal num
     uint32_t value;
 
     CanMessage()
-      : crc(0), num(0), code(CMD_INVALID), pin(0), value(0)
+      : crc(0), msgno(0), code(CMD_INVALID), devno(0), value(0)
     { }
 
     void updateCrc() { crc = Crc8Partial(*this); }

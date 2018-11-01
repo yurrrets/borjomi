@@ -82,11 +82,12 @@ CanCommands::ReadStatus CanCommands::read()
     return crcOK ? S_OK : S_INVALID_CRC;
 }
 
-uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint32_t value)
+uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t devno, uint32_t value)
 {
     lastAddrId = addrId;
-    ++request.num;
+    ++request.msgno;
     request.code = command;
+    request.devno = devno;
     request.value = value;
     request.updateCrc();
 
