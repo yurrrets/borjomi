@@ -32,13 +32,15 @@ struct CbSoilMoistureSensorInfo
 struct CbPressureSensorInfo
 {
     uint8_t pin; // analog pin
-    float coeff;
+    float A;
+    float B;
 };
 
 struct CbCurrentSensorInfo
 {
     uint8_t pin; // analog pin
-    float coeff;
+    float A;
+    float B;
 };
 
 struct CbDcAdapterSwitchInfo
@@ -49,7 +51,8 @@ struct CbDcAdapterSwitchInfo
 struct CbVoltageSensorInfo
 {
     uint8_t pin; // analog pin
-    float coeff;
+    float A;
+    float B;
 };
 
 struct CbPumpSwitchInfo

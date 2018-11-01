@@ -30,7 +30,7 @@
 /// Value is CVAL_CLOSED or CVAL_OPENED
 /// CommandPin parameter is ignored, instead always is used PIN_WATER_SWITCH
 #define CMD_SET_WATER_SWITCH     (4)
-#define PIN_WATER_SWITCH         (3) // water switch is on digital pin 4
+#define PIN_WATER_SWITCH         (5) // water switch is on digital pin 5
 #define CVAL_CLOSED              (0)
 #define CVAL_OPENED              (1)
 

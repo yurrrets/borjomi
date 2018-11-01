@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 #ifndef DEBUG
-#define DEBUG
+//#define DEBUG
 #endif
 
 #endif // CONFIG_H
