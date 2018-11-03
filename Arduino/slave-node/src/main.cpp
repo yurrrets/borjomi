@@ -44,12 +44,16 @@ void setup()
     EEPROM.get(0, NodeConfig);
     if (NodeConfig.checkCrc() && NodeConfig.nodeId) // nodeId != 0
     {
+        NodeConfig.waterSwitchCount = min(NodeConfig.waterSwitchCount, 1);
+        NodeConfig.soilMoistureCount = min(NodeConfig.soilMoistureCount, 1);
 #ifdef DEBUG
         Serial.print("I'm the Slave Node ID 0x");
-        Serial.println(NodeConfig.nodeId, HEX);
+        Serial.print(NodeConfig.nodeId, HEX);
+        Serial.print(", water switches = ");
+        Serial.print(NodeConfig.waterSwitchCount);
+        Serial.print(", soil moistures = ");
+        Serial.println(NodeConfig.soilMoistureCount);
 #endif
-        NodeConfig.waterSwitchCount = max(NodeConfig.waterSwitchCount, 1);
-        NodeConfig.soilMoistureCount = max(NodeConfig.soilMoistureCount, 1);
     }
     else
     {

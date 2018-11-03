@@ -47,6 +47,7 @@ public:
     BTCommand read();
     void answerError(uint8_t errcode);
     void answerOK();
+    void answerVersion(unsigned long addrId, uint32_t val);
     void answerCapabilities(unsigned long addrId, uint32_t val);
     void answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state);
     void answerPong(unsigned long addrId);

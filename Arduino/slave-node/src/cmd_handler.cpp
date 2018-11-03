@@ -2,12 +2,16 @@
 #include "cmd_codes.h"
 #include "nodes.h"
 #include "capabilities.h"
+#include <HardwareSerial.h>
 
 
 extern SlaveNodeID NodeConfig;
 
 CanMessage cmdVersion(const CanMessage &msg)
 {
+#ifdef DEBUG
+    Serial.println("cmdVersion");
+#endif
     CanMessage res;
     res.msgno = msg.msgno;
     res.code = CMD_OK;
@@ -39,16 +43,28 @@ CanMessage cmdSetWaterSwitch(const CanMessage &msg)
     res.msgno = msg.msgno;
     res.devno = msg.devno;
 
-    if (msg.devno < NodeConfig.soilMoistureCount)
+    if (msg.devno < NodeConfig.waterSwitchCount)
     {
         res.code = CMD_OK;
         res.value = CVAL_ACCEPTED;
         digitalWrite(PINS_WATER_SWITCH[msg.devno], msg.value == CVAL_OPENED ? HIGH : LOW);
+#ifdef DEBUG
+        Serial.print("cmdSetWaterSwitch ok: set ");
+        Serial.print(msg.value == CVAL_OPENED ? HIGH : LOW);
+        Serial.print(" on device no ");
+        Serial.println(msg.devno);
+        Serial.print(" on pin ");
+        Serial.println(PINS_WATER_SWITCH[msg.devno]);
+#endif
     }
     else
     {
         res.code = CMD_ERROR;
         res.value = CVAL_ERR_INVALID_DEV_NO;
+#ifdef DEBUG
+        Serial.print("cmdSetWaterSwitch failed: invalid device no ");
+        Serial.println(msg.devno);
+#endif
     }
 
     res.updateCrc();
@@ -60,10 +76,13 @@ CanMessage cmdGetWaterSwitch(const CanMessage &msg)
     CanMessage res;
     res.msgno = msg.msgno;
     res.devno = msg.devno;
-    if (msg.devno < NodeConfig.soilMoistureCount)
+    if (msg.devno < NodeConfig.waterSwitchCount)
     {
         res.code = CMD_OK;
         res.value = digitalRead(PINS_WATER_SWITCH[msg.devno]);
+#ifdef DEBUG
+        Serial.print("cmdGetWaterSwitch");
+#endif
     }
     else
     {

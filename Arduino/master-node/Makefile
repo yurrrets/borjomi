@@ -11,8 +11,15 @@ ARDUINO_LIBS = SoftwareSerial MCP_CAN SPI CRC common-node ArduinoSTL
 
 include /usr/share/arduino/Arduino.mk
 
-#DEVICE_PATH=/dev/ttyACM0
+DEVICE_PATH=
+
+ifeq ($(BOARD_TAG), uno)
+DEVICE_PATH=/dev/ttyACM0
+endif
+
+ifeq ($(BOARD_TAG), nano)
 DEVICE_PATH=/dev/ttyUSB0
+endif
 
 CPPFLAGS += -std=c++11 # -DDEBUG
 

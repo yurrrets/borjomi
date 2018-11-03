@@ -51,11 +51,26 @@ BTCommand BTCommandParser::read()
     StreamExt::ReadResult rr = stream.readBytesUntilOneOf(Terminators, sizeof(Terminators), buf, sizeof(buf));
     buf[rr.sz] = '\0';
 
+    if (!strcmp("AT+VERSION", buf))
+    {
+        if (stream.lastReaded() == '?')
+        {
+            res.cmd = CMD_VERSION;
+            res.address = stream.parseInt();
+            return res;
+        }
+        else
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+    }
+
     if (!strcmp("AT+CAPABILITIES", buf))
     {
         if (stream.lastReaded() == '?')
         {
-            res.cmd = CMD_ANALOG_READ;
+            res.cmd = CMD_CAPABILITIES;
             res.address = stream.parseInt();
             return res;
         }
@@ -202,6 +217,14 @@ void BTCommandParser::answerError(uint8_t errcode)
 void BTCommandParser::answerOK()
 {
     stream.println("OK");
+}
+
+void BTCommandParser::answerVersion(unsigned long addrId, uint32_t val)
+{
+    stream.print("+VERSION=");
+    stream.print(addrId);
+    stream.print(",");
+    stream.println(val);
 }
 
 void BTCommandParser::answerCapabilities(unsigned long addrId, uint32_t val)

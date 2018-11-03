@@ -67,6 +67,7 @@ void loop()
 
             // process bt command
             switch (btCmd.cmd) {
+            case CMD_VERSION:
             case CMD_CAPABILITIES:
             case CMD_SET_WATER_SWITCH:
             case CMD_GET_WATER_SWITCH:
@@ -114,6 +115,9 @@ void loop()
             {
                 // switch reaction depending on command
                 switch (canCommands.getRequest().code) {
+                case CMD_VERSION:
+                    btCommandIO.answerVersion(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    break;
                 case CMD_CAPABILITIES:
                     btCommandIO.answerCapabilities(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
                     break;
@@ -125,6 +129,7 @@ void loop()
                     break;
                 case CMD_READ_SOIL_MOISTURE:
                     btCommandIO.answerSoilMoisture(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                    break;
                 case CMD_ANALOG_READ:
                     btCommandIO.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                     break;
