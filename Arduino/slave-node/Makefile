@@ -13,4 +13,4 @@ include /usr/share/arduino/Arduino.mk
 
 DEVICE_PATH=/dev/ttyUSB0
 
-CPPFLAGS += -std=c++11 -DDEBUG
+CPPFLAGS += -std=c++11 # -DDEBUG

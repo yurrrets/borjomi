@@ -22,6 +22,11 @@ CanMessage cmdVersion(const CanMessage &msg)
     return res;
 }
 
+inline uint32_t makeCapability(uint8_t capability, uint8_t count)
+{
+    return (count & 0x0F) << 4*(capability-1);
+}
+
 CanMessage cmdCapabilities(const CanMessage &msg)
 {
     CanMessage res;
@@ -29,8 +34,8 @@ CanMessage cmdCapabilities(const CanMessage &msg)
     res.code = CMD_OK;
     res.devno = 0;
     res.value = 0;
-    res.value |= (NodeConfig.waterSwitchCount & 0x0F) << (CB_WATER_SWITCH-1);
-    res.value |= (NodeConfig.soilMoistureCount & 0x0F) << (CB_SOIL_MOISTURE-1);
+    res.value |= makeCapability(CB_WATER_SWITCH, NodeConfig.waterSwitchCount);
+    res.value |= makeCapability(CB_SOIL_MOISTURE, NodeConfig.soilMoistureCount);
 
     res.updateCrc();
     return res;
@@ -117,6 +122,8 @@ CanMessage cmdReadSoilMoisture(const CanMessage &msg)
     {
         res.code = CMD_OK;
         res.value = analogRead(PINS_SOIL_MOISTURE[msg.devno]);
+        // inverse value 'cause originally bigger value correspond to dry soil, not wet
+        res.value = 1024 - res.value;
     }
     else
     {
