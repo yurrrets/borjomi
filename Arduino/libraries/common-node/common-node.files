@@ -1,3 +1,4 @@
+version.mk
 can_message.h
 can_message.cpp
 capabilities.h

@@ -53,7 +53,7 @@
 /// Answer is CMD_OK, and value is in format <major>.<minor>.
 /// High 16 bits of value is <major>, and low 16 bits are for <minor>.
 #define CMD_VERSION              (7)
-#define MAKE_VERSION(mj,mn)      ((((uint32_t)mj & 0xFFFF) << 16) | ((uint32_t)mn & 0xFFFF))
+#define MAKE_VERSION(mj,mn,rev)  ((((uint32_t)mj & 0xFF) << 24) | (((uint32_t)mn & 0xFF) << 16) | ((uint32_t)rev & 0xFFFF))
 
 /// Returns capabilities of the node.
 /// Answer is CMD_OK.

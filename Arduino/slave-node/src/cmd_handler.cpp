@@ -16,7 +16,7 @@ CanMessage cmdVersion(const CanMessage &msg)
     res.msgno = msg.msgno;
     res.code = CMD_OK;
     res.devno = 0;
-    res.value = MAKE_VERSION(0,2);
+    res.value = MAKE_VERSION(BORJOMI_VERSION_MJ, BORJOMI_VERSION_MN, BORJOMI_VERSION_REV);
 
     res.updateCrc();
     return res;

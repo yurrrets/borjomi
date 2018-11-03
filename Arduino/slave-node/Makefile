@@ -8,6 +8,7 @@ ARDUINO_SKETCHBOOK = .
 USER_LIB_PATH = $(realpath ../libraries)
 ARDUINO_LIBS = ArduinoSTL MCP_CAN SPI CRC EEPROM common-node
 
+include ../libraries/common-node/version.mk
 include /usr/share/arduino/Arduino.mk
 
 DEVICE_PATH=/dev/ttyUSB0
