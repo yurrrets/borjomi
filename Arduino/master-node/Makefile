@@ -1,7 +1,7 @@
 # Arduino Make file. Refer to https://github.com/sudar/Arduino-Makefile
 
-#BOARD_TAG    = uno
-BOARD_TAG    = nano
+BOARD_TAG    = uno
+#BOARD_TAG    = nano
 
 LOCAL_CPP_SRCS  ?= $(wildcard src/*.cpp)
 

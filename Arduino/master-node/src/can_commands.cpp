@@ -72,7 +72,7 @@ CanCommands::ReadStatus CanCommands::read()
     Serial.print(" Answer Crc: ");
     Serial.print(crcOK ? "ok" : "failed");
     Serial.print(" AnswerNo: ");
-    Serial.print(answer.num);
+    Serial.print(answer.msgno);
     Serial.print(" AnswerCode: ");
     Serial.print(answer.code);
     Serial.print(" AnswerValue: ");

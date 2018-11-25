@@ -67,13 +67,13 @@ void setup()
     if(CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
     {
 #ifdef DEBUG
-//        Serial.println("MCP2515 Initialized Successfully!");
+        Serial.println("MCP2515 Initialized Successfully!");
 #endif
     }
     else
     {
 #ifdef DEBUG
-//        Serial.println("Error Initializing MCP2515...");
+        Serial.println("Error Initializing MCP2515...");
 #endif
     }
 
