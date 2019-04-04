@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name Borjomi-rescue)(type Legacy)(uri ${KIPRJMOD}/Borjomi-rescue.lib)(options "")(descr ""))
+  (lib (name RelayModule)(type Legacy)(uri ${KIPRJMOD}/RelayModule.lib)(options "")(descr ""))
+)
