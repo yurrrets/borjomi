@@ -31,8 +31,8 @@ U 1 1 5B6F5288
 P 7600 2350
 F 0 "U1" H 7600 3128 50  0000 C CNN
 F 1 "MCP2515-TJA1050" H 7600 3037 50  0000 C CNN
-F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7600 1450 50  0001 C CIN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/21801e.pdf" H 7700 1550 50  0001 C CNN
+F 2 "CAN:AOC346_MCP2515" H 7600 1450 50  0001 C CIN
+F 3 "http://arduino.ua/prod1347-modyl-can-shini-na-mcp2515-i-tja1050" H 7700 1550 50  0001 C CNN
 	1    7600 2350
 	1    0    0    -1  
 $EndComp
@@ -150,26 +150,26 @@ Wire Wire Line
 Wire Wire Line
 	2100 1750 1750 1750
 $Comp
-L Connector_Generic:Conn_01x05 J4
+L Connector:RJ14 J4
 U 1 1 5B6F8A1D
-P 1550 4100
-F 0 "J4" H 1470 3675 50  0000 C CNN
-F 1 "Data in" H 1470 3766 50  0000 C CNN
-F 2 "Connector_RJ:RJ12_Amphenol_54601" H 1550 4100 50  0001 C CNN
-F 3 "~" H 1550 4100 50  0001 C CNN
-	1    1550 4100
-	-1   0    0    1   
+P 1350 4200
+F 0 "J4" H 1100 3850 50  0000 C CNN
+F 1 "Data in" H 1500 3850 50  0000 C CNN
+F 2 "Connector:RJ14_YH-57-21_5722_6P4C" H 1350 4200 50  0001 C CNN
+F 3 "https://www.rcscomponents.kiev.ua/product/rozetka-yh-57-21-5722-6p4c_12940.html" H 1350 4200 50  0001 C CNN
+	1    1350 4200
+	1    0    0    -1  
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x05 J5
+L Connector:RJ14 J5
 U 1 1 5B6F8AB0
-P 1550 3250
-F 0 "J5" H 1470 2825 50  0000 C CNN
-F 1 "Data out" H 1470 2916 50  0000 C CNN
-F 2 "Connector_RJ:RJ12_Amphenol_54601" H 1550 3550 50  0001 C CNN
-F 3 "~" H 1550 3250 50  0001 C CNN
-	1    1550 3250
-	-1   0    0    1   
+P 1350 3350
+F 0 "J5" H 1100 3000 50  0000 C CNN
+F 1 "Data out" H 1500 3000 50  0000 C CNN
+F 2 "Connector:RJ14_YH-57-21_5722_6P4C" H 1350 3650 50  0001 C CNN
+F 3 "https://www.rcscomponents.kiev.ua/product/rozetka-yh-57-21-5722-6p4c_12940.html" H 1350 3350 50  0001 C CNN
+	1    1350 3350
+	1    0    0    -1  
 $EndComp
 Wire Wire Line
 	1750 4300 1900 4300
@@ -180,29 +180,11 @@ Wire Wire Line
 Wire Wire Line
 	1750 4200 1950 4200
 Wire Wire Line
-	1950 4200 1950 3350
-Wire Wire Line
 	1950 3350 1750 3350
-Wire Wire Line
-	1750 4100 2000 4100
 Wire Wire Line
 	2000 4100 2000 3250
 Wire Wire Line
-	2000 3250 1750 3250
-Wire Wire Line
-	1750 4000 2050 4000
-Wire Wire Line
 	2050 4000 2050 3150
-Wire Wire Line
-	2050 3150 1750 3150
-Wire Wire Line
-	1750 3900 2100 3900
-Wire Wire Line
-	2100 3900 2100 3050
-Wire Wire Line
-	2100 3050 1750 3050
-Text Label 1800 3050 0    50   ~ 0
-shield
 Wire Wire Line
 	1950 4200 1950 4750
 Wire Wire Line
@@ -274,7 +256,7 @@ U 1 1 5B713FC4
 P 6600 1150
 F 0 "U2" H 6600 1525 50  0000 C CNN
 F 1 "MH-Series" H 6600 1434 50  0000 C CNN
-F 2 "Package_DFN_QFN:AMS_QFN-4-1EP_2x2mm_P0.95mm_EP0.7x1.6mm" H 6600 750 50  0001 C CNN
+F 2 "MH_Sensor:MH_Sensor" H 6600 750 50  0001 C CNN
 F 3 "https://ru.aliexpress.com/item/1pcs-lot-soil-the-hygrometer-detection-module-soil-moisture-sensor-Robot-smart-car/32826425650.html?spm=a2g0v.10010108.1000016.1.7ca9471dkqoaPU&isOrigTitle=true" H 6500 1150 50  0001 C CNN
 	1    6600 1150
 	1    0    0    -1  
@@ -415,4 +397,18 @@ Wire Wire Line
 Wire Wire Line
 	3400 2900 3300 2900
 Connection ~ 4750 1750
+Wire Wire Line
+	1750 3250 2000 3250
+Wire Wire Line
+	1750 3150 2050 3150
+Wire Wire Line
+	1950 4100 1950 4200
+Wire Wire Line
+	1950 4000 1950 4100
+Wire Wire Line
+	1950 3350 1950 4000
+Wire Wire Line
+	1750 4000 2050 4000
+Wire Wire Line
+	1750 4100 2000 4100
 $EndSCHEMATC

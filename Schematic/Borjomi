@@ -1,0 +1,11 @@
+Reference, Value, Footprint, Datasheet
+"A1","Arduino_Nano","Module:Arduino_Nano","http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf"
+"U1","MCP2515-TJA1050","CAN:AOC346_MCP2515","http://arduino.ua/prod1347-modyl-can-shini-na-mcp2515-i-tja1050"
+"J1","Vin 12V","Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm","~"
+"J2","Vout 12V","Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm","~"
+"J4","Data in","Connector_RJ:RJ12_Amphenol_54601","~"
+"J5","Data out","Connector_RJ:RJ12_Amphenol_54601","~"
+"J3","Water Switch 12V","Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm","~"
+"U2","MH-Series","MH_Sensor:MH_Sensor","https://ru.aliexpress.com/item/1pcs-lot-soil-the-hygrometer-detection-module-soil-moisture-sensor-Robot-smart-car/32826425650.html?spm=a2g0v.10010108.1000016.1.7ca9471dkqoaPU&isOrigTitle=true"
+"J6","Conn_01x02","Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm","~"
+"U3","5V_Relay_Module","RelayModule:Relay_Module_1_Channel","http://arduino.ua/prod2888-modyl-rele-5v-10a-visokogo-yrovnya-high-level"
