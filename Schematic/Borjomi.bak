@@ -155,8 +155,8 @@ U 1 1 5B6F8A1D
 P 1350 4200
 F 0 "J4" H 1100 3850 50  0000 C CNN
 F 1 "Data in" H 1500 3850 50  0000 C CNN
-F 2 "Connector_RJ:RJ12_Amphenol_54601" H 1350 4200 50  0001 C CNN
-F 3 "~" H 1350 4200 50  0001 C CNN
+F 2 "Connector:RJ14_YH-57-21_5722_6P4C" H 1350 4200 50  0001 C CNN
+F 3 "https://www.rcscomponents.kiev.ua/product/rozetka-yh-57-21-5722-6p4c_12940.html" H 1350 4200 50  0001 C CNN
 	1    1350 4200
 	1    0    0    -1  
 $EndComp
@@ -166,8 +166,8 @@ U 1 1 5B6F8AB0
 P 1350 3350
 F 0 "J5" H 1100 3000 50  0000 C CNN
 F 1 "Data out" H 1500 3000 50  0000 C CNN
-F 2 "Connector_RJ:RJ12_Amphenol_54601" H 1350 3650 50  0001 C CNN
-F 3 "~" H 1350 3350 50  0001 C CNN
+F 2 "Connector:RJ14_YH-57-21_5722_6P4C" H 1350 3650 50  0001 C CNN
+F 3 "https://www.rcscomponents.kiev.ua/product/rozetka-yh-57-21-5722-6p4c_12940.html" H 1350 3350 50  0001 C CNN
 	1    1350 3350
 	1    0    0    -1  
 $EndComp

@@ -251,7 +251,7 @@ Connection ~ 2400 1750
 Wire Wire Line
 	2400 1750 4450 1750
 $Comp
-L Sensors:MH-Series U2
+L Borjomi-rescue:MH-Series-Sensors U2
 U 1 1 5B713FC4
 P 6600 1150
 F 0 "U2" H 6600 1525 50  0000 C CNN
