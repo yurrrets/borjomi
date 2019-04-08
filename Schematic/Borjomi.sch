@@ -37,10 +37,6 @@ F 3 "http://arduino.ua/prod1347-modyl-can-shini-na-mcp2515-i-tja1050" H 7700 155
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3850 1450 3850 2350
-Wire Wire Line
-	3850 2350 4050 2350
-Wire Wire Line
 	7000 2200 5800 2200
 Wire Wire Line
 	5800 2200 5800 4250
@@ -94,7 +90,7 @@ U 1 1 5B6F66B3
 P 1550 1850
 F 0 "J1" H 1470 1525 50  0000 C CNN
 F 1 "Vin 12V" H 1470 1616 50  0000 C CNN
-F 2 "Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm" H 1550 1850 50  0001 C CNN
+F 2 "Connector:Degson_DG301_1x02_P5.00mm_Horizontal" H 1550 1850 50  0001 C CNN
 F 3 "~" H 1550 1850 50  0001 C CNN
 	1    1550 1850
 	-1   0    0    1   
@@ -105,7 +101,7 @@ U 1 1 5B6F678B
 P 1550 2300
 F 0 "J2" H 1470 1975 50  0000 C CNN
 F 1 "Vout 12V" H 1470 2066 50  0000 C CNN
-F 2 "Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm" H 1550 2300 50  0001 C CNN
+F 2 "Connector:Degson_DG301_1x02_P5.00mm_Horizontal" H 1550 2300 50  0001 C CNN
 F 3 "~" H 1550 2300 50  0001 C CNN
 	1    1550 2300
 	-1   0    0    1   
@@ -187,23 +183,13 @@ Wire Wire Line
 	2050 4000 2050 3150
 Wire Wire Line
 	1950 4200 1950 4750
-Wire Wire Line
-	8200 4750 8200 2600
 Connection ~ 1950 4200
 Wire Wire Line
-	8200 2500 8300 2500
-Wire Wire Line
-	8300 2500 8300 4800
-Wire Wire Line
-	1900 4800 1900 4300
+	8200 2600 8200 4650
 Connection ~ 1900 4300
-Wire Wire Line
-	2100 1750 2400 1750
 Connection ~ 2100 1750
 Wire Wire Line
-	1950 4750 8200 4750
-Wire Wire Line
-	1900 4800 8300 4800
+	1900 4650 8200 4650
 $Comp
 L power:GND #PWR03
 U 1 1 5B7075AE
@@ -222,34 +208,27 @@ Wire Wire Line
 $Comp
 L Connector:Screw_Terminal_01x02 J3
 U 1 1 5B709E73
-P 2600 1250
-F 0 "J3" V 2600 1050 50  0000 C CNN
-F 1 "Water Switch 12V" V 2450 750 50  0000 C CNN
-F 2 "Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm" H 2600 1250 50  0001 C CNN
-F 3 "~" H 2600 1250 50  0001 C CNN
-	1    2600 1250
-	0    -1   -1   0   
+P 2500 1100
+F 0 "J3" V 2450 1200 50  0000 C CNN
+F 1 "Water Switch 12V" V 2350 1500 50  0000 C CNN
+F 2 "Connector:Degson_DG301_1x02_P5.00mm_Horizontal" H 2500 1100 50  0001 C CNN
+F 3 "~" H 2500 1100 50  0001 C CNN
+	1    2500 1100
+	0    1    -1   0   
 $EndComp
 $Comp
 L power:GND #PWR02
 U 1 1 5B70B3E3
-P 2700 1550
-F 0 "#PWR02" H 2700 1300 50  0001 C CNN
-F 1 "GND" H 2705 1377 50  0000 C CNN
-F 2 "" H 2700 1550 50  0001 C CNN
-F 3 "" H 2700 1550 50  0001 C CNN
-	1    2700 1550
+P 2500 1400
+F 0 "#PWR02" H 2500 1150 50  0001 C CNN
+F 1 "GND" H 2505 1227 50  0000 C CNN
+F 2 "" H 2500 1400 50  0001 C CNN
+F 3 "" H 2500 1400 50  0001 C CNN
+	1    2500 1400
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2700 1450 2700 1550
-Wire Wire Line
-	2600 1450 2600 2700
-Wire Wire Line
-	2400 1750 2400 2800
-Connection ~ 2400 1750
-Wire Wire Line
-	2400 1750 4450 1750
+	2500 1300 2500 1400
 $Comp
 L Borjomi-rescue:MH-Series-Sensors U2
 U 1 1 5B713FC4
@@ -287,24 +266,13 @@ Wire Wire Line
 	5600 2750 5600 1000
 Wire Wire Line
 	5600 1000 6200 1000
-$Comp
-L Connector_Generic:Conn_01x02 J6
-U 1 1 5B71928D
-P 8450 1200
-F 0 "J6" H 8530 1192 50  0000 L CNN
-F 1 "Conn_01x02" H 8530 1101 50  0000 L CNN
-F 2 "Connector_Wire:SolderWirePad_1x02_P5.08mm_Drill1.5mm" H 8450 1200 50  0001 C CNN
-F 3 "~" H 8450 1200 50  0001 C CNN
-	1    8450 1200
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	7000 1200 8250 1200
 Wire Wire Line
 	8250 1300 7000 1300
 NoConn ~ 2600 2900
 NoConn ~ 4050 2150
-NoConn ~ 4050 2650
+NoConn ~ 4050 2350
 NoConn ~ 4050 2250
 NoConn ~ 4050 2550
 NoConn ~ 4050 2750
@@ -383,8 +351,6 @@ F 3 "http://arduino.ua/prod2888-modyl-rele-5v-10a-visokogo-yrovnya-high-level" H
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	2400 2800 2600 2800
-Wire Wire Line
 	3300 2800 3500 2800
 Wire Wire Line
 	3500 2800 3500 3350
@@ -411,4 +377,61 @@ Wire Wire Line
 	1750 4000 2050 4000
 Wire Wire Line
 	1750 4100 2000 4100
+$Comp
+L Connector_Generic:Conn_01x02 J6
+U 1 1 5B71928D
+P 8450 1300
+F 0 "J6" H 8530 1292 50  0000 L CNN
+F 1 "Conn_01x02" H 8530 1201 50  0000 L CNN
+F 2 "Connector:Degson_DG301_1x02_P5.00mm_Horizontal" H 8450 1300 50  0001 C CNN
+F 3 "~" H 8450 1300 50  0001 C CNN
+	1    8450 1300
+	1    0    0    1   
+$EndComp
+Wire Wire Line
+	2600 1750 2600 2700
+Connection ~ 2600 1750
+Wire Wire Line
+	2600 1750 4450 1750
+Wire Wire Line
+	2100 1750 2600 1750
+Wire Wire Line
+	2400 2800 2600 2800
+Wire Wire Line
+	2400 1300 2400 2800
+Wire Wire Line
+	1900 4650 1900 4300
+Wire Wire Line
+	8300 2500 8300 4750
+Wire Wire Line
+	8200 2500 8300 2500
+Wire Wire Line
+	1950 4750 8300 4750
+Wire Wire Line
+	3850 2650 4050 2650
+Wire Wire Line
+	3850 1450 3850 2650
+$Comp
+L Diode:1N5408 D1
+U 1 1 5CAC420C
+P 2400 2950
+F 0 "D1" V 2400 2750 50  0000 L CNN
+F 1 "1N5408" V 2500 2650 50  0000 L CNN
+F 2 "Diode_THT:D_DO-27_P5.08mm_Vertical_KathodeUp" H 2400 2775 50  0001 C CNN
+F 3 "http://www.vishay.com/docs/88516/1n5400.pdf" H 2400 2950 50  0001 C CNN
+	1    2400 2950
+	0    1    1    0   
+$EndComp
+Connection ~ 2400 2800
+$Comp
+L power:GND #PWR06
+U 1 1 5CAC8B8C
+P 2400 3100
+F 0 "#PWR06" H 2400 2850 50  0001 C CNN
+F 1 "GND" H 2405 2927 50  0000 C CNN
+F 2 "" H 2400 3100 50  0001 C CNN
+F 3 "" H 2400 3100 50  0001 C CNN
+	1    2400 3100
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
