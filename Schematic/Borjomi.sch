@@ -20,7 +20,7 @@ U 1 1 5B6D71E4
 P 4550 2750
 F 0 "A1" H 4850 1750 50  0000 C CNN
 F 1 "Arduino_Nano" H 5050 1650 50  0000 C CNN
-F 2 "Module:Arduino_Nano" H 4700 1800 50  0001 L CNN
+F 2 "Arduino:Arduino_Nano_Holes0.9" H 4700 1800 50  0001 L CNN
 F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 4550 1750 50  0001 C CNN
 	1    4550 2750
 	1    0    0    -1  
@@ -31,7 +31,7 @@ U 1 1 5B6F5288
 P 7600 2350
 F 0 "U1" H 7600 3128 50  0000 C CNN
 F 1 "MCP2515-TJA1050" H 7600 3037 50  0000 C CNN
-F 2 "CAN:AOC346_MCP2515" H 7600 1450 50  0001 C CIN
+F 2 "CAN:AOC346_MCP2515_Holes0.9" H 7600 1450 50  0001 C CIN
 F 3 "http://arduino.ua/prod1347-modyl-can-shini-na-mcp2515-i-tja1050" H 7700 1550 50  0001 C CNN
 	1    7600 2350
 	1    0    0    -1  
@@ -235,7 +235,7 @@ U 1 1 5B713FC4
 P 6600 1150
 F 0 "U2" H 6600 1525 50  0000 C CNN
 F 1 "MH-Series" H 6600 1434 50  0000 C CNN
-F 2 "MH_Sensor:MH_Sensor" H 6600 750 50  0001 C CNN
+F 2 "MH_Sensor:MH_Sensor_Holes0.9" H 6600 750 50  0001 C CNN
 F 3 "https://ru.aliexpress.com/item/1pcs-lot-soil-the-hygrometer-detection-module-soil-moisture-sensor-Robot-smart-car/32826425650.html?spm=a2g0v.10010108.1000016.1.7ca9471dkqoaPU&isOrigTitle=true" H 6500 1150 50  0001 C CNN
 	1    6600 1150
 	1    0    0    -1  
@@ -345,7 +345,7 @@ U 1 1 5CA61D0C
 P 2950 2800
 F 0 "U3" H 2950 3150 50  0000 C CNN
 F 1 "5V_Relay_Module" H 2950 3050 50  0000 C CNN
-F 2 "RelayModule:Relay_Module_1_Channel" H 2950 2800 50  0001 C CNN
+F 2 "RelayModule:Relay_Module_1_Channel_Holes0.9" H 2950 2800 50  0001 C CNN
 F 3 "http://arduino.ua/prod2888-modyl-rele-5v-10a-visokogo-yrovnya-high-level" H 2950 2800 50  0001 C CNN
 	1    2950 2800
 	-1   0    0    1   

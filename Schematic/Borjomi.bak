@@ -417,7 +417,7 @@ U 1 1 5CAC420C
 P 2400 2950
 F 0 "D1" V 2400 2750 50  0000 L CNN
 F 1 "1N5408" V 2500 2650 50  0000 L CNN
-F 2 "Diode_THT:D_DO-27_P5.08mm_Vertical_AnodeUp" H 2400 2775 50  0001 C CNN
+F 2 "Diode_THT:D_DO-27_P5.08mm_Vertical_KathodeUp" H 2400 2775 50  0001 C CNN
 F 3 "http://www.vishay.com/docs/88516/1n5400.pdf" H 2400 2950 50  0001 C CNN
 	1    2400 2950
 	0    1    1    0   
