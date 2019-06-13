@@ -4,4 +4,6 @@
   (lib (name CAN)(type KiCad)(uri ${KIPRJMOD}/CAN.pretty)(options "")(descr ""))
   (lib (name Connector)(type KiCad)(uri ${KIPRJMOD}/Connector.pretty)(options "")(descr ""))
   (lib (name Arduino)(type KiCad)(uri ${KIPRJMOD}/Arduino.pretty)(options "")(descr ""))
+  (lib (name BT)(type KiCad)(uri ${KIPRJMOD}/BT.pretty)(options "")(descr ""))
+  (lib (name ACS_CurrentSensor)(type KiCad)(uri ${KIPRJMOD}/ACS_CurrentSensor.pretty)(options "")(descr ""))
 )
