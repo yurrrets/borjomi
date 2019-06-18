@@ -83,17 +83,6 @@ Wire Wire Line
 Wire Wire Line
 	5800 1450 3850 1450
 $Comp
-L Connector:Screw_Terminal_01x02 J1
-U 1 1 5B6F66B3
-P 1550 1850
-F 0 "J1" H 1470 1525 50  0000 C CNN
-F 1 "Vin 12V" H 1470 1616 50  0000 C CNN
-F 2 "Connector:Degson_DG301_1x02_P5.00mm_Horizontal" H 1550 1850 50  0001 C CNN
-F 3 "~" H 1550 1850 50  0001 C CNN
-	1    1550 1850
-	-1   0    0    1   
-$EndComp
-$Comp
 L power:GND #PWR04
 U 1 1 5B6F6C10
 P 4550 3900
@@ -109,16 +98,16 @@ Wire Wire Line
 $Comp
 L power:GND #PWR01
 U 1 1 5B6F704F
-P 2000 2350
-F 0 "#PWR01" H 2000 2100 50  0001 C CNN
-F 1 "GND" H 2005 2177 50  0000 C CNN
-F 2 "" H 2000 2350 50  0001 C CNN
-F 3 "" H 2000 2350 50  0001 C CNN
-	1    2000 2350
+P 2000 2300
+F 0 "#PWR01" H 2000 2050 50  0001 C CNN
+F 1 "GND" H 2005 2127 50  0000 C CNN
+F 2 "" H 2000 2300 50  0001 C CNN
+F 3 "" H 2000 2300 50  0001 C CNN
+	1    2000 2300
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1750 1850 2000 1850
+	1750 1950 2000 1950
 $Comp
 L Connector:RJ14 J4
 U 1 1 5B6F8A1D
@@ -350,8 +339,6 @@ Wire Wire Line
 Wire Wire Line
 	3300 2850 3300 3350
 Wire Wire Line
-	2000 2350 2000 1850
-Wire Wire Line
 	2600 1100 2600 1200
 Wire Wire Line
 	2500 1100 2500 2550
@@ -529,4 +516,18 @@ F 3 "" H 2950 3450 50  0001 C CNN
 	1    2950 3450
 	-1   0    0    1   
 $EndComp
+$Comp
+L Connector:Barrel_Jack_Switch J1
+U 1 1 5D0EB08D
+P 1450 1850
+F 0 "J1" H 1507 2167 50  0000 C CNN
+F 1 "Vin 12V" H 1507 2076 50  0000 C CNN
+F 2 "Connector_BarrelJack:BarrelJack_Horizontal" H 1500 1810 50  0001 C CNN
+F 3 "~" H 1500 1810 50  0001 C CNN
+	1    1450 1850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 1950 2000 2300
+NoConn ~ 1750 1850
 $EndSCHEMATC

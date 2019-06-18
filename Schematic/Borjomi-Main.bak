@@ -30,7 +30,7 @@ L CAN:MCP2515-TJA1050 U1
 U 1 1 5B6F5288
 P 7600 2350
 F 0 "U1" H 7600 3128 50  0000 C CNN
-F 1 "MCP2515-TJA1050" H 7600 3037 50  0000 C CNN
+F 1 "CAN_Module" H 7600 3037 50  0000 C CNN
 F 2 "CAN:AOC346_MCP2515_Holes0.9" H 7600 1450 50  0001 C CIN
 F 3 "http://arduino.ua/prod1347-modyl-can-shini-na-mcp2515-i-tja1050" H 7700 1550 50  0001 C CNN
 	1    7600 2350
@@ -83,17 +83,6 @@ Wire Wire Line
 Wire Wire Line
 	5800 1450 3850 1450
 $Comp
-L Connector:Screw_Terminal_01x02 J1
-U 1 1 5B6F66B3
-P 1550 1850
-F 0 "J1" H 1470 1525 50  0000 C CNN
-F 1 "Vin 12V" H 1470 1616 50  0000 C CNN
-F 2 "Connector:Degson_DG301_1x02_P5.00mm_Horizontal" H 1550 1850 50  0001 C CNN
-F 3 "~" H 1550 1850 50  0001 C CNN
-	1    1550 1850
-	-1   0    0    1   
-$EndComp
-$Comp
 L power:GND #PWR04
 U 1 1 5B6F6C10
 P 4550 3900
@@ -109,16 +98,16 @@ Wire Wire Line
 $Comp
 L power:GND #PWR01
 U 1 1 5B6F704F
-P 2000 2350
-F 0 "#PWR01" H 2000 2100 50  0001 C CNN
-F 1 "GND" H 2005 2177 50  0000 C CNN
-F 2 "" H 2000 2350 50  0001 C CNN
-F 3 "" H 2000 2350 50  0001 C CNN
-	1    2000 2350
+P 2000 2300
+F 0 "#PWR01" H 2000 2050 50  0001 C CNN
+F 1 "GND" H 2005 2127 50  0000 C CNN
+F 2 "" H 2000 2300 50  0001 C CNN
+F 3 "" H 2000 2300 50  0001 C CNN
+	1    2000 2300
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1750 1850 2000 1850
+	1750 1950 2000 1950
 $Comp
 L Connector:RJ14 J4
 U 1 1 5B6F8A1D
@@ -241,7 +230,7 @@ L RelayModule:5V_1_Channel_Relay_Module U3
 U 1 1 5CA61D0C
 P 2950 2550
 F 0 "U3" H 2950 2900 50  0000 C CNN
-F 1 "5V_Relay_Module" H 2950 2800 50  0000 C CNN
+F 1 "Relay_12Vout" H 2950 2800 50  0000 C CNN
 F 2 "RelayModule:Relay_Module_1_Channel_Holes0.9" H 2950 2550 50  0001 C CNN
 F 3 "http://arduino.ua/prod2888-modyl-rele-5v-10a-visokogo-yrovnya-high-level" H 2950 2550 50  0001 C CNN
 	1    2950 2550
@@ -297,7 +286,7 @@ L Sensors:ACS712 U2
 U 1 1 5D0231D1
 P 2950 1800
 F 0 "U2" H 2950 1450 50  0000 C CNN
-F 1 "ACS712" H 2950 1550 50  0000 C CNN
+F 1 "CurrentMeas_12V" H 2950 1550 50  0000 C CNN
 F 2 "ACS_CurrentSensor:ACS712" H 2950 1800 50  0001 C CNN
 F 3 "http://arduino.ua/prod2259-datchik-toka-acs712-5a-gy-712" H 2950 1800 50  0001 C CNN
 	1    2950 1800
@@ -331,17 +320,6 @@ Wire Wire Line
 Connection ~ 3400 1900
 Wire Wire Line
 	3400 1900 3400 2650
-$Comp
-L RelayModule:5V_1_Channel_Relay_Module U4
-U 1 1 5D04BA45
-P 2950 3450
-F 0 "U4" H 2950 3800 50  0000 C CNN
-F 1 "5V_Relay_Module" H 2950 3700 50  0000 C CNN
-F 2 "RelayModule:Relay_Module_1_Channel_Holes0.9" H 2950 3450 50  0001 C CNN
-F 3 "" H 2950 3450 50  0001 C CNN
-	1    2950 3450
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
 	3500 2550 3500 3450
 Wire Wire Line
@@ -360,8 +338,6 @@ Wire Wire Line
 	4050 2850 3300 2850
 Wire Wire Line
 	3300 2850 3300 3350
-Wire Wire Line
-	2000 2350 2000 1850
 Wire Wire Line
 	2600 1100 2600 1200
 Wire Wire Line
@@ -441,7 +417,7 @@ L BT:HC-05 U5
 U 1 1 5D004DBC
 P 6400 1000
 F 0 "U5" H 6400 635 50  0000 C CNN
-F 1 "HC-05" H 6400 726 50  0000 C CNN
+F 1 "Bluetooth" H 6400 726 50  0000 C CNN
 F 2 "BT:HC-05" H 6400 1000 50  0001 C CNN
 F 3 "http://arduino.ua/prod999-bluetooth-modyl-hc-05" H 6400 1000 50  0001 C CNN
 	1    6400 1000
@@ -529,4 +505,29 @@ Wire Wire Line
 Wire Wire Line
 	5550 3150 5050 3150
 NoConn ~ 1750 2850
+$Comp
+L RelayModule:5V_1_Channel_Relay_Module U4
+U 1 1 5D04BA45
+P 2950 3450
+F 0 "U4" H 2950 3800 50  0000 C CNN
+F 1 "Relay_Gate220V" H 2950 3700 50  0000 C CNN
+F 2 "RelayModule:Relay_Module_1_Channel_Holes0.9" H 2950 3450 50  0001 C CNN
+F 3 "" H 2950 3450 50  0001 C CNN
+	1    2950 3450
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector:Barrel_Jack_Switch J1
+U 1 1 5D0EB08D
+P 1450 1850
+F 0 "J1" H 1507 2167 50  0000 C CNN
+F 1 "Vin 12V" H 1507 2076 50  0000 C CNN
+F 2 "" H 1500 1810 50  0001 C CNN
+F 3 "~" H 1500 1810 50  0001 C CNN
+	1    1450 1850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 1950 2000 2300
+NoConn ~ 1750 1850
 $EndSCHEMATC
