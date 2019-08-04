@@ -1,7 +1,7 @@
 # Arduino Make file. Refer to https://github.com/sudar/Arduino-Makefile
 
-BOARD_TAG    = uno
-#BOARD_TAG    = nano
+#BOARD_TAG    = uno
+BOARD_TAG    = nano328
 
 LOCAL_CPP_SRCS  ?= $(wildcard src/*.cpp)
 
@@ -20,6 +20,10 @@ CPPFLAGS += -DDEBUG
 endif
 
 ifeq ($(BOARD_TAG), nano)
+DEVICE_PATH=/dev/ttyUSB0
+endif
+
+ifeq ($(BOARD_TAG), nano328)
 DEVICE_PATH=/dev/ttyUSB0
 endif
 

@@ -11,7 +11,7 @@
 #define CB_VOLTAGE_SENSOR      (6)
 #define CB_PUMP_SWITCH         (7)
 
-static const uint8_t PINS_WATER_SWITCH[] = { 5 }; // digital pins
+static const uint8_t PINS_WATER_SWITCH[] = { 3 }; // digital pins
 static const uint8_t PINS_SOIL_MOISTURE[] = { 0 }; // analog pins
 
 #pragma pack(push, 1)
