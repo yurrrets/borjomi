@@ -28,6 +28,34 @@ unsigned long lastCommandMillis;
 
 
 
+void processLocal(const BTCommand &btCmd, BTCommandParser &btCommandIO)
+{
+    switch (btCmd.cmd) {
+    case CMD_VERSION:
+        btCommandIO.answerVersion(
+                    btCmd.address,
+                    MAKE_VERSION(BORJOMI_VERSION_MJ, BORJOMI_VERSION_MN, BORJOMI_VERSION_REV));
+        break;
+    case CMD_CAPABILITIES:
+    case CMD_SET_WATER_SWITCH:
+    case CMD_GET_WATER_SWITCH:
+    case CMD_READ_SOIL_MOISTURE:
+    case CMD_ANALOG_READ:
+        canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
+        break;
+    case CMD_PING:
+        canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
+        if (btCmd.address == MULTICAST_NODE)
+            lastCommandAnswered = true; // we don't know the exact number of answers
+        break;
+    default:
+        btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
+        lastCommandAnswered = true;
+    }
+}
+
+
+
 void setup()
 {
 #ifdef DEBUG
@@ -62,6 +90,12 @@ void loop()
         }
         else
         {
+            if (btCmd.address == MASTER_NODE)
+            {
+                processLocal(btCmd, btCommandIO);
+                return;
+            }
+
             lastCommandAnswered = false;
             lastCommandMillis = millis();
 

@@ -1,6 +1,6 @@
 # Arduino Make file. Refer to https://github.com/sudar/Arduino-Makefile
 
-BOARD_TAG    = nano328
+BOARD_TAG    = nano     # nano or nano328
 
 LOCAL_CPP_SRCS  ?= $(wildcard src/*.cpp)
 

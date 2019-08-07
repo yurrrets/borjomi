@@ -20,7 +20,7 @@ unsigned char len = 0;
 //unsigned char rxBuf[8];
 //char msg[64];
 
-#define CAN0_INT 2                              // Set INT to pin 2
+#define CAN0_INT 5                              // Set INT to pin 2
 MCP_CAN CAN0(9);                               // Set CS to pin 10
 
 
