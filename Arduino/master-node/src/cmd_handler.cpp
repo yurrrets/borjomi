@@ -77,11 +77,6 @@ void cmdVersion(const BTCommand &btCmd, BTCommandParser &btCommandIO)
                 MAKE_VERSION(BORJOMI_VERSION_MJ, BORJOMI_VERSION_MN, BORJOMI_VERSION_REV));
 }
 
-inline uint32_t makeCapability(uint8_t capability, uint8_t count)
-{
-    return (count & 0x0F) << 4*(capability-1);
-}
-
 void cmdCapabilities(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     uint32_t value = 0;
@@ -106,8 +101,8 @@ void cmdReadPressureSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         return;
     }
     int value = analogRead(PINS_PRESSURE_SENSOR[btCmd.devno]);
-    float val_mAtm = NodeConfig.pressureCoeffs.apply(value);
-    btCommandIO.answerPressure(NodeConfig.nodeId, btCmd.devno, static_cast<uint16_t>(val_mAtm));
+    float val_bars = NodeConfig.pressureCoeffs.apply(value);
+    btCommandIO.answerPressure(NodeConfig.nodeId, btCmd.devno, val_bars);
 }
 
 void cmdReadCurrentSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -118,8 +113,8 @@ void cmdReadCurrentSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         return;
     }
     int value = analogRead(PINS_CURRENT_SENSOR[btCmd.devno]);
-    float val_mA = NodeConfig.dcCurrentCoeffs.apply(value);
-    btCommandIO.answerDCCurrent(NodeConfig.nodeId, btCmd.devno, static_cast<uint16_t>(val_mA));
+    float val_A = NodeConfig.dcCurrentCoeffs.apply(value);
+    btCommandIO.answerDCCurrent(NodeConfig.nodeId, btCmd.devno, val_A);
 }
 
 void cmdReadVoltageSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -130,8 +125,8 @@ void cmdReadVoltageSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         return;
     }
     int value = analogRead(PINS_VOLTAGE_SENSOR[btCmd.devno]);
-    float val_mV = NodeConfig.dcVoltageCoeffs.apply(value);
-    btCommandIO.answerDCVoltage(NodeConfig.nodeId, btCmd.devno, static_cast<uint16_t>(val_mV));
+    float val_V = NodeConfig.dcVoltageCoeffs.apply(value);
+    btCommandIO.answerDCVoltage(NodeConfig.nodeId, btCmd.devno, val_V);
 }
 
 void cmdSetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)

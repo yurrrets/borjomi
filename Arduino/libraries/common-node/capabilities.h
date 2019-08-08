@@ -11,6 +11,11 @@
 #define CB_VOLTAGE_SENSOR      (6)
 #define CB_PUMP_SWITCH         (7)
 
+inline uint32_t makeCapability(uint8_t capability, uint8_t count)
+{
+    return uint32_t(count & 0x0F) << 4*(capability-1);
+}
+
 // on slave node
 static const uint8_t PINS_WATER_SWITCH[] = { 3 }; // digital pins
 static const uint8_t PINS_SOIL_MOISTURE[] = { 0 }; // analog pins

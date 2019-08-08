@@ -22,10 +22,17 @@ void setup()
     nodeConfig.reserved2 = 0;
     nodeConfig.reserved3 = 0;
 
-    nodeConfig.dcCurrentCoeffs.A = 1;
-    nodeConfig.dcCurrentCoeffs.B = 0;
+    // CurrentRange = -5..5A
+    // NumLevels = 10 bit = 1024
+    nodeConfig.dcCurrentCoeffs.A = 10.0 / 1024;
+    nodeConfig.dcCurrentCoeffs.B = -5.0;
 
-    nodeConfig.dcVoltageCoeffs.A = 1;
+    // VCC_5V = 4.71
+    // VDD_12V = 12.27
+    // V_divider = 4.16
+    // NumLevels = 10 bit = 1024
+    // A = ( VDD_12V / V_divider ) * ( VCC_5V / NumLevels ) = 0.013566636305588941
+    nodeConfig.dcVoltageCoeffs.A = ( 12.27 / 4.16 ) * ( 4.71 / 1024 );
     nodeConfig.dcVoltageCoeffs.B = 0;
 
     nodeConfig.pressureCoeffs.A = 1;

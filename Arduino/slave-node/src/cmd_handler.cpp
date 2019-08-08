@@ -22,11 +22,6 @@ CanMessage cmdVersion(const CanMessage &msg)
     return res;
 }
 
-inline uint32_t makeCapability(uint8_t capability, uint8_t count)
-{
-    return (count & 0x0F) << 4*(capability-1);
-}
-
 CanMessage cmdCapabilities(const CanMessage &msg)
 {
     CanMessage res;

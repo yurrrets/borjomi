@@ -14,6 +14,8 @@
 #include "nodes.h"
 #include "cmd_handler.h"
 
+#include <EEPROM.h>
+
 #define BT_RX_PIN   (4)
 #define BT_TX_PIN   (10)
 #define CAN_CS_PIN  (9)
@@ -36,6 +38,22 @@ void setup()
     Serial.begin(9600);
 #endif
 
+    EEPROM.get(0, NodeConfig);
+    if (NodeConfig.checkCrc() && NodeConfig.nodeId)
+    {
+#ifdef DEBUG
+        Serial.print("I'm the Master Node ID 0x");
+        Serial.print(NodeConfig.nodeId, HEX);
+#endif
+    }
+    else
+    {
+#ifdef DEBUG
+        Serial.println("I'm the Master Node with UNDEFINED ID!");
+#endif
+        NodeConfig.nodeId = UNKNOWN_NODE;
+    }
+
     lastCommandAnswered = true;
 
     // set the data rate for the SoftwareSerial port
@@ -43,6 +61,11 @@ void setup()
 //    btSerial.println("Hello, World!");
 
     canCommands.setup();
+
+    pinMode(PINS_DC_ADAPTER_SWITCH[0], OUTPUT);
+    digitalWrite(PINS_DC_ADAPTER_SWITCH[0], LOW);
+    pinMode(PINS_PUMP_SWITCH[0], OUTPUT);
+    digitalWrite(PINS_PUMP_SWITCH[0], LOW);
 }
 
 

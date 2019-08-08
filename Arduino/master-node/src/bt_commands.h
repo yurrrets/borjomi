@@ -54,14 +54,16 @@ public:
     void answerDCAdapterState(unsigned long addrId, uint8_t devNo, uint8_t state);
     void answerPumpState(unsigned long addrId, uint8_t devNo, uint8_t state);
     void answerSoilMoisture(unsigned long addrId, uint8_t devNo, uint16_t val);
-    void answerPressure(unsigned long addrId, uint8_t devNo, uint16_t val);
-    void answerDCCurrent(unsigned long addrId, uint8_t devNo, uint16_t val);
-    void answerDCVoltage(unsigned long addrId, uint8_t devNo, uint16_t val);
+    void answerPressure(unsigned long addrId, uint8_t devNo, float val);
+    void answerDCCurrent(unsigned long addrId, uint8_t devNo, float val);
+    void answerDCVoltage(unsigned long addrId, uint8_t devNo, float val);
     void answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint16_t val);
     void answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state);
 
 private:
     StreamExt &stream;
+    void fillSensorCmd(uint8_t cmdCode, BTCommand &res);
+    void fillGetSetCmd(uint8_t cmdSetCode, uint8_t cmdGetCode, BTCommand &res);
     template <typename T>
     void answerGeneralVal(const char *body, unsigned long addrId, uint8_t devNo, T val);
 };
