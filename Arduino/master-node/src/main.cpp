@@ -12,6 +12,7 @@
 #include "bt_commands.h"
 #include "can_commands.h"
 #include "nodes.h"
+#include "cmd_handler.h"
 
 #define BT_RX_PIN   (4)
 #define BT_TX_PIN   (10)
@@ -65,7 +66,7 @@ void loop()
         {
             if (btCmd.address == MASTER_NODE)
             {
-                processLocal(btCmd, btCommandIO);
+                processLocalCommand(btCmd, btCommandIO);
                 return;
             }
 
@@ -79,14 +80,25 @@ void loop()
             case CMD_SET_WATER_SWITCH:
             case CMD_GET_WATER_SWITCH:
             case CMD_READ_SOIL_MOISTURE:
+            case CMD_READ_PRESSURE_SENSOR:
+            case CMD_READ_CURRENT_SENSOR:
+            case CMD_SET_DC_ADAPTER_SWITCH:
+            case CMD_GET_DC_ADAPTER_SWITCH:
+            case CMD_READ_VOLTAGE_SENSOR:
+            case CMD_SET_PUMP_SWITCH:
+            case CMD_GET_PUMP_SWITCH:
+            case CMD_ANALOG_WRITE:
             case CMD_ANALOG_READ:
+            case CMD_DIGITAL_WRITE:
+            case CMD_DIGITAL_READ:
+            case CMD_DIGITAL_PIN_MODE:
                 canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
                 break;
             case CMD_PING:
                 canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
                 if (btCmd.address == MULTICAST_NODE)
                 {
-                    processLocal(btCmd, btCommandIO);
+                    processLocalCommand(btCmd, btCommandIO);
                     lastCommandAnswered = true; // we don't know the exact number of answers
                 }
                 break;

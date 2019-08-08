@@ -321,7 +321,7 @@ void BTCommandParser::answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint
 
 void BTCommandParser::answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state)
 {
-    answerGeneralVal("+DIGITAL=", addrId, devNo, val);
+    answerGeneralVal("+DIGITAL=", addrId, pinNo, state);
 }
 
 template <typename T>

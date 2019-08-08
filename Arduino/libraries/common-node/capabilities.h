@@ -17,9 +17,9 @@ static const uint8_t PINS_SOIL_MOISTURE[] = { 0 }; // analog pins
 
 // on master node
 static const uint8_t PINS_DC_ADAPTER_SWITCH[] = { 3 }; // digital pins
-static const uint8_t PINS_PUMP_SWITCH[] = { 3 }; // digital pins
-static const uint8_t PINS_PRESSURE_SENSOR[] = { 0 }; // analog pins
+static const uint8_t PINS_PUMP_SWITCH[] = { 7 }; // digital pins
+static const uint8_t PINS_PRESSURE_SENSOR[] = { 4 }; // analog pins
 static const uint8_t PINS_CURRENT_SENSOR[] = { 0 }; // analog pins
-static const uint8_t PINS_VOLTAGE_SENSOR[] = { 0 }; // analog pins
+static const uint8_t PINS_VOLTAGE_SENSOR[] = { 2 }; // analog pins
 
 #endif // CAPABILITIES_H

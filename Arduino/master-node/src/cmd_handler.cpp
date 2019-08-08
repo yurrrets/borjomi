@@ -141,7 +141,7 @@ void cmdSetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         btCommandIO.answerError(BTERR_INVALID_ANSWER);
         return;
     }
-    digitalWrite(PINS_DC_ADAPTER_SWITCH[msg.devno], btCmd.value == CVAL_ON ? HIGH : LOW);
+    digitalWrite(PINS_DC_ADAPTER_SWITCH[btCmd.devno], btCmd.value == CVAL_ON ? HIGH : LOW);
     btCommandIO.answerOK();
 }
 
@@ -152,7 +152,7 @@ void cmdGetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         btCommandIO.answerError(BTERR_INVALID_ANSWER);
         return;
     }
-    int value = digitalRead(PINS_DC_ADAPTER_SWITCH[msg.devno]);
+    int value = digitalRead(PINS_DC_ADAPTER_SWITCH[btCmd.devno]);
     btCommandIO.answerDCAdapterState(NodeConfig.nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
 }
 
@@ -163,7 +163,7 @@ void cmdSetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         btCommandIO.answerError(BTERR_INVALID_ANSWER);
         return;
     }
-    digitalWrite(PINS_PUMP_SWITCH[msg.devno], btCmd.value == CVAL_ON ? HIGH : LOW);
+    digitalWrite(PINS_PUMP_SWITCH[btCmd.devno], btCmd.value == CVAL_ON ? HIGH : LOW);
     btCommandIO.answerOK();
 }
 
@@ -174,7 +174,7 @@ void cmdGetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
         btCommandIO.answerError(BTERR_INVALID_ANSWER);
         return;
     }
-    int value = digitalRead(PINS_PUMP_SWITCH[msg.devno]);
+    int value = digitalRead(PINS_PUMP_SWITCH[btCmd.devno]);
     btCommandIO.answerPumpState(NodeConfig.nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
 }
 
