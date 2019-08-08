@@ -64,40 +64,40 @@
 #define CMD_CAPABILITIES         (8)
 
 /// Reads current pressure in the system in mAtm (milli atmosphere)
-/// Command device num is ordinal number, 0...(count(???)-1)
+/// Command device num is ordinal number, 0...(count(PINS_PRESSURE_SENSOR)-1)
 #define CMD_READ_PRESSURE_SENSOR     (10)
 
 /// Returns DC current in 12V line, in mA
-/// Command device num is ordinal number, 0...(count(???)-1)
+/// Command device num is ordinal number, 0...(count(PINS_CURRENT_SENSOR)-1)
 #define CMD_READ_CURRENT_SENSOR      (11)
 
 /// Sets state of DC 12V line switch.
 /// Value could be CVAL_OFF or CVAL_ON
-/// Command device num is ordinal number, 0...(count()-1)
+/// Command device num is ordinal number, 0...(count(PINS_DC_ADAPTER_SWITCH)-1)
 #define CMD_SET_DC_ADAPTER_SWITCH    (12)
 #define CVAL_OFF                     (0)
 #define CVAL_ON                      (1)
 
 /// Gets current state of DC 12V line switch.
 /// Returned value is CVAL_OFF or CVAL_ON
-/// Command device num is ordinal number, 0...(count(PINS_WATER_SWITCH)-1)
+/// Command device num is ordinal number, 0...(count(PINS_DC_ADAPTER_SWITCH)-1)
 #define CMD_GET_DC_ADAPTER_SWITCH    (13)
 
 /// Returns DC voltage in 12V line, in mV
-/// Command device num is ordinal number, 0...(count(???)-1)
+/// Command device num is ordinal number, 0...(count(PINS_VOLTAGE_SENSOR)-1)
 #define CMD_READ_VOLTAGE_SENSOR      (14)
 
 /// Sets state of pump switch.
 /// Note that pump gets worked you also should set to on DC_ADAPTER_SWITCH
 /// Value could be CVAL_OFF or CVAL_ON
-/// Command device num is ordinal number, 0...(count()-1)
+/// Command device num is ordinal number, 0...(count(PINS_PUMP_SWITCH)-1)
 #define CMD_SET_PUMP_SWITCH          (15)
 
 /// Gets current state of pump switch.
 /// Returned value is CVAL_OFF or CVAL_ON
 /// Note that this value could be CVAL_ON but this doesn't mean that pump is working;
 /// pump is working when both CMD_GET_PUMP_SWITCH and CMD_GET_DC_ADAPTER_SWITCH are CVAL_ON
-/// Command device num is ordinal number, 0...(count(PINS_WATER_SWITCH)-1)
+/// Command device num is ordinal number, 0...(count(PINS_PUMP_SWITCH)-1)
 #define CMD_GET_PUMP_SWITCH          (16)
 
 

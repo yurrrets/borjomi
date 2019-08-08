@@ -49,13 +49,21 @@ public:
     void answerOK();
     void answerVersion(unsigned long addrId, uint32_t val);
     void answerCapabilities(unsigned long addrId, uint32_t val);
-    void answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state);
     void answerPong(unsigned long addrId);
+    void answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state);
+    void answerDCAdapterState(unsigned long addrId, uint8_t devNo, uint8_t state);
+    void answerPumpState(unsigned long addrId, uint8_t devNo, uint8_t state);
     void answerSoilMoisture(unsigned long addrId, uint8_t devNo, uint16_t val);
+    void answerPressure(unsigned long addrId, uint8_t devNo, uint16_t val);
+    void answerDCCurrent(unsigned long addrId, uint8_t devNo, uint16_t val);
+    void answerDCVoltage(unsigned long addrId, uint8_t devNo, uint16_t val);
     void answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint16_t val);
+    void answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state);
 
 private:
     StreamExt &stream;
+    template <typename T>
+    void answerGeneralVal(const char *body, unsigned long addrId, uint8_t devNo, T val);
 };
 
 #endif // BT_COMMANDS_H

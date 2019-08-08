@@ -273,38 +273,64 @@ void BTCommandParser::answerCapabilities(unsigned long addrId, uint32_t val)
     stream.println();
 }
 
-void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state)
-{
-    stream.print("+WATER=");
-    stream.print(addrId);
-    stream.print(",");
-    stream.print(devNo);
-    stream.print(",");
-    stream.println(state);
-}
-
 void BTCommandParser::answerPong(unsigned long addrId)
 {
     stream.print("+PONG=");
     stream.println(addrId);
 }
 
+void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state)
+{
+    answerGeneralVal("+WATER=", addrId, devNo, state);
+}
+
+void BTCommandParser::answerDCAdapterState(unsigned long addrId, uint8_t devNo, uint8_t state)
+{
+    answerGeneralVal("+DCADAPTER=", addrId, devNo, state);
+}
+
+void BTCommandParser::answerPumpState(unsigned long addrId, uint8_t devNo, uint8_t state)
+{
+    answerGeneralVal("+PUMP=", addrId, devNo, state);
+}
+
 void BTCommandParser::answerSoilMoisture(unsigned long addrId, uint8_t devNo, uint16_t val)
 {
-    stream.print("+SOIL=");
-    stream.print(addrId);
-    stream.print(",");
-    stream.print(devNo);
-    stream.print(",");
-    stream.println(val);
+    answerGeneralVal("+SOIL=", addrId, devNo, val);
+}
+
+void BTCommandParser::answerPressure(unsigned long addrId, uint8_t devNo, uint16_t val)
+{
+    answerGeneralVal("+PRESSURE=", addrId, devNo, val);
+}
+
+void BTCommandParser::answerDCCurrent(unsigned long addrId, uint8_t devNo, uint16_t val)
+{
+    answerGeneralVal("+CURRENT=", addrId, devNo, val);
+}
+
+void BTCommandParser::answerDCVoltage(unsigned long addrId, uint8_t devNo, uint16_t val)
+{
+    answerGeneralVal("+VOLTAGE=", addrId, devNo, val);
 }
 
 void BTCommandParser::answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint16_t val)
 {
-    stream.print("+ANALOG=");
+    answerGeneralVal("+ANALOG=", addrId, pinNo, val);
+}
+
+void BTCommandParser::answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state)
+{
+    answerGeneralVal("+DIGITAL=", addrId, devNo, val);
+}
+
+template <typename T>
+void BTCommandParser::answerGeneralVal(const char *body, unsigned long addrId, uint8_t devNo, T val)
+{
+    stream.print(body);
     stream.print(addrId);
     stream.print(",");
-    stream.print(pinNo);
+    stream.print(devNo);
     stream.print(",");
     stream.println(val);
 }

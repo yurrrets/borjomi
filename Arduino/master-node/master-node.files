@@ -4,6 +4,8 @@ src/bt_commands.cpp
 src/bt_commands.h
 src/can_commands.cpp
 src/can_commands.h
+src/cmd_handler.cpp
+src/cmd_handler.h
 src/main.cpp
 src/config.h
 src/button.cpp
