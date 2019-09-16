@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>646</width>
+    <height>479</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+    <property name="leftMargin">
+     <number>9</number>
+    </property>
+    <property name="topMargin">
+     <number>9</number>
+    </property>
+    <property name="rightMargin">
+     <number>9</number>
+    </property>
+    <property name="bottomMargin">
+     <number>9</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="wgtLeftPanel" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="wgtDevice" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Device</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_2" native="true">
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="0">
+              <widget class="QPushButton" name="pushButton">
+               <property name="text">
+                <string>PushButton</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="wgtNodes" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Nodes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="wgtNodeButtons" native="true">
+            <layout class="QGridLayout" name="wgtNodeButtonsLayout"/>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="wgtCommands" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Commands</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="wgtCommandButtons" native="true">
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="2" column="0">
+              <widget class="QPushButton" name="pbWaterOn">
+               <property name="text">
+                <string>water on</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="pbPing">
+               <property name="text">
+                <string>ping</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="pbCapabilities">
+               <property name="text">
+                <string>capabilities</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QPushButton" name="pbWaterState">
+               <property name="text">
+                <string>water ?</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="pbVersion">
+               <property name="text">
+                <string>version</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QPushButton" name="pbWaterOff">
+               <property name="text">
+                <string>water off</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QPushButton" name="pbSoilState">
+               <property name="text">
+                <string>soil ?</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="wgtMasterCommands" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>MasterNode Commands</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="wgtMasterCommandButtons" native="true">
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="pbDcAdapterOn">
+               <property name="text">
+                <string>dc adapter on</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="pbPingAll">
+               <property name="text">
+                <string>ping *</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QPushButton" name="pbPressureState">
+               <property name="text">
+                <string>pressure ?</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QPushButton" name="pbCurrentState">
+               <property name="text">
+                <string>current ?</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QPushButton" name="pbVoltageState">
+               <property name="text">
+                <string>voltage ?</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="pbPumpOn">
+               <property name="text">
+                <string>pump on</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="pbDcAdapterOff">
+               <property name="text">
+                <string>dc adapter off</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QPushButton" name="pbDcAdapterState">
+               <property name="text">
+                <string>dc adapter ?</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QPushButton" name="pbPumpOff">
+               <property name="text">
+                <string>pump off</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QPushButton" name="pbPumpState">
+               <property name="text">
+                <string>pump ?</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="wgtLog" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Log</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="textEdit"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
