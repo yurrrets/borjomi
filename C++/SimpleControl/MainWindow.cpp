@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     fillNodeButtons();
     fillDeviceList();
+    connect(&tmrRead, &QTimer::timeout, this, &MainWindow::onTimeToReadDevice);
+    connect(ui->txtCustomCmd, &QLineEdit::returnPressed, this, &MainWindow::on_pbSendCustomCmd_clicked);
 }
 
 MainWindow::~MainWindow()
@@ -31,22 +33,36 @@ void MainWindow::onNodeButtonToggled(bool checked)
     currentNode = static_cast<QPushButton *>(sender())->text();
 }
 
+void MainWindow::onTimeToReadDevice()
+{
+    if (!serialPort.canReadLine())
+        return;
+    QByteArray lnArr = serialPort.readLine();
+    QString ln = QString::fromLatin1(lnArr);
+    logEvent(Receive, ln);
+}
+
 void MainWindow::on_pbDeviceOpen_clicked()
 {
     QString portName = ui->cbDeviceList->currentText();
-    logEvent(Info, QString("Trying to open port '%0'").arg(portName));
+    QString msg = QString("Try to open port '%0'...").arg(portName);
     serialPort.close();
     serialPort.setBaudRate(QSerialPort::Baud9600);
     serialPort.setPortName(portName);
     bool success = serialPort.open(QIODevice::ReadWrite);
     if (success)
-        logEvent(Info, "Success");
+        logEvent(Info, msg + " Success");
     else
+    {
+        logEvent(Info, msg);
         logEvent(Error, "Failed. "+serialPort.errorString());
+    }
+    tmrRead.start(200);
 }
 
 void MainWindow::on_pbDeviceClose_clicked()
 {
+    tmrRead.stop();
     serialPort.close();
 }
 
@@ -221,4 +237,9 @@ void MainWindow::on_pbVoltageState_clicked()
 void MainWindow::on_pbCurrentState_clicked()
 {
     sendATCommand("CURRENT?", masterNode, "0");
+}
+
+void MainWindow::on_pbSendCustomCmd_clicked()
+{
+    doSendATCommand(ui->txtCustomCmd->text());
 }

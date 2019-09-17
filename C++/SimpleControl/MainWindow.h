@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSerialPort>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -19,54 +20,38 @@ public:
 
 private slots:
     void onNodeButtonToggled(bool checked);
+    void onTimeToReadDevice();
 
     void on_pbDeviceRefreshList_clicked();
-
     void on_pbDeviceOpen_clicked();
-
     void on_pbClearLog_clicked();
-
     void on_pbDeviceClose_clicked();
-
     void on_pbPing_clicked();
-
     void on_pbVersion_clicked();
-
     void on_pbCapabilities_clicked();
-
     void on_pbWaterOn_clicked();
-
     void on_pbWaterOff_clicked();
-
     void on_pbWaterState_clicked();
-
     void on_pbSoilState_clicked();
-
     void on_pbPingAll_clicked();
-
     void on_pbDcAdapterOn_clicked();
-
     void on_pbDcAdapterOff_clicked();
-
     void on_pbDcAdapterState_clicked();
-
     void on_pbPumpOn_clicked();
-
     void on_pbPumpOff_clicked();
-
     void on_pbPumpState_clicked();
-
     void on_pbPressureState_clicked();
-
     void on_pbVoltageState_clicked();
-
     void on_pbCurrentState_clicked();
+
+    void on_pbSendCustomCmd_clicked();
 
 private:
     Ui::MainWindow *ui;
     QList<QPushButton *> nodeButtons;
     QString currentNode;
     QSerialPort serialPort;
+    QTimer tmrRead;
 
     void fillDeviceList();
     void fillNodeButtons();
