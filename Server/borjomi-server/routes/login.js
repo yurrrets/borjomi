@@ -32,5 +32,12 @@ router.post('/', function(req, res, next) {
 		res.end();
 	}
 });
+
+router.get('/logout', function(req, res, next) {
+	req.session.loggedin = false;
+	req.session.username = '';
+	res.redirect('/');
+	res.end();
+})
   
 module.exports = router;
