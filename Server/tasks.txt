@@ -1,0 +1,13 @@
+Tasks for Server
+
+1. User Interface (WEB)
+- Auth user
+- Select Borjomi program and run on client
+- Show client status with its node statuses
+- Show history data by some period
+
+2. Borjomi client API
+- Auth client
+- Get status data from client
+- Send command for running program
+
