@@ -9,6 +9,7 @@
     <% if (session.loggedin) { %>
       <p>Welcome to <%= title %>, <%= session.username %>!</p>
       <p>[ <a href="/login/logout">Logout</a> ]</p>
+      <p><a href="/account">Accounts</a></p>
     <% } else { %>
       <p>Welcome to <%= title %></p>
       <p>To proceed further, please <a href="/login">Login</a></p>
