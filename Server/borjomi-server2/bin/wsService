@@ -1,0 +1,3 @@
+#!/usr/bin/env node -r esm
+var {startWithDB} = require('../src/server/wsService')
+startWithDB()

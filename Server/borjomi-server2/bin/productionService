@@ -1,0 +1,6 @@
+#!/usr/bin/env node -r esm
+
+process.env.NODE_ENV='production'
+
+var {startWithDB} = require('../src/server/wsService')
+startWithDB()

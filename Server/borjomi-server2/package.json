@@ -2,15 +2,43 @@
   "name": "borjomi-server2",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
-  },
-  "dependencies": {
-    "mysql2": "^2.1.0",
-    "ws": "^7.2.1"
-  },
-  "main": "app.js",
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mysql2": "^2.1.0",
+    "ws": "^7.2.1",
+    "esm": "^3.0.84"
+  },
+  "scripts": {
+    "dev": "npm-run-all --parallel server client",
+    "client": "react-scripts start",
+    "server": "node -r esm ./bin/wsService",
+    "test": "mocha -r esm",
+    "test-client": "react-scripts test",
+    "build": "react-scripts build",
+    "pack-deploy": "node ./bin/pack_deploy",
+    "test_server": "npm-run-all test build pack-deploy",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "mocha": "^5.2.0",
+    "npm-run-all": "^4.1.5",
+    "query-string": "^6.2.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "2.1.3",
+    "tar": "^4.4.8"
+  }
 }

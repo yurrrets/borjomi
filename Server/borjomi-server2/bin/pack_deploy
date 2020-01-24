@@ -1,0 +1,62 @@
+#!/usr/bin/env node -r esm
+var http = require('http');
+var fs = require('fs');
+var tar = require("tar")
+
+function do_post(data){
+
+  // An object of options to indicate where to post to
+  var post_options = {
+    host: 'antonybox.pmay.crp',
+    port: '5000',
+    path: '/cgi-bin/uploadVersion.sh',
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(data)
+    }
+  };
+
+  // Set up the request
+  var post_req = http.request(post_options, function(res) {
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+        console.log('Response: ' + chunk);
+    });
+  });
+
+  // post the data
+  post_req.write(data);
+  post_req.end();
+}
+
+async function main(){
+
+  var {name,version}=require("../package.json")
+  var tarName=`${name}-${version}.tgz`
+
+  // remove dev dependency
+  fs.renameSync("package.json","package_origin.json")
+  orig=JSON.parse(fs.readFileSync("package_origin.json"))
+  orig["devDependencies"]=undefined
+  fs.writeFileSync("package.json",JSON.stringify(orig,null, 2))
+
+  await tar.c(
+    {
+      gzip: true,
+      file: tarName
+    },
+    ['build',"src/server","src/common","package.json","bin/wsService","lib/linux","ecosystem.config.js"]
+  )
+  console.log("tar created");
+  
+  fs.renameSync("package_origin.json","package.json")
+
+  data=fs.readFileSync(tarName)
+  do_post(data);
+}
+
+main()
+
+
+
