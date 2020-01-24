@@ -89,16 +89,16 @@ body {
     function loadPage(){
         debugTextArea = document.getElementById("debugTextArea");
     }
-    function debug(message) {
-        //debugTextArea.value += message + "\n";
+    function debug(...messages) {
+        //debugTextArea.value += messages.join(' ') + "\n";
         //debugTextArea.scrollTop = debugTextArea.scrollHeight;
     }
-    function info(message) {
-        debugTextArea.value += message + "\n";
+    function info(...messages) {
+        debugTextArea.value += messages.join(' ') + "\n";
         debugTextArea.scrollTop = debugTextArea.scrollHeight;
     }
-    function error(message) {
-        debugTextArea.value += message + "\n";
+    function error(...messages) {
+        debugTextArea.value += messages.join(' ') + "\n";
         debugTextArea.scrollTop = debugTextArea.scrollHeight;
     }
 
@@ -135,7 +135,7 @@ body {
         }
     }
 
-    var wsUri = "ws://localhost:8080";
+    var wsUri = "ws://localhost:3001";
     var websocket = null;
 
     function initWebSocket() {
@@ -145,25 +145,26 @@ body {
             if ( websocket && websocket.readyState == 1 )
                 websocket.close();
             websocket = new WebSocket( wsUri );
+            info("Connecting to", wsUri)
             websocket.onopen = function (evt) {
                 info("CONNECTED");
-                onCycleConnected(evt);
+                // onCycleConnected(evt);
             };
             websocket.onclose = function (evt) {
                 info("DISCONNECTED");
-                onCycleDisconnected(evt);
+                // onCycleDisconnected(evt);
             };
             websocket.onmessage = function (evt) {
                 console.log( "Message received :", evt.data );
                 debug( "Received:\n"+evt.data );
-                onCycleMessage(evt);
+                // onCycleMessage(evt);
             };
             websocket.onerror = function (evt) {
                 if (evt.data)
                     error('ERROR: ' + evt.data);
                 else
                     error('ERROR. Check MaxInspect running and WebSocketAPI enabled.');
-                onCycleError(evt);
+                // onCycleError(evt);
             };
         } catch (exception) {
             error('ERROR: ' + exception);
@@ -207,52 +208,52 @@ body {
     }
     
     
-    var cycleRunning = false;
-    var cycleCounter;
+    // var cycleRunning = false;
+    // var cycleCounter;
     
-    function onCycleConnected(evt) {
-        sendMessageJson({'function':'Handshake','version':1,'reqID':1});
-    }
+    // function onCycleConnected(evt) {
+    //     sendMessageJson({'function':'Handshake','version':1,'reqID':1});
+    // }
     
-    function onCycleDisconnected(evt) {
-        stopCycle();
-    }
+    // function onCycleDisconnected(evt) {
+    //     stopCycle();
+    // }
     
-    function onCycleMessage(evt) {
-        if (!cycleRunning) return;
-        var d = JSON.parse(evt.data);
-        if (d.eventType == "Error") {
-            error(evt.data);
-            setTimeout(stopCycle, 0);
-        }
-        if (!(
-            (d.eventType == "ScenarioState" && d.state === 0) ||
-            (d.reqID == 1 && d.errCode === 0))) {
-                return;
-        }
-        setTimeout(function() {
-            cycleCounter++;
-            info("Starting measurement " + cycleCounter);
-            sendMessageJson({'function':'Measure'});
-        }, 0);
-    }
+    // function onCycleMessage(evt) {
+    //     if (!cycleRunning) return;
+    //     var d = JSON.parse(evt.data);
+    //     if (d.eventType == "Error") {
+    //         error(evt.data);
+    //         setTimeout(stopCycle, 0);
+    //     }
+    //     if (!(
+    //         (d.eventType == "ScenarioState" && d.state === 0) ||
+    //         (d.reqID == 1 && d.errCode === 0))) {
+    //             return;
+    //     }
+    //     setTimeout(function() {
+    //         cycleCounter++;
+    //         info("Starting measurement " + cycleCounter);
+    //         sendMessageJson({'function':'Measure'});
+    //     }, 0);
+    // }
     
-    function onCycleError(evt) {
-        stopCycle();
-    }
+    // function onCycleError(evt) {
+    //     stopCycle();
+    // }
     
-    function startCycle() {
-        info("Starting test...");
-        cycleCounter = 0;
-        cycleRunning = true;
-        initWebSocket();
-    }
+    // function startCycle() {
+    //     info("Starting test...");
+    //     cycleCounter = 0;
+    //     cycleRunning = true;
+    //     initWebSocket();
+    // }
     
-    function stopCycle() {
-        cycleRunning = false;
-        stopWebSocket();
-        info("Test finished.");
-    }
+    // function stopCycle() {
+    //     cycleRunning = false;
+    //     stopWebSocket();
+    //     info("Test finished.");
+    // }
 </script>
 
 </head>
@@ -267,9 +268,9 @@ body {
     <div id="main">
         <div id="doc">
             <div class="iteractive">
-                <p>Connecting to <i>localhost:1234</i></p>
-                <button onClick="startCycle();">Start</button>
-                <button onClick="stopCycle();">Stop</button>
+                <p>Connecting to <i>localhost:XXXX</i></p>
+                <button onClick="initWebSocket();">Start</button>
+                <button onClick="stopWebSocket();">Stop</button>
             </div>
         </div>
         <div id="output">

@@ -40,7 +40,7 @@ let config = {
 
 
 try {
-    let localCfg = require('./config.json')
+    let localCfg = require('../../config.json')
     config = mergeDeep({}, config, localCfg)
 }
 catch(err) {
