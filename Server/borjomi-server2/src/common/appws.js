@@ -1,3 +1,8 @@
+const { ErrorCodes, APIError } = require("./error")
+
+const customJSONStringify = JSON.stringify;
+const customJSONparse = JSON.parse;
+
 /**
  * Wrapper for App WebSocket
  */

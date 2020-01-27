@@ -90,8 +90,8 @@ body {
         debugTextArea = document.getElementById("debugTextArea");
     }
     function debug(...messages) {
-        //debugTextArea.value += messages.join(' ') + "\n";
-        //debugTextArea.scrollTop = debugTextArea.scrollHeight;
+        debugTextArea.value += messages.join(' ') + "\n";
+        debugTextArea.scrollTop = debugTextArea.scrollHeight;
     }
     function info(...messages) {
         debugTextArea.value += messages.join(' ') + "\n";
@@ -100,6 +100,9 @@ body {
     function error(...messages) {
         debugTextArea.value += messages.join(' ') + "\n";
         debugTextArea.scrollTop = debugTextArea.scrollHeight;
+    }
+    function clearLog() {
+        debugTextArea.value = ""
     }
 
     function sendMessage() {
@@ -206,6 +209,18 @@ body {
             info("WebSocket is null");
         }
     }
+
+    function handshake(evt) {
+        sendMessageJson({'function':'Handshake','version':1,'reqID':1});
+    }
+
+    function login() {
+        sendMessageJson({
+            'function': "login",
+            'username': document.getElementById("username").value,
+            'password': document.getElementById("password").value
+        })
+    }
     
     
     // var cycleRunning = false;
@@ -271,11 +286,21 @@ body {
                 <p>Connecting to <i>localhost:XXXX</i></p>
                 <button onClick="initWebSocket();">Start</button>
                 <button onClick="stopWebSocket();">Stop</button>
+                <button onClick="handshake();">Handshake</button>
+            </div>
+            <div>&nbsp;</div>
+            <div class="iteractive">
+                <p>Login/Logout</p>
+                Username <input type="text" id="username" /><br />
+                Password <input type="text" id="password" /><br />
+                <button onClick="login();">Login</button>
+                <button onClick="logout();">Logout</button>
             </div>
         </div>
         <div id="output">
             <p>
             Inptut output log:
+            <span style="float: right">[ <a href="#" onClick="clearLog();">Clear</a> ]</span>
             </p>
             <textarea id="debugTextArea" style="width:100%;height:80%;"></textarea>
             

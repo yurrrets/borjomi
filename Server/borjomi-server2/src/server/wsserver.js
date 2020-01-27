@@ -1,14 +1,15 @@
+const { ErrorCodes, APIError } = require("../common/error")
 const WebSocket = require('ws')
 import { AppWebSocket } from "../common/appws"
+const API_VERSION = 1
 const SERVER_VERSION = require("../../package.json").version
 
 
-class APIError extends Error {
-    constructor(message, code = 0) {
-        super(message)
-        this.name = "APIError"
-        this.code = code
+function requireParam(inObj, pName, pType) {
+    if (typeof inObj[pName] != pType) {
+        throw new APIError("inObj['"+pName+"'] is undefined or has invalid type. Expected type: "+pType)
     }
+    return inObj[pName]
 }
 
 class WSServer {
@@ -23,7 +24,7 @@ class WSServer {
     /**
      * 
      * @param {string} name function name
-     * @param {{ inObj, ws:SMXWebSocket, handshakeParams }} func 
+     * @param {{ inObj, ws:AppWebSocket, handshakeParams }} func 
      */
     addFunction(name, func) {
         if (this.functionMap.has(name))
@@ -37,7 +38,7 @@ class WSServer {
 
         var version = requireParam(inObj, 'version', 'number')
         if (version != 1)
-            throw new APIError("Versions not compatible")
+            throw new APIError("Versions are not compatible")
 
         this._handshakeParams.set(ws, inObj)
 
@@ -88,4 +89,4 @@ class WSServer {
     }
 }
 
-export { WSServer, APIError }
+export { WSServer, requireParam }
