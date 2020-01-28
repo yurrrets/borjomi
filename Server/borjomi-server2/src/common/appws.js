@@ -1,7 +1,7 @@
 const { ErrorCodes, APIError } = require("./error")
+import {customJSONparse,customJSONStringify} from '../common/utils'
 
-const customJSONStringify = JSON.stringify;
-const customJSONparse = JSON.parse;
+var API_VERSION = 1
 
 /**
  * Wrapper for App WebSocket
@@ -234,4 +234,4 @@ class AppWebSocket {
 
 }
 
-export {AppWebSocket}
+export {AppWebSocket, API_VERSION}
