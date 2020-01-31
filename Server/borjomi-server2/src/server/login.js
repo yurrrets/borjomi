@@ -4,7 +4,7 @@ import {requireParam} from './wsserver'
 
 async function login({inObj, context}) {
     if (context.loginInfo)
-        throw new APIError("Already loged in")
+        throw new APIError("Already logged in")
     if (inObj.password!=undefined){
         const username=requireParam(inObj,'username')
         var {id,name,permission_mask,token} = await db.doLogin(username,inObj.password)

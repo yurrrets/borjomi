@@ -123,4 +123,4 @@ class WSServer {
     }
 }
 
-export { WSServer, requireParam }
+export { WSServer, WSContext, requireParam }
