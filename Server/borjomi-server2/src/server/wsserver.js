@@ -90,7 +90,7 @@ class WSServer {
 
         var func = this.functionMap.get(inObj.function)
         var context = this._contextMap.get(ws)
-        var ret = await func({ inObj, context })
+        var ret = await func(inObj, context)
         return ret
     }
 

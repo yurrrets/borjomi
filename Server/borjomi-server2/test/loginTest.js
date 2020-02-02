@@ -6,8 +6,8 @@ describe('login', function() {
     describe('login', function() {
         it('check teste login with username/password', async function() {
             let context = new WSContext()
-            const token = await login.login({username: 'test', password: 'test'}, context)
-            assert.ok(length(token) >= 32, 'token expected');
+            const {token} = await login.login({username: 'test', password: 'test'}, context)
+            assert.ok(token && (token.length >= 32), 'token expected');
         });
     });
 });
