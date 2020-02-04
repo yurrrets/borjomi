@@ -9,11 +9,13 @@ describe('login', function() {
         await db.init()
     });
 
-    describe('login', function() {
+    describe('login-logout', function() {
         it('check teste login with username/password', async function() {
             let context = new WSContext()
             const {token} = await login.login({username: 'test', password: 'test'}, context)
-            assert.ok(token && (token.length >= 32), 'token expected');
+            assert.ok(token && (token.length >= 32), 'token expected')
+
+            await login.logout({}, context)
         });
     });
 

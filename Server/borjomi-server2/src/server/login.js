@@ -11,7 +11,7 @@ async function login(inObj, context) {
         var {id,name,token} = await db.login(username,inObj.password)
     }
     else if (inObj.token!=undefined)
-        var {id,name,token} = await db.doTokenLogin(inObj.token)
+        var {id,name,token} = await db.tokenLogin(inObj.token)
     else
         throw new APIError("password or token required")
 
@@ -29,9 +29,10 @@ async function logout(inObj, context) {
     if (!loginInfo) {
         return
     }
-    await db.addLogout(loginInfo.connection_id)
+    // await db.addLogout(loginInfo.connection_id)
     await db.removeToken(loginInfo.token)
     context.loginInfo = null
 }
+
 
 export { login, logout }

@@ -42,6 +42,22 @@ INSERT INTO `accounts` VALUES (1,'test','test','test@test.com'),(2,'t1','t1','t1
 UNLOCK TABLES;
 
 --
+-- Table structure for table `account_tokens`
+--
+
+DROP TABLE IF EXISTS `account_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(100) NOT NULL,
+  `accounts_id` int(11) NOT NULL,
+  `expire_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `accounts_rel`
 --
 
