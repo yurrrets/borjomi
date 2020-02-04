@@ -2,11 +2,12 @@
 const ErrorCodes = {
     ConnectionClosed: -1,
     Ok: 0,
-    HandshakeRequired: 1,
-    InvalidFormat: 2,
-    FunctionNotFound: 3,
-    InvalidParams: 4,
-    GeneralError: 5
+    GeneralError: 1,
+    HandshakeRequired: 2,
+    NotLoggedIn: 3,
+    InvalidFormat: 4,
+    FunctionNotFound: 5,
+    InvalidParams: 6
 }
 
 class APIError extends Error {

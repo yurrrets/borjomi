@@ -1,5 +1,6 @@
 'use strict';
 import {requireParam} from './wsserver'
+import { APIError, ErrorCodes } from '../common/error';
 const db = require('./db')
 
 
@@ -11,7 +12,7 @@ async function login(inObj, context) {
         var {id,name,token} = await db.login(username,inObj.password)
     }
     else if (inObj.token!=undefined)
-        var {id,name,token} = await db.tokenLogin(inObj.token)
+        var {id,name,token} = await db.loginToken(inObj.token)
     else
         throw new APIError("password or token required")
 
@@ -34,5 +35,12 @@ async function logout(inObj, context) {
     context.loginInfo = null
 }
 
+async function ensureLogin(inObj, context) {
+    const loginInfo = context.loginInfo
+    if (!loginInfo || !loginInfo.userID) {
+        throw new APIError("Please log in first", ErrorCodes.NotLoggedIn)
+    }
+}
 
-export { login, logout }
+
+export { login, logout, ensureLogin }
