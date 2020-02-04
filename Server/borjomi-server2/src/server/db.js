@@ -2,9 +2,18 @@
 
 const mysql = require('mysql2/promise')
 const config = require('./config')
-const pool = mysql.createPool(config.db)
+var pool = null
 const crypto = require('crypto')
 
+
+async function init() {
+    pool = mysql.createPool(config.db)
+}
+
+async function finish() {
+    pool.end()
+    pool = null
+}
 
 async function login(username, password) {
     try
@@ -34,4 +43,4 @@ async function login(username, password) {
     }
 }
 
-export { login }
+export { init, finish, login }
