@@ -27,12 +27,27 @@ describe('login', function() {
 
     describe('ensure login', function() {
         it('check when not logged in', async function() {
-            assert.rejects(login.ensureLogin, APIError)
+            assert.throws(function() { login.ensureLogin(new WSContext()) }, APIError)
         });
         it('check after logged in', async function() {
             let context = new WSContext()
             const {token} = await login.login({username: 'test', password: 'test'}, context)
-            login.ensureLogin({}, context)
+            login.ensureLogin(context)
+            await login.logout({}, context)
+        });
+    });
+
+    describe('get child accounts', function() {
+        it('check login.getChildAccounts func', async function() {
+            let context = new WSContext()
+            const {token} = await login.login({username: 'test', password: 'test'}, context)
+            const child_accs = await login.getChildAccounts({}, context);
+            assert.notEqual(child_accs.length, 0)
+            for (const val of child_accs) {
+                assert.equal(await login.hasChildAccount({ id: val.id }, context), true)
+            }
+            assert.equal(await login.hasChildAccount({ id: -1 }, context), false)
+            assert.rejects(async function () { await login.hasChildAccount({ }, context) }, APIError)
             await login.logout({}, context)
         });
     });

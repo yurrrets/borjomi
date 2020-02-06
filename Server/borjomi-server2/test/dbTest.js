@@ -30,8 +30,17 @@ describe('db', function() {
         });
     });
 
+    describe('#child_accounts', function() {
+        it('tries to get child accounts for "test" user', async function() {
+            const r = await db.login('test', 'test')
+            await db.removeToken(r.token)
+            let child_accs = await db.getChildAccounts(r.id)
+            // console.log(child_accs)
+            assert.notEqual(child_accs.length, 0);
+        });
+    });
+
     after(async function() {
-        console.log("db.finish")
         await db.finish()
     });
 

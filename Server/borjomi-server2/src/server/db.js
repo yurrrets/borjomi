@@ -104,4 +104,24 @@ async function removeToken(token) {
     }
 }
 
-export { init, finish, login, loginToken, removeToken }
+async function getChildAccounts(userID) {
+    try
+    {
+        var connection = await pool.getConnection();
+        const [rows, fields] = await connection.query(
+            `SELECT a.id, a.username
+             FROM accounts_rel r
+             JOIN accounts a ON r.child_account_id = a.id
+             WHERE r.parent_account_id = ?`,
+            [userID]
+        )
+        return rows.map(x => { return {id: x.id, username: x.username} })
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
+export { init, finish, login, loginToken, removeToken, getChildAccounts }
