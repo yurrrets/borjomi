@@ -42,13 +42,13 @@ INSERT INTO `account` VALUES (1,'test','test','test@test.com'),(2,'t1','t1','t1@
 UNLOCK TABLES;
 
 --
--- Table structure for table `account_tokens`
+-- Table structure for table `account_token`
 --
 
-DROP TABLE IF EXISTS `account_tokens`;
+DROP TABLE IF EXISTS `account_token`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_tokens` (
+CREATE TABLE `account_token` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `token` varchar(100) NOT NULL,
   `account_id` int(11) NOT NULL,
