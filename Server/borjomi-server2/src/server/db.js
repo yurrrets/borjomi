@@ -21,7 +21,7 @@ async function login(username, password) {
         var ret = { id: 0, username: "", token: "" }
         var connection = await pool.getConnection();
         const [rows, fields] = await connection.query(
-            'SELECT id, username FROM accounts WHERE username = ? AND password = ?',
+            'SELECT id, username FROM account WHERE username = ? AND password = ?',
             [username, password])
         if (!rows.length) {
             return ret // no login/password pair
@@ -34,7 +34,7 @@ async function login(username, password) {
         let expire_date = new Date(Date.now())
         expire_date.setDate(expire_date.getDate() + 5) // add 5 days
         await connection.query(
-            'INSERT INTO account_tokens (token, accounts_id, expire_date) VALUES (?, ?, ?)',
+            'INSERT INTO account_token (token, account_id, expire_date) VALUES (?, ?, ?)',
             [ret.token, ret.id, expire_date]
         )
 
@@ -54,8 +54,8 @@ async function loginToken(token) {
         var connection = await pool.getConnection();
         const [rows, fields] = await connection.query(
             `SELECT a.id, a.username, t.token, t.expire_date
-             FROM account_tokens t 
-             JOIN accounts a ON t.accounts_id = a.id
+             FROM account_token t 
+             JOIN account a ON t.account_id = a.id
              WHERE t.token = ?`,
             [token])
         if (!rows.length) {
@@ -75,7 +75,7 @@ async function loginToken(token) {
         let expire_date = new Date(Date.now())
         expire_date.setDate(expire_date.getDate() + 5) // add 5 days
         await connection.query(
-            'UPDATE account_tokens SET expire_date = ? WHERE token = ?',
+            'UPDATE account_token SET expire_date = ? WHERE token = ?',
             [expire_date, ret.token]
         )
 
@@ -93,7 +93,7 @@ async function removeToken(token) {
     {
         var connection = await pool.getConnection();
         await connection.query(
-            'DELETE FROM account_tokens WHERE token = ?',
+            'DELETE FROM account_token WHERE token = ?',
             [token]
         )
     }
@@ -110,8 +110,8 @@ async function getChildAccounts(userID) {
         var connection = await pool.getConnection();
         const [rows, fields] = await connection.query(
             `SELECT a.id, a.username
-             FROM accounts_rel r
-             JOIN accounts a ON r.child_account_id = a.id
+             FROM account_rel r
+             JOIN account a ON r.child_account_id = a.id
              WHERE r.parent_account_id = ?`,
             [userID]
         )

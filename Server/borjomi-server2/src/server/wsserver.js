@@ -56,7 +56,7 @@ class WSServer {
     /**
      * 
      * @param {string} name function name
-     * @param {{ inObj, ws:AppWebSocket, context:WSContext }} func 
+     * @param {{ inObj, context:WSContext }} func 
      */
     addFunction(name, func) {
         if (this.functionMap.has(name))
