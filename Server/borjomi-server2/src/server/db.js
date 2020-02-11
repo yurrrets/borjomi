@@ -1,9 +1,12 @@
+import { MessageStatus } from '../common/message';
+
 'use strict';
 
 const mysql = require('mysql2/promise')
 const config = require('./config')
 var pool = null
 const crypto = require('crypto')
+const message = require('../common/message')
 
 
 async function init() {
@@ -124,4 +127,51 @@ async function getChildAccounts(userID) {
     }
 }
 
-export { init, finish, login, loginToken, removeToken, getChildAccounts }
+
+/**
+ * Inserts to DB new message.
+ * Message parameter id is ignored. Input message object is not modified
+ * @param {message.Message} message
+ * @returns id of newly inserted message
+ */
+async function createMessage(message) {
+    try {
+        var connection = await pool.getConnection();
+        const [rst] = await connection.query(
+            `INSERT INTO message (status, type, creation_date, last_modified, requestor_id, executor_id, valid_until, params)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [message.status, message.type, message.creationDate, message.lastModified, message.requestor, message.executor,
+             message.validUntil, JSON.stringify(message.params)]
+        )
+        return rst.insertId
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
+/**
+ * Removes message with given id
+ * @param {int} id 
+ * @returns true if message was removed, false it message was not found
+ */
+async function removeMessage(id) {
+    try {
+        var connection = await pool.getConnection();
+        const [rst] = await connection.query(`DELETE FROM message WHERE id = ?`, [id])
+        return rst.affectedRows > 0
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
+export {
+    init, finish,
+    login, loginToken, removeToken, getChildAccounts,
+    createMessage, removeMessage
+}
