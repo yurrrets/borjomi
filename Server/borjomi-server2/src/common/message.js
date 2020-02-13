@@ -1,13 +1,20 @@
 
 const MessageStatus = {
     New: 1,            // New message
-    Cancelled: 2,      // Cancelled by requestor
+    Sent: 2,           // Message was sent to executor
     Accepted: 3,       // Accepted by executor
     Processing: 4,     // Executing in process
     DoneOk: 5,         // Completed successfully
     DoneError: 6,      // Message processed, but error happened (most probably not completed)
     TimedOut: 7,       // Message hasn't been accepted or processed in time
 }
+
+// Message workflow states.
+// Described as state machine. In brakets is a role who can change to given state
+// New -> Sent, TimedOut (server)
+// Sent -> New (server) | Accepted, Processing, DoneOk, DoneError (executor)
+// Accepted -> Processing, DoneOk, DoneError (executor)
+// Processing -> DoneOk, DoneError (executor)
 
 const MessageType = {
     /**
@@ -25,7 +32,7 @@ class Message {
         this.creationDate = null  // when message was created
         this.lastModified = null  // datetime of last modification
         this.requestor = 0        // requestor (account id)
-        this.target = 0           // executor (account id); 0 means that executor is server itself, and it should process the message
+        this.executor = 0         // executor (account id); 0 means that executor is server itself, and it should process the message
         this.validUntil = null    // datetime; null means always valid no-timeout message
         this.params = null        // object; message parameters
     }

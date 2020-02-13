@@ -41,8 +41,8 @@ describe('db', function() {
         });
     });
 
-    describe('#create/delete message', function() {
-        it('creates and deletes ping message', async function() {
+    describe('#create/retrieve/update/delete message', function() {
+        it('message manipulations', async function() {
             let msg = new message.Message()
             msg.status = message.MessageStatus.New
             msg.type = message.MessageType.Ping
@@ -55,7 +55,19 @@ describe('db', function() {
             msg.params = { testParam: "testValue"}
             const msgId = await db.createMessage(msg)
             assert.ok(msgId)
-            const flag = await db.removeMessage(msgId)
+
+            let msg1 = await db.getMessageByID(msgId)
+            assert.ok(msg1)
+            // assert.deepEqual(msg, msg1) - don't use this, because dates will be rounded because of datetime type in dbms
+            msg1.status = message.MessageStatus.Sent
+            let flag = await db.updateMessage(msg1)
+            assert.ok(flag)
+
+            let msg2 = await db.getMessageByID(msgId)
+            assert.ok(msg2)
+            assert.deepEqual(msg1, msg2)
+
+            flag = await db.removeMessage(msgId)
             assert.ok(flag)
         });
     });

@@ -170,8 +170,67 @@ async function removeMessage(id) {
     }
 }
 
+/**
+ * Update given message in db. Message.id is using to find the message
+ */
+async function updateMessage(message) {
+    try {
+        var connection = await pool.getConnection();
+        const [rst] = await connection.query(
+            `UPDATE message
+             SET status = ?, type = ?, creation_date = ?, last_modified = ?, requestor_id = ?, executor_id = ?, valid_until = ?, params = ?
+             WHERE id = ?`,
+            [message.status, message.type, message.creationDate, message.lastModified, message.requestor, message.executor,
+             message.validUntil, JSON.stringify(message.params), message.id]
+        )
+        return rst.affectedRows > 0
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
+/**
+ * Get Message object by given id, or returns null if no message with given id found
+ * @param {int} id 
+ */
+async function getMessageByID(id) {
+    try {
+        var connection = await pool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT id, status, type, creation_date, last_modified, requestor_id, executor_id, valid_until, params
+             FROM message
+             WHERE id = ?`,
+            [id]
+        )
+        if (rows.length == 0) {
+            return null
+        }
+        const row = rows[0]
+        let msg = new message.Message()
+        msg.id = row.id
+        msg.status = row.status
+        msg.type = row.type
+        msg.creationDate = row.creation_date
+        msg.lastModified = row.last_modified
+        msg.requestor = row.requestor_id
+        msg.executor = row.executor_id
+        msg.validUntil = row.valid_until
+        if (row.params)
+            msg.params = JSON.parse(row.params)
+        return msg
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
 export {
     init, finish,
     login, loginToken, removeToken, getChildAccounts,
-    createMessage, removeMessage
+    createMessage, removeMessage, updateMessage, getMessageByID
 }

@@ -1,8 +1,15 @@
 'use strict';
-import {requireParam} from './wsserver'
+import { WSContext, requireParam } from './wsserver'
 import { APIError, ErrorCodes } from '../common/error';
 const db = require('./db')
 
+
+class LoginInfo {
+    constructor(userID, token) {
+        this.userID = userID
+        this.token = token
+    }
+}
 
 async function login(inObj, context) {
     if (context.loginInfo)
@@ -18,8 +25,8 @@ async function login(inObj, context) {
 
     if (id===0)
         throw new APIError("Login failed")
-    var connection_id = 0 //await db.addLoginLog("LOGIN",id,context.ws.remoteAddress,context.handshakeParams.ClientVersion)
-    context.loginInfo={ userID: id, token, connection_id }
+    // var connection_id = 0 //await db.addLoginLog("LOGIN",id,context.ws.remoteAddress,context.handshakeParams.ClientVersion)
+    context.loginInfo = new LoginInfo(id, token)
 
     // console.log(`UserID ${id} Logged in`)
     return {token}
@@ -35,11 +42,17 @@ async function logout(inObj, context) {
     context.loginInfo = null
 }
 
+/**
+ * 
+ * @param {WSContext} context 
+ * @returns {LoginInfo}
+ */
 function ensureLogin(context) {
     const loginInfo = context.loginInfo
     if (!loginInfo || !loginInfo.userID) {
         throw new APIError("Please log in first", ErrorCodes.NotLoggedIn)
     }
+    return loginInfo
 }
 
 async function getChildAccounts(inObj, context) {
@@ -62,6 +75,6 @@ async function hasChildAccount(inObj, context) {
 }
 
 export {
-     login, logout, ensureLogin,
+     LoginInfo, login, logout, ensureLogin,
      getChildAccounts, hasChildAccount
 }

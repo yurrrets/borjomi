@@ -36,6 +36,19 @@ function requireParam(inObj, name, type=undefined) {
     return inObj[name]
 }
 
+function optionalParam(inObj, name, type=undefined) {
+
+    if (!(name in inObj))
+        return null
+    var ret = inObj[name]
+
+    if (!_validateType(ret,type))
+        throw new APIError(`Optional parameter '${name}' should be ${type} [if provided]`,
+            ErrorCodes.InvalidParams)
+
+    return inObj[name]
+}
+
 class WSContext {
     constructor(appWs) {
         this.ws = appWs
@@ -123,4 +136,4 @@ class WSServer {
     }
 }
 
-export { WSServer, WSContext, requireParam }
+export { WSServer, WSContext, requireParam, optionalParam }
