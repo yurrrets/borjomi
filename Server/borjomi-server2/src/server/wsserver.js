@@ -4,6 +4,7 @@ const { ErrorCodes, APIError } = require("../common/error")
 const WebSocket = require('ws')
 import { AppWebSocket, API_VERSION } from "../common/appws"
 const SERVER_VERSION = require("../../package.json").version
+const { Broker } = require("./broker")
 
 
 
@@ -50,7 +51,13 @@ function optionalParam(inObj, name, type=undefined) {
 }
 
 class WSContext {
-    constructor(appWs) {
+    /**
+     * 
+     * @param {AppWebSocket} appWs 
+     * @param {WSServer} wsServer 
+     */
+    constructor(appWs, wsServer) {
+        this.broker = wsServer._broker
         this.ws = appWs
         this.handshakeParams = null
         this.loginInfo = null
@@ -62,6 +69,8 @@ class WSServer {
         this.functionMap = new Map()
         this._contextMap = new Map()
         this._onClientClose = null
+        this._broker = new Broker()
+        this._broker.newMessageHandler = this.onBrokerNewMessage
     }
     setOnClientClose(func){ this._onClientClose = func }
     // WARNING calling ws.command await can cause dead lock.
@@ -112,7 +121,7 @@ class WSServer {
         this.wss.on("connection", (ws,req) => {
             console.log("client connected");
             var appWs = new AppWebSocket(ws, true)
-            this._contextMap.set(appWs, new WSContext(appWs))
+            this._contextMap.set(appWs, new WSContext(appWs, this))
             // const ip = req.headers['x-forwarded-for'].split(/\s*,\s*/)[0];
             const ip = req.connection.remoteAddress
             appWs.remoteAddress=ip
@@ -126,6 +135,10 @@ class WSServer {
         this._contextMap.delete(ws)
         if (this._onClientClose)
             this._onClientClose(ws)
+    }
+
+    async onBrokerNewMessage() {
+        console.log("onBrokerNewMessage; wsServer._contextMap.size =", this._contextMap.size)
     }
 
     close() {

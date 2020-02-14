@@ -1,11 +1,16 @@
 import { requireParam, optionalParam } from './wsserver'
-import { APIError, ErrorCodes } from '../common/error';
+import { APIError, ErrorCodes } from '../common/error'
 const db = require('./db')
 const message = require('../common/message')
 import { ensureLogin, hasChildAccount } from './login'
-import { login } from './db';
+import { WSContext } from './wsserver'
 
 
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
 async function newMessage(inObj, context) {
     const loginInfo = ensureLogin(context)
 
@@ -29,7 +34,7 @@ async function newMessage(inObj, context) {
     }
 
     // check if user has permission to send message
-    if (!login.hasChildAccount({ id: msg.executor }, context)) {
+    if (!hasChildAccount({ id: msg.executor }, context)) {
         throw APIError(`Can't send message to executor ${msg.executor}. Not a child account`, ErrorCodes.InvalidParams)
     }
 
@@ -38,5 +43,7 @@ async function newMessage(inObj, context) {
         throw APIError(`Parameter validUntil should be greater than creationDate`, ErrorCodes.InvalidParams)
     }
 
-    return await db.createMessage(msg)
+    const ret = await db.createMessage(msg)
+    context.broker.notifyNewMessage()
+    return ret
 }
