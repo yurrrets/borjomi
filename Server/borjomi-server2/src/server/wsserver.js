@@ -64,13 +64,25 @@ class WSContext {
     }
 }
 
+class ServerContext {
+    constructor(wsServer) {
+        this.broker = wsServer._broker
+        this.handshakeParams = null
+        this.loginInfo = null
+    }
+}
+
 class WSServer {
     constructor() {
         this.functionMap = new Map()
+        this.messageMap = new Map() // messages processed by server
         this._contextMap = new Map()
         this._onClientClose = null
         this._broker = new Broker()
         this._broker.newMessageHandler = this.onBrokerNewMessage
+
+        this.serverContext = new ServerContext(this)
+        this.serverContext.handshakeParams = { version: 1 }
     }
     setOnClientClose(func){ this._onClientClose = func }
     // WARNING calling ws.command await can cause dead lock.
@@ -84,6 +96,17 @@ class WSServer {
         if (this.functionMap.has(name))
             throw Error(`Function with name "${name}" is already registered`)
         this.functionMap.set(name, func)
+    }
+
+    /**
+     * 
+     * @param {string} tp message type
+     * @param {{ inObj }} func 
+     */
+    addMessage(tp, func) {
+        if (this.messageMap.has(tp))
+            throw Error(`Message with type "${name}" is already registered`)
+        this.messageMap.set(tp, func)
     }
 
     handshake(inObj, ws) {
@@ -116,7 +139,7 @@ class WSServer {
         return ret
     }
 
-    initWS(options) {
+    init(options) {
         this.wss = new WebSocket.Server(options)
         this.wss.on("connection", (ws,req) => {
             console.log("client connected");
@@ -137,10 +160,6 @@ class WSServer {
             this._onClientClose(ws)
     }
 
-    async onBrokerNewMessage() {
-        console.log("onBrokerNewMessage; wsServer._contextMap.size =", this._contextMap.size)
-    }
-
     close() {
         console.log("closing server");
         if (this.wss)
@@ -149,4 +168,4 @@ class WSServer {
     }
 }
 
-export { WSServer, WSContext, requireParam, optionalParam }
+export { WSServer, WSContext, ServerContext, requireParam, optionalParam }

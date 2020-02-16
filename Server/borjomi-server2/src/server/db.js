@@ -229,8 +229,27 @@ async function getMessageByID(id) {
     }
 }
 
+async function getMessageIDsByStatus(status) {
+    try {
+        var connection = await pool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT id
+             FROM message
+             WHERE status = ?
+             ORDER BY last_modified`,
+            [status]
+        )
+        return rows.map(x => x)
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
 export {
     init, finish,
     login, loginToken, removeToken, getChildAccounts,
-    createMessage, removeMessage, updateMessage, getMessageByID
+    createMessage, removeMessage, updateMessage, getMessageByID, getMessageIDsByStatus
 }

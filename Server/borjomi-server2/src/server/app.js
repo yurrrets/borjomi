@@ -15,7 +15,8 @@ class WSService {
 
     async startWSService() {
         console.log('starting service');
-        this.wss.initWS({ 'port': 3001 })
+        this.wss.init({ 'port': 3001 })
+        login.loginServer(this.wss.serverContext)
     }
 }
 

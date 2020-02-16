@@ -1,5 +1,5 @@
 'use strict';
-import { WSContext, requireParam } from './wsserver'
+import { WSContext, ServerContext, requireParam } from './wsserver'
 import { APIError, ErrorCodes } from '../common/error';
 const db = require('./db')
 
@@ -44,12 +44,20 @@ async function logout(inObj, context) {
 
 /**
  * 
+ * @param {ServerContext} context 
+ */
+function loginServer(context) {
+    context.loginInfo = new LoginInfo(0, null)
+    context.loginInfo.isServer = true
+}
+/**
+ * 
  * @param {WSContext} context 
  * @returns {LoginInfo}
  */
 function ensureLogin(context) {
     const loginInfo = context.loginInfo
-    if (!loginInfo || !loginInfo.userID) {
+    if (!loginInfo || (!loginInfo.userID && !loginInfo.isServer)) {
         throw new APIError("Please log in first", ErrorCodes.NotLoggedIn)
     }
     return loginInfo
@@ -75,6 +83,6 @@ async function hasChildAccount(inObj, context) {
 }
 
 export {
-     LoginInfo, login, logout, ensureLogin,
+     LoginInfo, login, logout, loginServer, ensureLogin,
      getChildAccounts, hasChildAccount
 }
