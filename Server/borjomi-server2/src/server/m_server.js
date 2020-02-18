@@ -25,7 +25,7 @@ async function onBrokerNewMessage(wsServer) {
                 await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
                 var func = wsServer.messageMap.get(msg.type)
                 var context = wsServer.serverContext
-                await func(inObj, context)
+                await func(msg, context)
             }
             catch(e) {
                 await db.registerMessageAnswer(msgId, typeof(e.code) == "number" ? e.code : ErrorCodes.GeneralError, e.message)
@@ -34,8 +34,8 @@ async function onBrokerNewMessage(wsServer) {
     }
 }
 
-async function ping(context) {
-    ~
+async function ping(msg, context) {
+    await db.registerMessageAnswer(msg.id, ErrorCodes.Ok)
 }
 
 /**
@@ -46,3 +46,7 @@ function init(wsServer) {
     wsServer._broker.onBrokerNewMessage = async function () { await onBrokerNewMessage(wsServer) }
     wsServer.addMessage('ping', ping)
 }
+
+
+
+export { init }

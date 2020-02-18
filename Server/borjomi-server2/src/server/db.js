@@ -10,7 +10,7 @@ async function init() {
     pool = mysql.createPool(config.db)
 }
 
-async function finish() {
+function finish() {
     pool.end()
     pool = null
 }

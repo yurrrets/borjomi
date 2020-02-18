@@ -7,7 +7,8 @@ const ErrorCodes = {
     NotLoggedIn: 3,
     InvalidFormat: 4,
     FunctionNotFound: 5,
-    InvalidParams: 6
+    InvalidParams: 6,
+    NoPermission: 7
 }
 
 class APIError extends Error {
