@@ -1,12 +1,9 @@
-import { MessageStatus } from '../common/message';
-
-'use strict';
-
 const mysql = require('mysql2/promise')
 const config = require('./config')
 var pool = null
 const crypto = require('crypto')
 const message = require('../common/message')
+import { APIError, ErrorCodes } from '../common/error';
 
 
 async function init() {
@@ -130,20 +127,33 @@ async function getChildAccounts(userID) {
 
 /**
  * Inserts to DB new message.
- * Message parameter id is ignored. Input message object is not modified
- * @param {message.Message} message
- * @returns id of newly inserted message
+ * Input parameters correspond to the ones of Message class.
+ * The exception is validTimeout, which is a Date object that indicates a relative time to live for Message.
+ * So message.validUntil = Date.now() + validTimeout
+ * @param {Date} validTimeout
+ * @returns {message.Message} new Message object with correct values
  */
-async function createMessage(message) {
+async function createMessage(type, requestor, executor, params, validTimeout) {
     try {
         var connection = await pool.getConnection();
+        const dt = new Date()
+        const validUntil = validTimeout ? new Date(dt.getTime() + validTimeout.getTime()) : null
         const [rst] = await connection.query(
             `INSERT INTO message (status, type, creation_date, last_modified, requestor_id, executor_id, valid_until, params)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [message.status, message.type, message.creationDate, message.lastModified, message.requestor, message.executor,
-             message.validUntil, JSON.stringify(message.params)]
+            [message.MessageStatus.New, type, dt, dt, requestor, executor, validUntil, JSON.stringify(params)]
         )
-        return rst.insertId
+        let msg = new message.Message()
+        msg.id = rst.insertId
+        msg.status = message.MessageStatus.New
+        msg.type = type
+        msg.creationDate = dt
+        msg.lastModified = dt
+        msg.requestor = requestor
+        msg.executor = executor
+        msg.validUntil = validUntil
+        msg.params = params
+        return msg
     }
     finally {
         if (connection) {
@@ -160,6 +170,7 @@ async function createMessage(message) {
 async function removeMessage(id) {
     try {
         var connection = await pool.getConnection();
+        await connection.query(`DELETE FROM message_answer WHERE message_id = ?`, [id]) // delete anwser if it exists
         const [rst] = await connection.query(`DELETE FROM message WHERE id = ?`, [id])
         return rst.affectedRows > 0
     }
@@ -171,19 +182,22 @@ async function removeMessage(id) {
 }
 
 /**
- * Update given message in db. Message.id is using to find the message
+ * Update status of given message in db.
+ * @param {int} id messageId
+ * @param {message.MessageStatus} status new status
+ * @returns {Date} if success, return message's lastModified date; otherwise returns null
  */
-async function updateMessage(message) {
+async function updateMessageStatus(id, status) {
     try {
         var connection = await pool.getConnection();
+        const dt = new Date()
         const [rst] = await connection.query(
             `UPDATE message
-             SET status = ?, type = ?, creation_date = ?, last_modified = ?, requestor_id = ?, executor_id = ?, valid_until = ?, params = ?
+             SET status = ?, last_modified = ?
              WHERE id = ?`,
-            [message.status, message.type, message.creationDate, message.lastModified, message.requestor, message.executor,
-             message.validUntil, JSON.stringify(message.params), message.id]
+            [status, dt, id]
         )
-        return rst.affectedRows > 0
+        return rst.affectedRows > 0 ? dt : null
     }
     finally {
         if (connection) {
@@ -248,8 +262,72 @@ async function getMessageIDsByStatus(status) {
     }
 }
 
+async function registerMessageAnswer(msgId, errCode, errMessage, notes) {
+    if (typeof(errCode) != "number") {
+        errCode = ErrorCodes.GeneralError
+    }
+    try {
+        var connection = await pool.getConnection();
+        // ensure that there is no answer
+        const [rows] = await connection.query(
+            `SELECT COUNT(id) as cnt
+             FROM message_answer
+             WHERE message_id = ?`,
+            [msgId]
+        )
+        if (rows[0].cnt > 0) {
+            throw new APIError(`Error answer with message_id ${msgId} is already registered`, ErrorCodes.InvalidParams)
+        }
+        // update message status and ensure all is ok
+        const lastModDate = await this.updateMessageStatus(msgId, errCode === ErrorCodes.Ok ? message.MessageStatus.DoneOk : message.MessageStatus.DoneError)
+        if (!lastModDate) {
+            throw new APIError(`Can't update status of message with id ${msgId}. Maybe invalid message_id?`, ErrorCodes.InvalidParams)
+        }
+        // add new answer
+        const [rst] = await connection.query(
+            `INSERT INTO message_answer (message_id, error_code, error_text, notes)
+             VALUES (?, ?, ?, ?)`,
+            [msgId, errCode, errMessage, notes]
+        )
+        return rst.insertId
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
+async function readMessageAnswer(msgId) {
+    try {
+        var connection = await pool.getConnection();
+        const [rows] = await connection.query(
+            `SELECT message_id, error_code, error_text, notes
+             FROM message_answer
+             WHERE message_id = ?`,
+            [msgId]
+        )
+        if (rows.length === 0) {
+            return null
+        }
+        const row = rows[0]
+        let msga = new message.MessageAnswer()
+        msga.messageId = row.message_id
+        msga.errorCode = row.error_code
+        msga.errorText = row.error_text
+        msga.notes = row.notes
+        return msga
+    }
+    finally {
+        if (connection) {
+            connection.release()
+        }
+    }
+}
+
 export {
     init, finish,
     login, loginToken, removeToken, getChildAccounts,
-    createMessage, removeMessage, updateMessage, getMessageByID, getMessageIDsByStatus
+    createMessage, removeMessage, updateMessageStatus, getMessageByID, getMessageIDsByStatus,
+    registerMessageAnswer, readMessageAnswer
 }

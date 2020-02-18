@@ -1,6 +1,7 @@
 const { WSServer } = require('./wsserver')
 const db = require('./db')
 const message = require('../common/message')
+import { APIError, ErrorCodes } from '../common/error';
 
 
 /**
@@ -21,13 +22,13 @@ async function onBrokerNewMessage(wsServer) {
                     throw new APIError("Function not found.", ErrorCodes.FunctionNotFound)
                 }
                 
-                // mark it as sent
+                await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
                 var func = wsServer.messageMap.get(msg.type)
                 var context = wsServer.serverContext
                 await func(inObj, context)
             }
-            catch {
-                // to do
+            catch(e) {
+                await db.registerMessageAnswer(msgId, typeof(e.code) == "number" ? e.code : ErrorCodes.GeneralError, e.message)
             }
         }
     }

@@ -1,6 +1,7 @@
 var assert = require('assert');
 const db = require('../src/server/db')
 const message = require('../src/common/message')
+import { ErrorCodes } from '../src/common/error'
 
 let loginData = {}
 
@@ -41,35 +42,49 @@ describe('db', function() {
         });
     });
 
-    describe('#create/retrieve/update/delete message', function() {
-        it('message manipulations', async function() {
-            let msg = new message.Message()
-            msg.status = message.MessageStatus.New
-            msg.type = message.MessageType.Ping
-            msg.creationDate = new Date()
-            msg.lastModified = msg.creationDate
-            msg.requestor = 1
-            msg.executor = 2
-            msg.validUntil = new Date(msg.creationDate)
-            msg.validUntil.setDate(msg.validUntil.getDate() + 1) // add 1 day
-            msg.params = { testParam: "testValue"}
-            const msgId = await db.createMessage(msg)
-            assert.ok(msgId)
+    describe('#messages', function() {
+        it('message crud', async function() {
+            const msg = await db.createMessage("ping", 1, 2, { testParam: "testValue"}, new Date(0, 0, 1)) // 1 day
+            assert.ok(msg && msg.id)
 
-            let msg1 = await db.getMessageByID(msgId)
+            let msg1 = await db.getMessageByID(msg.id)
             assert.ok(msg1)
-            // assert.deepEqual(msg, msg1) - don't use this, because dates will be rounded because of datetime type in dbms
+            // assert.deepEqual(msg, msg1) - don't use this, because dates will be rounded because of datetime type (ms cutting) in DBms
+            let lastModDate = await db.updateMessageStatus(msg1.id, message.MessageStatus.Sent)
             msg1.status = message.MessageStatus.Sent
-            let flag = await db.updateMessage(msg1)
-            assert.ok(flag)
+            assert.ok(lastModDate)
 
-            let msg2 = await db.getMessageByID(msgId)
+            let msg2 = await db.getMessageByID(msg.id)
             assert.ok(msg2)
             assert.deepEqual(msg1, msg2)
 
-            flag = await db.removeMessage(msgId)
+            let flag = await db.removeMessage(msg.id)
             assert.ok(flag)
         });
+
+        it('message answer', async function() {
+            const msg1 = await db.createMessage("ring", 3, 4)
+            assert.ok(msg1 && msg1.id)
+
+            const flag1 = await db.registerMessageAnswer(msg1.id, null, "Some error", "my bbbbbiggggg notes")
+            const msga1 = await db.readMessageAnswer(msg1.id)
+            assert.equal(msga1.messageId, msg1.id)
+            assert.equal(msga1.errorCode, ErrorCodes.GeneralError)
+            assert.equal(msga1.errorText, "Some error")
+            assert.equal(msga1.notes, "my bbbbbiggggg notes")
+
+            await db.removeMessage(msg1.id)
+
+            const msg2 = await db.createMessage("sing", 5, 6)
+            assert.ok(msg2 && msg2.id)
+
+            const flag2 = await db.registerMessageAnswer(msg2.id, ErrorCodes.Ok)
+            const msga2 = await db.readMessageAnswer(msg2.id)
+            assert.equal(msga2.messageId, msg2.id)
+            assert.equal(msga2.errorCode, ErrorCodes.Ok)
+
+            await db.removeMessage(msg2.id)
+        })
     });
 
     after(async function() {
