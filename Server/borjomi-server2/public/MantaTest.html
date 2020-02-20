@@ -84,6 +84,71 @@ body {
 
 
 </style>
+
+<script type="text/javascript">
+// from utils.js
+
+
+function _wrapDate(obj){
+
+// walk trhoug all object and replcace Date with json { _dtype:'date', value:val.toISOString() }
+var objToSee=[ obj ]
+
+while (objToSee.length>0){
+
+  obj=objToSee.pop()
+
+  for (var key in obj)
+  {
+    var val=obj[key]
+
+    if (val instanceof Date) {
+      if (isNaN(val.getTime())) // invalid date case
+        obj[key]={ _dtype:'date', value:'' }
+      else
+        obj[key]={ _dtype:'date', value: val.toISOString() }
+    }if ( typeof val==='object' && val!==null ){
+      objToSee.push(val)
+    }
+
+  }
+  
+}
+}
+
+function customJSONStringify(obj){
+_wrapDate(obj)
+return JSON.stringify(obj, (k,val)=>{
+  if (typeof val === 'number'){
+    if (isFinite(val)) return val;
+    return {_dtype:'number', value: val.toString() }
+  }
+  return val
+})
+}
+
+function customJSONparse(str,blobs=undefined){
+return JSON.parse(str,function (k, v) {
+  if (k === '') return v
+  if (v===null) return v
+  if (typeof (v) == 'object' ) {
+
+    if ('_dtype' in v){
+      switch (v._dtype){
+        case 'number': return Number(v.value)
+        case 'date': return new Date(v.value)
+      }  
+    }else if ('_blobN' in v){
+      return blobs[v._blobN]
+    }
+  }
+  
+  return v
+})
+}
+
+</script>
+
 <script type="text/javascript">
     var debugTextArea = null;
     function loadPage(){
@@ -105,19 +170,19 @@ body {
         debugTextArea.value = ""
     }
 
-    function sendMessage() {
-        var msg = document.getElementById("inputText").value;
-        if ( websocket != null )
-        {
-            document.getElementById("inputText").value = "";
-            websocket.send( msg );
-            console.log( "string sent :", '"'+msg+'"' );
-        }else{
-            error("Socket is not connected");
-        }
-    }
+    // function sendMessage() {
+    //     var msg = document.getElementById("inputText").value;
+    //     if ( websocket != null )
+    //     {
+    //         document.getElementById("inputText").value = "";
+    //         websocket.send( msg );
+    //         console.log( "string sent :", '"'+msg+'"' );
+    //     }else{
+    //         error("Socket is not connected");
+    //     }
+    // }
 
-    function sendMessageRaw(sendStr){
+    function sendDataRaw(sendStr){
         if ( websocket != null )
         {
             debug("Sending:\n"+sendStr) 
@@ -127,10 +192,10 @@ body {
         }
     }
 
-    function sendMessageJson(data){
+    function sendDataJson(data){
         if ( websocket != null )
         {
-            var sendStr = JSON.stringify(data)
+            var sendStr = customJSONStringify(data)
             debug("Sending:\n"+sendStr) 
             websocket.send( sendStr );
         }else{
@@ -211,64 +276,39 @@ body {
     }
 
     function handshake(evt) {
-        sendMessageJson({'function':'Handshake','version':1,'reqID':1});
+        sendDataJson({'function':'Handshake','version':1,'reqID':1});
     }
 
     function login() {
-        sendMessageJson({
+        sendDataJson({
             'function': "login",
             'username': document.getElementById("username").value,
             'password': document.getElementById("password").value
         })
     }
+
+    function logout() {
+        sendDataJson({
+            'function': "logout"
+        })
+    }
+
+    function getMessageStatus() {
+        sendDataJson({
+            'function': "getMessageAnswer",
+            'messageId': Number.parseInt(document.getElementById("message_id").value),
+        })
+    }
+
+    function ping() {
+        sendDataJson({
+            'function': "newMessage",
+            'type': "ping",
+            'executor': Number.parseInt(document.getElementById("ping_executor").value),
+            'validFor': new Date(0, 0, 0, 0, 1) // 1 min
+        })
+    }
     
-    
-    // var cycleRunning = false;
-    // var cycleCounter;
-    
-    // function onCycleConnected(evt) {
-    //     sendMessageJson({'function':'Handshake','version':1,'reqID':1});
-    // }
-    
-    // function onCycleDisconnected(evt) {
-    //     stopCycle();
-    // }
-    
-    // function onCycleMessage(evt) {
-    //     if (!cycleRunning) return;
-    //     var d = JSON.parse(evt.data);
-    //     if (d.eventType == "Error") {
-    //         error(evt.data);
-    //         setTimeout(stopCycle, 0);
-    //     }
-    //     if (!(
-    //         (d.eventType == "ScenarioState" && d.state === 0) ||
-    //         (d.reqID == 1 && d.errCode === 0))) {
-    //             return;
-    //     }
-    //     setTimeout(function() {
-    //         cycleCounter++;
-    //         info("Starting measurement " + cycleCounter);
-    //         sendMessageJson({'function':'Measure'});
-    //     }, 0);
-    // }
-    
-    // function onCycleError(evt) {
-    //     stopCycle();
-    // }
-    
-    // function startCycle() {
-    //     info("Starting test...");
-    //     cycleCounter = 0;
-    //     cycleRunning = true;
-    //     initWebSocket();
-    // }
-    
-    // function stopCycle() {
-    //     cycleRunning = false;
-    //     stopWebSocket();
-    //     info("Test finished.");
-    // }
 </script>
 
 </head>
@@ -288,6 +328,7 @@ body {
                 <button onClick="stopWebSocket();">Stop</button>
                 <button onClick="handshake();">Handshake</button>
             </div>
+
             <div>&nbsp;</div>
             <div class="iteractive">
                 <p>Login/Logout</p>
@@ -296,7 +337,22 @@ body {
                 <button onClick="login();">Login</button>
                 <button onClick="logout();">Logout</button>
             </div>
+
+            <div>&nbsp;</div>
+            <div class="iteractive">
+                <p>Message status</p>
+                Message ID <input type="text" id="message_id" /><br />
+                <button onClick="getMessageStatus();">Read</button>
+            </div>
+
+            <div>&nbsp;</div>
+            <div class="iteractive">
+                <p>Message: ping</p>
+                Target Account ID (0 for server) <input type="text" id="ping_executor" /><br />
+                <button onClick="ping();">Send</button>
+            </div>
         </div>
+
         <div id="output">
             <p>
             Inptut output log:

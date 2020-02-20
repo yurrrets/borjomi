@@ -4,6 +4,7 @@ const db = require('./db')
 const message = require('../common/message')
 import { ensureLogin, hasChildAccount } from './login'
 import { WSContext } from './wsserver'
+import { mergeDeep } from '../common/utils'
 
 
 /**
@@ -29,7 +30,7 @@ async function newMessage(inObj, context) {
     // }
 
     // check if user has permission to send message
-    if (!hasChildAccount({ id: executor }, context)) {
+    if (executor !== 0 && !hasChildAccount({ id: executor }, context)) {
         throw APIError(`Can't send message to executor ${executor}. Not a child account`, ErrorCodes.InvalidParams)
     }
 
@@ -40,15 +41,15 @@ async function newMessage(inObj, context) {
 
     const msg = await db.createMessage(type, requestor, executor, params, validFor)
     context.broker.notifyNewMessage()
-    return msg.id
+    return { "messageId": msg.id }
 }
 
 async function getMessageAnswer(inObj, context) {
     const loginInfo = ensureLogin(context)
-    const msgId = requireParam(inObj, "messageId", "string")
+    const msgId = requireParam(inObj, "messageId", "integer")
 
     // check if msgId is correct
-    const msg = await db.getMessageByID()
+    const msg = await db.getMessageByID(msgId)
     if (!msg) {
         throw new APIError(`Message with id ${msgId} is not found`, ErrorCodes.InvalidParams)
     }
@@ -61,7 +62,11 @@ async function getMessageAnswer(inObj, context) {
         }
     
     // getting answer
-    return await db.readMessageAnswer(msgId)
+    return {
+        messageId: msg.id,
+        messageStatus: msg.status,
+        answer: await db.readMessageAnswer(msgId)
+    }
 }
 
 export { newMessage, getMessageAnswer }

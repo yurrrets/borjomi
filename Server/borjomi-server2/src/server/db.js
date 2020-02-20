@@ -253,7 +253,7 @@ async function getMessageIDsByStatus(status) {
              ORDER BY last_modified`,
             [status]
         )
-        return rows.map(x => x)
+        return rows.map(x => x.id)
     }
     finally {
         if (connection) {
@@ -302,7 +302,7 @@ async function readMessageAnswer(msgId) {
     try {
         var connection = await pool.getConnection();
         const [rows] = await connection.query(
-            `SELECT message_id, error_code, error_text, notes
+            `SELECT error_code, error_text, notes
              FROM message_answer
              WHERE message_id = ?`,
             [msgId]
@@ -312,7 +312,6 @@ async function readMessageAnswer(msgId) {
         }
         const row = rows[0]
         let msga = new message.MessageAnswer()
-        msga.messageId = row.message_id
         msga.errorCode = row.error_code
         msga.errorText = row.error_text
         msga.notes = row.notes

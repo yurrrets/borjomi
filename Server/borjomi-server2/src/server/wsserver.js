@@ -79,7 +79,6 @@ class WSServer {
         this._contextMap = new Map()
         this._onClientClose = null
         this._broker = new Broker()
-        this._broker.newMessageHandler = this.onBrokerNewMessage
 
         this.serverContext = new ServerContext(this)
         this.serverContext.handshakeParams = { version: 1 }

@@ -13,6 +13,7 @@ class WSService {
     constructor(){
         this.wss = new WSServer()
         this.wss.addFunction('login', login.login)
+        this.wss.addFunction('logout', login.logout)
         this.wss.addFunction('newMessage', h_message.newMessage)
         this.wss.addFunction('getMessageAnswer', h_message.getMessageAnswer)
     }

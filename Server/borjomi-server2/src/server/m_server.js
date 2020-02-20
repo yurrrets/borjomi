@@ -9,17 +9,15 @@ import { APIError, ErrorCodes } from '../common/error';
  * @param {WSServer} wsServer 
  */
 async function onBrokerNewMessage(wsServer) {
-    console.log("onBrokerNewMessage; wsServer._contextMap.size =", this._contextMap.size)
-
     // get new messages
     const newMsgs = await db.getMessageIDsByStatus(message.MessageStatus.New)
-    for (msgId of newMsgs) {
+    for (const msgId of newMsgs) {
         const msg = await db.getMessageByID(msgId)
         if (msg.executor === 0) {
             // executor is server
             try {
                 if (!wsServer.messageMap.has(msg.type)) {
-                    throw new APIError("Function not found.", ErrorCodes.FunctionNotFound)
+                    throw new APIError("Message handler not found.", ErrorCodes.FunctionNotFound)
                 }
                 
                 await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
@@ -43,7 +41,7 @@ async function ping(msg, context) {
  * @param {WSServer} wsServer 
  */
 function init(wsServer) {
-    wsServer._broker.onBrokerNewMessage = async function () { await onBrokerNewMessage(wsServer) }
+    wsServer._broker.newMessageHandler = async function () { await onBrokerNewMessage(wsServer) }
     wsServer.addMessage('ping', ping)
 }
 
