@@ -50,6 +50,22 @@ function loginServer(context) {
     context.loginInfo = new LoginInfo(0, null)
     context.loginInfo.isServer = true
 }
+
+/**
+ * 
+ * @param {WSContext} context 
+ */
+function getLoggedUserID(context) {
+    const loginInfo = context.loginInfo
+    if (!loginInfo) {
+        return -1
+    }
+    if (loginInfo.isServer) {
+        return 0
+    }
+    return loginInfo.userID
+}
+
 /**
  * 
  * @param {WSContext} context 
@@ -83,6 +99,6 @@ async function hasChildAccount(inObj, context) {
 }
 
 export {
-     LoginInfo, login, logout, loginServer, ensureLogin,
+     LoginInfo, login, logout, loginServer, getLoggedUserID, ensureLogin,
      getChildAccounts, hasChildAccount
 }

@@ -140,11 +140,10 @@ class WSServer {
 
     init(options) {
         this.wss = new WebSocket.Server(options)
-        const self = this
         this.wss.on("connection", (ws,req) => {
             console.log("client connected");
             var appWs = new AppWebSocket(ws, true)
-            this._contextMap.set(appWs, new WSContext(appWs, self))
+            this._contextMap.set(appWs, new WSContext(appWs, this))
             // const ip = req.headers['x-forwarded-for'].split(/\s*,\s*/)[0];
             const ip = req.connection.remoteAddress
             appWs.remoteAddress=ip

@@ -1,7 +1,9 @@
-const { WSServer } = require('./wsserver')
+const { WSServer, WSContext } = require('./wsserver')
 const db = require('./db')
 const message = require('../common/message')
 import { APIError, ErrorCodes } from '../common/error';
+import { getLoggedUserID } from './login'
+import { AppWebSocket } from '../common/appws'
 
 
 /**
@@ -27,6 +29,29 @@ async function onBrokerNewMessage(wsServer) {
             }
             catch(e) {
                 await db.registerMessageAnswer(msgId, typeof(e.code) == "number" ? e.code : ErrorCodes.GeneralError, e.message)
+            }
+        }
+        else {
+            // executor is remote client
+            try {
+                // check if client is now connected
+                for (const kvp of wsServer._contextMap) {
+                    /** @type { AppWebSocket } */
+                    const appWs = kvp[0]
+                    /** @type { WSContext } */
+                    const wsContext = kvp[1]
+                    const userID = getLoggedUserID(wsContext)
+                    if (msg.executor !== userID) {
+                        continue
+                    }
+
+                    // client found
+                    appWs.sendObject(mergeDeep({ function: 'message' }, msg))
+                }
+            }
+            catch(e) {
+                // could be a connection error - so just ignore it
+                console.log(`Error sending message ${msg.id} to client: `, e.message)
             }
         }
     }
