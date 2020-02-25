@@ -4,7 +4,10 @@ const message = require('../common/message')
 import { APIError, ErrorCodes } from '../common/error';
 import { getLoggedUserID } from './login'
 import { AppWebSocket } from '../common/appws'
+import { mergeDeep } from '../common/utils'
 
+
+const SentTimeoutMs = 1000*60
 
 /**
  * 
@@ -15,6 +18,11 @@ async function onBrokerNewMessage(wsServer) {
     const newMsgs = await db.getMessageIDsByStatus(message.MessageStatus.New)
     for (const msgId of newMsgs) {
         const msg = await db.getMessageByID(msgId)
+        // first check if message is timed out
+        if (msg.validUntil && (msg.validUntil < new Date())) {
+            await db.updateMessageStatus(msg.id, message.MessageStatus.TimedOut)
+            continue
+        }
         if (msg.executor === 0) {
             // executor is server
             try {
@@ -46,7 +54,9 @@ async function onBrokerNewMessage(wsServer) {
                     }
 
                     // client found
-                    appWs.sendObject(mergeDeep({ function: 'message' }, msg))
+                    appWs.sendObject(mergeDeep({ function: 'message' }, msg)) // TODO
+                    await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
+                    setTimeout(checkSentMessages, SentTimeoutMs, wsServer) // check in a minute - if status still is Sent, need re-send a message
                 }
             }
             catch(e) {
@@ -54,6 +64,27 @@ async function onBrokerNewMessage(wsServer) {
                 console.log(`Error sending message ${msg.id} to client: `, e.message)
             }
         }
+    }
+}
+
+/**
+ * 
+ * @param {WSServer} wsServer 
+ */
+async function checkSentMessages(wsServer) {
+    // get new messages
+    const sentMsgs = await db.getMessageIDsByStatus(message.MessageStatus.Sent)
+    let flag = false
+    for (const msgId of sentMsgs) {
+        const msg = await db.getMessageByID(msgId)
+        const dt = new Date(msg.lastModified.getTime() + SentTimeoutMs)
+        if (dt < new Date()) {
+            await db.updateMessageStatus(msg.id, message.MessageStatus.New)
+            flag = true
+        }
+    }
+    if (flag) {
+        wsServer._broker.notifyNewMessage()
     }
 }
 

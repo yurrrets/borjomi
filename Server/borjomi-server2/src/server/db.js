@@ -130,14 +130,14 @@ async function getChildAccounts(userID) {
  * Input parameters correspond to the ones of Message class.
  * The exception is validTimeout, which is a Date object that indicates a relative time to live for Message.
  * So message.validUntil = Date.now() + validTimeout
- * @param {Date} validTimeout
+ * @param {int} validTimeoutMs
  * @returns {message.Message} new Message object with correct values
  */
-async function createMessage(type, requestor, executor, params, validTimeout) {
+async function createMessage(type, requestor, executor, params, validTimeoutMs) {
     try {
         var connection = await pool.getConnection();
         const dt = new Date()
-        const validUntil = validTimeout ? new Date(dt.getTime() + validTimeout.getTime()) : null
+        const validUntil = validTimeoutMs ? new Date(dt.getTime() + validTimeoutMs) : null
         const [rst] = await connection.query(
             `INSERT INTO message (status, type, creation_date, last_modified, requestor_id, executor_id, valid_until, params)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,

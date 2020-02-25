@@ -20,7 +20,7 @@ async function newMessage(inObj, context) {
     const executor = requireParam(inObj, "executor", "integer")
     // const validUntil = optionalParam(inObj, "validUntil", "object")
     const params = optionalParam(inObj, "params", "object")
-    const validFor = optionalParam(inObj, "validFor", "object")
+    const validForMs = optionalParam(inObj, "validForMs", "integer")
     // if (!msg.validUntil && validFor !== null) {
     //     if (!(validFor > 0)) {
     //         throw APIError(`If parameter 'validFor' provided it should be a positive number`)
@@ -30,8 +30,8 @@ async function newMessage(inObj, context) {
     // }
 
     // check if user has permission to send message
-    if (executor !== 0 && !hasChildAccount({ id: executor }, context)) {
-        throw APIError(`Can't send message to executor ${executor}. Not a child account`, ErrorCodes.InvalidParams)
+    if (executor !== 0 && !(await hasChildAccount({ id: executor }, context))) {
+        throw new APIError(`Can't send message to executor ${executor}. Not a child account`, ErrorCodes.InvalidParams)
     }
 
     // check for validUntil date
@@ -39,7 +39,7 @@ async function newMessage(inObj, context) {
     //     throw APIError(`Parameter validUntil should be greater than creationDate`, ErrorCodes.InvalidParams)
     // }
 
-    const msg = await db.createMessage(type, requestor, executor, params, validFor)
+    const msg = await db.createMessage(type, requestor, executor, params, validForMs)
     context.broker.notifyNewMessage()
     return { "messageId": msg.id }
 }

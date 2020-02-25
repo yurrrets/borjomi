@@ -8,7 +8,7 @@ var API_VERSION = 1
  */
 class AppWebSocket {
     /**
-     * 
+     * @param {WebSocket} connection
      * @param {boolean} verbose sets print all messages
      */
     constructor(connection, handleInvalidJson = false, verbose = false) {

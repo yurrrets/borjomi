@@ -40,7 +40,7 @@ function requireParam(inObj, name, type=undefined) {
 function optionalParam(inObj, name, type=undefined) {
 
     if (!(name in inObj))
-        return null
+        return undefined
     var ret = inObj[name]
 
     if (!_validateType(ret,type))

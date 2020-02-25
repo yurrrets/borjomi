@@ -30,7 +30,7 @@ class Message {
         this.status = 0           // current message status; see enum above
         this.type = null          // message type; see enum above
         this.creationDate = null  // when message was created
-        this.lastModified = null  // datetime of last modification
+        /** @type {Date} */ this.lastModified = null  // datetime of last modification
         this.requestor = 0        // requestor (account id)
         this.executor = 0         // executor (account id); 0 means that executor is server itself, and it should process the message
         this.validUntil = null    // datetime; null means always valid no-timeout message
@@ -40,7 +40,6 @@ class Message {
 
 class MessageAnswer {
     constructor() {
-        this.messageId = 0        // id of message
         this.errorCode = 0        // {error.ErrorCodes} error code
         this.errorText = null     // text description of error
         this.notes = null         // additional info
