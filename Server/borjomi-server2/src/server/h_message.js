@@ -69,4 +69,65 @@ async function getMessageAnswer(inObj, context) {
     }
 }
 
-export { newMessage, getMessageAnswer }
+async function updateMessageStatus(inObj, context) {
+    const loginInfo = ensureLogin(context)
+    const msgId = requireParam(inObj, "messageId", "integer")
+    const status = requireParam(inObj, "status", "integer")
+
+    // check if msgId is correct
+    const msg = await db.getMessageByID(msgId)
+    if (!msg) {
+        throw new APIError(`Message with id ${msgId} is not found`, ErrorCodes.InvalidParams)
+    }
+
+    // check permission
+    const isExec = loginInfo.userID === msg.executor
+    const isServ = loginInfo.isServer
+    if (!isExec && !isServ) {
+        throw new APIError("Access denied", ErrorCodes.NoPermission)
+    }
+
+    // check status flow
+    let validMap = new Map()
+    const s = message.MessageStatus
+    validMap.set(s.New, [
+        { s: s.Sent, v: isServ },
+        { s: s.TimedOut, v: isServ }
+    ])
+    validMap.set(s.Sent, [
+        { s: s.New, v: isServ },
+        { s: s.Accepted, v: isExec },
+        { s: s.Processing, v: isExec },
+        { s: s.DoneOk, v: isExec },
+        { s: s.DoneError, v: isExec }
+    ])
+    validMap.set(s.Accepted, [
+        { s: s.Processing, v: isExec },
+        { s: s.DoneOk, v: isExec },
+        { s: s.DoneError, v: isExec }
+    ])
+    validMap.set(s.Processing, [
+        { s: s.DoneOk, v: isExec },
+        { s: s.DoneError, v: isExec }
+    ])
+    
+    // first - check if there is new state among acceptable
+    let arr = validMap.get(msg.status) || []
+    let newState = arr.find(el => el.s === status)
+    if (!newState) {
+        throw new APIError(`Message id ${msg.id}: can't change status from ${msg.status} to ${status}`, ErrorCodes.InvalidParams)
+    }
+    // then check for permission
+    if (!newState.v) {
+        throw new APIError(`Access denied. Can't change status for message ${msg.id}`, ErrorCodes.NoPermission)
+    }
+
+    const res = await db.updateMessageStatus(msg.id, status)
+    if (!res) {
+        throw new APIError(`Change status for message ${msg.id} failed`, ErrorCodes.GeneralError)
+    }
+
+    return {}
+}
+
+export { newMessage, getMessageAnswer, updateMessageStatus }
