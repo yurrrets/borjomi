@@ -11,7 +11,8 @@ class Broker {
         this._newMessageRequestFlag = false
         this._newMessageProcessingFlag = false
         this.newMessageHandler = null
-        // this.newAnswerHandler = null
+        this.messageStatusChanged = null
+        this.messageAnswerHandler = null
     }
 
     notifyNewMessage() {
@@ -35,6 +36,26 @@ class Broker {
             }
         }
         this._newMessageProcessingFlag = false
+    }
+
+    notifyMessageStatusChanged(msgId) {
+        const self = this
+        setTimeout(async function() {
+            if (!self.messageStatusChanged) {
+                return
+            }
+            await self.messageStatusChanged(msgId)
+        }, this.params.callTimeout)
+    }
+
+    notifyMessageAnswer(msgId) {
+        const self = this
+        setTimeout(async function() {
+            if (!self.messageAnswerHandler) {
+                return
+            }
+            await self.messageAnswerHandler(msgId)
+        }, this.params.callTimeout)
     }
 }
 

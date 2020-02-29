@@ -44,6 +44,11 @@ async function newMessage(inObj, context) {
     return { "messageId": msg.id }
 }
 
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
 async function getMessageAnswer(inObj, context) {
     const loginInfo = ensureLogin(context)
     const msgId = requireParam(inObj, "messageId", "integer")
@@ -69,6 +74,11 @@ async function getMessageAnswer(inObj, context) {
     }
 }
 
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
 async function updateMessageStatus(inObj, context) {
     const loginInfo = ensureLogin(context)
     const msgId = requireParam(inObj, "messageId", "integer")
@@ -127,9 +137,14 @@ async function updateMessageStatus(inObj, context) {
         throw new APIError(`Change status for message ${msg.id} failed`, ErrorCodes.GeneralError)
     }
 
-    return {}
+    context.broker.notifyMessageStatusChanged(msg.id)
 }
 
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
 async function setMessageAnswer(inObj, context) {
     const msgId = requireParam(inObj, "messageId", "integer")
     const errorCode = requireParam(inObj, "errorCode", "integer")
@@ -144,6 +159,9 @@ async function setMessageAnswer(inObj, context) {
 
     // everything good - add an answer
     await db.registerMessageAnswer(msgId, errorCode, errorText, customJSONStringify(answer))
+
+    // inform about answer
+    context.broker.notifyMessageAnswer(msgId)
 }
 
 export { newMessage, getMessageAnswer, updateMessageStatus, setMessageAnswer }
