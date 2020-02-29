@@ -54,7 +54,7 @@ async function onBrokerNewMessage(wsServer) {
                     }
 
                     // client found
-                    appWs.sendObject(mergeDeep({ function: 'message' }, msg)) // TODO
+                    appWs.sendObject({ message: msg }) // TODO
                     await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
                     setTimeout(checkSentMessages, SentTimeoutMs, wsServer) // check in a minute - if status still is Sent, need re-send a message
                 }

@@ -4,7 +4,7 @@ const db = require('./db')
 const message = require('../common/message')
 import { ensureLogin, hasChildAccount } from './login'
 import { WSContext } from './wsserver'
-import { mergeDeep } from '../common/utils'
+import { mergeDeep, customJSONStringify } from '../common/utils'
 
 
 /**
@@ -130,4 +130,20 @@ async function updateMessageStatus(inObj, context) {
     return {}
 }
 
-export { newMessage, getMessageAnswer, updateMessageStatus }
+async function setMessageAnswer(inObj, context) {
+    const msgId = requireParam(inObj, "messageId", "integer")
+    const errorCode = requireParam(inObj, "errorCode", "integer")
+    const errorText = optionalParam(inObj, "errorText", "string")
+    const answer = optionalParam(inObj, "answer", "object")
+
+    // first update status
+    await updateMessageStatus({
+        messageId: msgId,
+        status: (errorCode === 0 ? message.MessageStatus.DoneOk : message.MessageStatus.DoneError)
+    }, context)
+
+    // everything good - add an answer
+    await db.registerMessageAnswer(msgId, errorCode, errorText, customJSONStringify(answer))
+}
+
+export { newMessage, getMessageAnswer, updateMessageStatus, setMessageAnswer }

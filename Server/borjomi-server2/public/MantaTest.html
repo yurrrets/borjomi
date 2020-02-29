@@ -147,6 +147,29 @@ return JSON.parse(str,function (k, v) {
 })
 }
 
+
+// From other common files
+const ErrorCodes = {
+    ConnectionClosed: -1,
+    Ok: 0,
+    GeneralError: 1,
+    HandshakeRequired: 2,
+    NotLoggedIn: 3,
+    InvalidFormat: 4,
+    FunctionNotFound: 5,
+    InvalidParams: 6,
+    NoPermission: 7
+}
+
+const MessageStatus = {
+    New: 1,            // New message
+    Sent: 2,           // Message was sent to executor
+    Accepted: 3,       // Accepted by executor
+    Processing: 4,     // Executing in process
+    DoneOk: 5,         // Completed successfully
+    DoneError: 6,      // Message processed, but error happened (most probably not completed)
+    TimedOut: 7,       // Message hasn't been accepted or processed in time
+}
 </script>
 
 <script type="text/javascript">
@@ -225,7 +248,7 @@ return JSON.parse(str,function (k, v) {
             websocket.onmessage = function (evt) {
                 console.log( "Message received :", evt.data );
                 debug( "Received:\n"+evt.data );
-                // onCycleMessage(evt);
+                onSocketMessage(evt);
             };
             websocket.onerror = function (evt) {
                 if (evt.data)
@@ -300,6 +323,24 @@ return JSON.parse(str,function (k, v) {
         })
     }
 
+    function updateMessageStatus(msgId, status) {
+        sendDataJson({
+            'function': "updateMessageStatus",
+            'messageId': msgId,
+            'status': status
+        })
+    }
+
+    function setMessageAnswer(msgId, errCode, errText, answer) {
+        sendDataJson({
+            'function': "setMessageAnswer",
+            'messageId': msgId,
+            'errorCode': errCode,
+            'errorText': errText,
+            'answer': answer
+        })
+    }
+
     function ping() {
         sendDataJson({
             'function': "newMessage",
@@ -307,6 +348,24 @@ return JSON.parse(str,function (k, v) {
             'executor': Number.parseInt(document.getElementById("ping_executor").value),
             'validForMs': 1000*60 // 1 min
         })
+    }
+
+    function onSocketMessage(evt) {
+        let obj = JSON.parse(evt.data)
+        if (!obj) return
+        if (obj.message) onServerMessage(obj.message)
+    }
+
+    function onServerMessage(msg) {
+        switch (msg.type) {
+            case "ping": {
+                setMessageAnswer(msg.id, ErrorCodes.Ok)
+                break
+            }
+            default: {
+                setMessageAnswer(msg.id, ErrorCodes.FunctionNotFound, `Message type "${msg.type}" is not supported by this client`)
+            }
+        }
     }
     
 </script>

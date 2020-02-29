@@ -16,21 +16,14 @@ const MessageStatus = {
 // Accepted -> Processing, DoneOk, DoneError (executor)
 // Processing -> DoneOk, DoneError (executor)
 
-const MessageType = {
-    /**
-     * Ping request
-     */
-    Ping: "ping",
-
-}
-
 class Message {
     constructor() {
         this.id = 0               // unique id
         this.status = 0           // current message status; see enum above
         this.type = null          // message type; see enum above
         this.creationDate = null  // when message was created
-        /** @type {Date} */ this.lastModified = null  // datetime of last modification
+        /** @type {Date} */
+        this.lastModified = null  // datetime of last modification
         this.requestor = 0        // requestor (account id)
         this.executor = 0         // executor (account id); 0 means that executor is server itself, and it should process the message
         this.validUntil = null    // datetime; null means always valid no-timeout message
@@ -46,4 +39,4 @@ class MessageAnswer {
     }
 }
 
-export { MessageStatus, MessageType, Message, MessageAnswer }
+export { MessageStatus, Message, MessageAnswer }
