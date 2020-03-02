@@ -68,10 +68,9 @@ describe('db', function() {
 
             const flag1 = await db.registerMessageAnswer(msg1.id, null, "Some error", "my bbbbbiggggg notes")
             const msga1 = await db.readMessageAnswer(msg1.id)
-            assert.equal(msga1.messageId, msg1.id)
             assert.equal(msga1.errorCode, ErrorCodes.GeneralError)
             assert.equal(msga1.errorText, "Some error")
-            assert.equal(msga1.notes, "my bbbbbiggggg notes")
+            assert.equal(msga1.result, "my bbbbbiggggg notes")
 
             await db.removeMessage(msg1.id)
 
@@ -80,7 +79,6 @@ describe('db', function() {
 
             const flag2 = await db.registerMessageAnswer(msg2.id, ErrorCodes.Ok)
             const msga2 = await db.readMessageAnswer(msg2.id)
-            assert.equal(msga2.messageId, msg2.id)
             assert.equal(msga2.errorCode, ErrorCodes.Ok)
 
             await db.removeMessage(msg2.id)

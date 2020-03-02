@@ -35,7 +35,7 @@ class MessageAnswer {
     constructor() {
         this.errorCode = 0        // {error.ErrorCodes} error code
         this.errorText = null     // text description of error
-        this.notes = null         // additional info
+        this.result = null        // additional info
     }
 }
 

@@ -149,7 +149,7 @@ async function setMessageAnswer(inObj, context) {
     const msgId = requireParam(inObj, "messageId", "integer")
     const errorCode = requireParam(inObj, "errorCode", "integer")
     const errorText = optionalParam(inObj, "errorText", "string")
-    const answer = optionalParam(inObj, "answer", "object")
+    const result = optionalParam(inObj, "result", "object")
 
     // first update status
     await updateMessageStatus({
@@ -158,7 +158,7 @@ async function setMessageAnswer(inObj, context) {
     }, context)
 
     // everything good - add an answer
-    await db.registerMessageAnswer(msgId, errorCode, errorText, customJSONStringify(answer))
+    await db.registerMessageAnswer(msgId, errorCode, errorText, customJSONStringify(result))
 
     // inform about answer
     context.broker.notifyMessageAnswer(msgId)

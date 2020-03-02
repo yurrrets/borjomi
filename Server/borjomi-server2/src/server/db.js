@@ -262,7 +262,7 @@ async function getMessageIDsByStatus(status) {
     }
 }
 
-async function registerMessageAnswer(msgId, errCode, errMessage, notes) {
+async function registerMessageAnswer(msgId, errCode, errMessage, result) {
     if (typeof(errCode) != "number") {
         errCode = ErrorCodes.GeneralError
     }
@@ -276,7 +276,7 @@ async function registerMessageAnswer(msgId, errCode, errMessage, notes) {
             [msgId]
         )
         if (rows[0].cnt > 0) {
-            throw new APIError(`Error answer with message_id ${msgId} is already registered`, ErrorCodes.InvalidParams)
+            throw new APIError(`Error: answer with message_id ${msgId} is already registered`, ErrorCodes.InvalidParams)
         }
         // update message status and ensure all is ok
         const lastModDate = await this.updateMessageStatus(msgId, errCode === ErrorCodes.Ok ? message.MessageStatus.DoneOk : message.MessageStatus.DoneError)
@@ -287,7 +287,7 @@ async function registerMessageAnswer(msgId, errCode, errMessage, notes) {
         const [rst] = await connection.query(
             `INSERT INTO message_answer (message_id, error_code, error_text, notes)
              VALUES (?, ?, ?, ?)`,
-            [msgId, errCode, errMessage, notes]
+            [msgId, errCode, errMessage, result]
         )
         return rst.insertId
     }
@@ -314,7 +314,7 @@ async function readMessageAnswer(msgId) {
         let msga = new message.MessageAnswer()
         msga.errorCode = row.error_code
         msga.errorText = row.error_text
-        msga.notes = row.notes
+        msga.result = row.notes
         return msga
     }
     finally {

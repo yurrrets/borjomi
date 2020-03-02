@@ -5,9 +5,10 @@ import { APIError, ErrorCodes } from '../common/error';
 import { getLoggedUserID } from './login'
 import { AppWebSocket } from '../common/appws'
 import { mergeDeep } from '../common/utils'
+const h_message = require('./h_message')
 
 
-const SentTimeoutMs = 1000*60
+const SentTimeoutMs = 1000*60  // 1 min
 
 /**
  * 
@@ -54,8 +55,8 @@ async function onBrokerNewMessage(wsServer) {
                     }
 
                     // client found
-                    appWs.sendObject({ message: msg })
                     await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
+                    appWs.sendObject({ message: msg })
                     setTimeout(checkSentMessages, SentTimeoutMs, wsServer) // check in a minute - if status still is Sent, need re-send a message
                 }
             }
@@ -154,7 +155,7 @@ async function checkSentMessages(wsServer) {
 }
 
 async function ping(msg, context) {
-    await db.registerMessageAnswer(msg.id, ErrorCodes.Ok)
+    await h_message.setMessageAnswer({ messageId: msg.id, errorCode: 0}, context)
 }
 
 /**

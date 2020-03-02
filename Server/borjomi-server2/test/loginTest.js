@@ -3,12 +3,15 @@ const login = require('../src/server/login')
 import { WSContext } from '../src/server/wsserver'
 import { APIError } from '../src/common/error';
 import { createContext } from 'vm';
+import { Broker } from '../src/server/broker';
 const db = require('../src/server/db')
 
 function createWsContext() {
     // fake server
     let wsserver = { _broker: null }
-    return new WSContext(null, wsserver)
+    let context = new WSContext(null, wsserver)
+    context.broker = new Broker
+    return context
 }
 
 describe('login', function() {

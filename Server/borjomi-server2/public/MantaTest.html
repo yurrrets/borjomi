@@ -331,13 +331,13 @@ const MessageStatus = {
         })
     }
 
-    function setMessageAnswer(msgId, errCode, errText, answer) {
+    function setMessageAnswer(msgId, errCode, errText, result) {
         sendDataJson({
             'function': "setMessageAnswer",
             'messageId': msgId,
             'errorCode': errCode,
             'errorText': errText,
-            'answer': answer
+            'result': result
         })
     }
 

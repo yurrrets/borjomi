@@ -11,6 +11,11 @@ class LoginInfo {
     }
 }
 
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
 async function login(inObj, context) {
     if (context.loginInfo)
         throw new APIError("Already logged in")
@@ -28,6 +33,7 @@ async function login(inObj, context) {
     // var connection_id = 0 //await db.addLoginLog("LOGIN",id,context.ws.remoteAddress,context.handshakeParams.ClientVersion)
     context.loginInfo = new LoginInfo(id, token)
 
+    context.broker.notifyNewMessage() // send messages to just logged in user (if any)
     // console.log(`UserID ${id} Logged in`)
     return {token}
 }
