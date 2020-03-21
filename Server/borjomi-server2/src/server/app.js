@@ -1,10 +1,16 @@
 const WebSocket = require('ws')
+const config = require('./config')
 const db = require('./db')
 const { ErrorCodes, APIError } = require("../common/error")
 const { WSServer, requireParam } = require('./wsserver')
 const login = require('./login')
 const h_message = require('./h_message')
 const m_server = require('./m_server')
+
+let client = null
+if (config.client.active) {
+    client = require('./client')
+}
 
 var wsService;
 
@@ -25,6 +31,9 @@ class WSService {
         this.wss.init({ 'port': 3001 })
         login.loginServer(this.wss.serverContext)
         m_server.init(this.wss)
+        if (client) {
+            client.init(this.wss)
+        }
     }
 }
 

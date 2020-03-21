@@ -10,6 +10,12 @@ let config = {
         waitForConnections : true,
         connectionLimit    : 10,
         queueLimit         : 0
+    },
+    client: {
+        active     : false,
+        serverUri  : "ws://server:port",
+        login      : "login",
+        password   : "pass"
     }
 }
 
