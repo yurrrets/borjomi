@@ -32,9 +32,10 @@ async function onBrokerNewMessage(wsServer) {
                 }
                 
                 await db.updateMessageStatus(msg.id, message.MessageStatus.Sent)
-                var func = wsServer.messageMap.get(msg.type)
-                var context = wsServer.serverContext
-                await func(msg, context)
+                let func = wsServer.messageMap.get(msg.type)
+                let context = wsServer.serverContext
+                let ret = await func(msg, context)
+                await h_message.setMessageAnswer(ret, context)
             }
             catch(e) {
                 await db.registerMessageAnswer(msgId, typeof(e.code) == "number" ? e.code : ErrorCodes.GeneralError, e.message)
@@ -155,7 +156,7 @@ async function checkSentMessages(wsServer) {
 }
 
 async function ping(msg, context) {
-    await h_message.setMessageAnswer({ messageId: msg.id, errorCode: 0}, context)
+    return { messageId: msg.id, errorCode: 0}
 }
 
 /**
