@@ -1,7 +1,9 @@
 const config = require('./config')
 const { ErrorCodes, APIError } = require("../common/error")
 const WebSocket = require('ws')
-import { customJSONStringify, customJSONparse } from '../common/utils'
+import { customJSONStringify, customJSONparse, mergeDeep } from '../common/utils'
+const { WSServer, WSContext } = require('./wsserver')
+const message = require('../common/message')
 
 var websocket = null;
 
@@ -80,7 +82,7 @@ async function login() {
     })
 }
 
-function initWebSocket() {
+function initWebSocket(wsServer) {
     try {
         if ( websocket && websocket.readyState == 1 )
             websocket.close();
@@ -99,7 +101,7 @@ function initWebSocket() {
         websocket.onmessage = function (evt) {
             // console.log( "Message received :", evt.data );
             debug( "Received:\n"+evt.data );
-            // onSocketMessage(evt);
+            onSocketMessage(evt, wsServer);
         };
         websocket.onerror = function (evt) {
             if (evt.data)
@@ -118,13 +120,61 @@ function stopWebSocket() {
         websocket.close();
 }
 
+function onSocketMessage(evt, wsServer) {
+    var obj = null
+    try {
+        obj = JSON.parse(evt.data)
+    }
+    catch {
+        // ignore
+    }
+    if (!obj) return
+    if (obj.message) {
+        setTimeout(onClientMessage, 0, obj.message, wsServer)
+    }
+}
+
+/** 
+ * @param {message.Message} msg
+ * @param {WSServer} wsServer
+ * */
+async function onClientMessage(msg, wsServer) {
+    try {
+        /** @type {message.Message} */
+        const mappedMsg = mergeDeep({}, msg)
+        mappedMsg.requestor = 0
+        mappedMsg.executor = 0
+
+        if (!wsServer.messageMap.has(mappedMsg.type)) {
+            throw new APIError("Message handler not found.", ErrorCodes.FunctionNotFound)
+        }
+        
+        let func = wsServer.messageMap.get(mappedMsg.type)
+        let context = wsServer.serverContext
+        let ret = await func(mappedMsg, context)
+        
+        await sendAndReadAnswerJson(mergeDeep({}, ret, {
+            'function': "setMessageAnswer",
+            'messageId': msg.id})
+        )
+    }
+    catch(e) {
+        await sendAndReadAnswerJson({
+            'function': "setMessageAnswer",
+            'messageId': msg.id,
+            'errorCode': typeof(e.code) == "number" ? e.code : ErrorCodes.GeneralError,
+            'errorText': e.message
+        })
+    }
+}
+
 
 /** 
  * 
  * @param {WSServer} wsServer
  * */
 function init(wsServer) {
-    initWebSocket()
+    initWebSocket(wsServer)
 }
 
 export { init }
