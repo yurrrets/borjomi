@@ -70,8 +70,12 @@ function sendAndReadAnswerJson(data) {
 
 
 
-async function handshake(evt) {
-    return await sendAndReadAnswerJson({'function':'Handshake','version':1,'reqID':1});
+async function handshake() {
+    return await sendAndReadAnswerJson({
+        'function': 'Handshake',
+        'version': 1,
+        'reqID': 1
+    })
 }
 
 async function login() {
@@ -81,6 +85,14 @@ async function login() {
         'password': config.client.password
     })
 }
+
+async function answerMessage(msgId, msgAns) {
+    await sendAndReadAnswerJson(mergeDeep({}, msgAns, {
+        'function': "setMessageAnswer",
+        'messageId': msgId
+    }))
+}
+
 
 function initWebSocket(wsServer) {
     try {
@@ -153,15 +165,10 @@ async function onClientMessage(msg, wsServer) {
         let context = wsServer.serverContext
         let ret = await func(mappedMsg, context)
         
-        await sendAndReadAnswerJson(mergeDeep({}, ret, {
-            'function': "setMessageAnswer",
-            'messageId': msg.id})
-        )
+        await answerMessage(msg.id, ret)
     }
     catch(e) {
-        await sendAndReadAnswerJson({
-            'function': "setMessageAnswer",
-            'messageId': msg.id,
+        await answerMessage(msg.id, {
             'errorCode': typeof(e.code) == "number" ? e.code : ErrorCodes.GeneralError,
             'errorText': e.message
         })
