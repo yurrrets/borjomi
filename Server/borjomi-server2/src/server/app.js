@@ -8,7 +8,7 @@ const h_message = require('./h_message')
 const m_server = require('./m_server')
 
 let client = null
-if (config.client.active) {
+if (config.client.enabled) {
     client = require('./client')
 }
 

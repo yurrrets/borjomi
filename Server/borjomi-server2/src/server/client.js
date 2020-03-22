@@ -8,7 +8,7 @@ const message = require('../common/message')
 var websocket = null;
 
 
-const debug = console.log
+const debug = function () {} //console.log
 const info = console.log
 const error = console.log
 
@@ -93,6 +93,10 @@ async function answerMessage(msgId, msgAns) {
     }))
 }
 
+function scheduleReconnect(wsServer) {
+    info("Scheduling RECONNECT")
+    setTimeout(initWebSocket, config.client.reconnectTimeout, wsServer)
+}
 
 function initWebSocket(wsServer) {
     try {
@@ -109,6 +113,7 @@ function initWebSocket(wsServer) {
         };
         websocket.onclose = function (evt) {
             info("SelfClient DISCONNECTED");
+            scheduleReconnect(wsServer)
         };
         websocket.onmessage = function (evt) {
             // console.log( "Message received :", evt.data );
@@ -119,11 +124,12 @@ function initWebSocket(wsServer) {
             if (evt.data)
                 error('ERROR: ' + evt.data);
             else
-                error('ERROR. Check MaxInspect running and WebSocketAPI enabled.');
+                error('ERROR. Some error happended. Data: ' + customJSONStringify(evt));
             // onCycleError(evt);
         };
     } catch (exception) {
         error('ERROR: ' + exception);
+        scheduleReconnect(wsServer)
     }
 }
 
