@@ -8,7 +8,8 @@ const message = require('../common/message')
 var websocket = null;
 
 
-const debug = function () {} //console.log
+// const debug = function () {} //console.log
+const debug = console.log
 const info = console.log
 const error = console.log
 
@@ -49,6 +50,9 @@ function sendAndReadAnswerJson(data) {
 
     return new Promise(function(resolve, reject) {
         let prevOnMessage = websocket.onmessage
+        let timeoutTmrId = setTimeout(function() {
+            reject(new APIError("Timeout. Answer hasn't been received during timeout period", ErrorCodes.TimeoutElapsed))
+        }, config.client.connectionTimeout)
         websocket.onmessage = function(evt) {
             try {
                 prevOnMessage(evt)
@@ -59,6 +63,7 @@ function sendAndReadAnswerJson(data) {
                 resolve(ret)
             }
             finally {
+                clearTimeout(timeoutTmrId)
                 websocket.onmessage = prevOnMessage
                 channelBusy = false
             }
@@ -93,9 +98,46 @@ async function answerMessage(msgId, msgAns) {
     }))
 }
 
+async function ping(targetId) {
+    if (typeof targetId === 'undefined') {
+        targetId = 0 // server
+    }
+    await sendAndReadAnswerJson(targetId ? {
+        'function': "newMessage",
+        'type': "ping",
+        'executor': targetId,
+        'validForMs': 1000*30 // 30 sec
+    } : {
+        'function' : "ping"  // short variant for server with less traffic usage
+    })
+}
+
+
+
+
 function scheduleReconnect(wsServer) {
     info("Scheduling RECONNECT")
     setTimeout(initWebSocket, config.client.reconnectTimeout, wsServer)
+}
+
+var pingTimerId = null
+
+function periodicPing(fStart) {
+    if (fStart) {
+        pingTimerId = setTimeout(async function() {
+            try {
+                await ping()
+                if (pingTimerId) periodicPing(true)
+            }
+            catch {
+                if (websocket) websocket.close()
+            } 
+        }, config.client.serverPingEvery)
+    } else {
+        if (!pingTimerId) return
+        clearInterval(pingTimerId)
+        pingTimerId = null
+    }
 }
 
 function initWebSocket(wsServer) {
@@ -110,10 +152,12 @@ function initWebSocket(wsServer) {
                 await handshake()
                 await login()
             }, 0)
+            periodicPing(true)
         };
         websocket.onclose = function (evt) {
             info("SelfClient DISCONNECTED");
             scheduleReconnect(wsServer)
+            periodicPing(false)
         };
         websocket.onmessage = function (evt) {
             // console.log( "Message received :", evt.data );

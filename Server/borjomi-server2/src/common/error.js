@@ -8,7 +8,8 @@ const ErrorCodes = {
     InvalidFormat: 4,
     FunctionNotFound: 5,
     InvalidParams: 6,
-    NoPermission: 7
+    NoPermission: 7,
+    TimeoutElapsed : 8
 }
 
 class APIError extends Error {

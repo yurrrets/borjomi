@@ -12,10 +12,13 @@ let config = {
         queueLimit         : 0
     },
     client: {
-        active     : false,
+        enabled    : false,
         serverUri  : "ws://server:port",
         login      : "login",
-        password   : "pass"
+        password   : "pass",
+        connectionTimeout  : 5000,  // in ms
+        reconnectTimeout   : 60000, // in ms
+        serverPingEvery    : 10000, // in ms
     }
 }
 

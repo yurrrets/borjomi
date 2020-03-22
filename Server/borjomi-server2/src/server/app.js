@@ -18,6 +18,7 @@ var wsService;
 class WSService {
     constructor(){
         this.wss = new WSServer()
+        this.wss.addFunction('ping', async function () {}) // ping superfunction
         this.wss.addFunction('login', login.login)
         this.wss.addFunction('logout', login.logout)
         this.wss.addFunction('newMessage', h_message.newMessage)
