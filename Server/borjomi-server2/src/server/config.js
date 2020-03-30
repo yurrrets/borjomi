@@ -19,6 +19,10 @@ let config = {
         connectionTimeout  : 5000,  // in ms
         reconnectTimeout   : 60000, // in ms
         serverPingEvery    : 10000, // in ms
+    },
+    arduino: {
+        enabled    : false,
+        port       : "/dev/rfcomm0"
     }
 }
 
