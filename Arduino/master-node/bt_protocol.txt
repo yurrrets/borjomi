@@ -44,7 +44,7 @@ Answer:
     ERROR <errcode>
 Params:
     <address> - address of the node, dec format
-    <value> - version in format <major>.<minor>
+    <value> - integer, version in format (<major> << 16 | <minor>)
 
 
 
