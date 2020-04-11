@@ -1,13 +1,16 @@
 Commands over Bluetooth.
-Version 0.2.
+Version 0.3.
 
 
 Errorcodes:
-    0 - no errors
-    1 - unknown command
-    2 - command timeout (node did not respond)
-    3 - node with given address doesn't exist
-    4 - invalid <num> parameter provided, sensor/switch with given num doesn't exist
+    0 - BTERR_NO_ERROR              no errors
+    1 - BTERR_NO_CMD                empty command; just ignore it
+    2 - BTERR_UNKNOWN_CMD           unknown command
+    3 - BTERR_CMD_NOT_IMPLEMENTED   reaction on command is not implemented on master node
+    4 - BTERR_TIMEOUT               command timeout (slave node did not respond)
+    5 - BTERR_INVALID_ANSWER        got some error from slave node during transferring message
+    6 - BTERR_UNEXPECTED_ANSWER     slave node return unexpected msg no or error happen during executing the command
+
 
 
 Command:
@@ -44,7 +47,7 @@ Answer:
     ERROR <errcode>
 Params:
     <address> - address of the node, dec format
-    <value> - integer, version in format (<major> << 16 | <minor>)
+    <value> - integer, version in format (<major> << 24 | <minor> << 16 | <rev>)
 
 
 
