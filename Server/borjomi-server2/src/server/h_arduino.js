@@ -32,7 +32,7 @@ function callArduino(cmd) {
     }
     channelBusy = true
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject, timeoutMs = 5000) {
         function on_parser_data(data) {
             parser.off('data', on_parser_data)
             channelBusy = false
@@ -43,6 +43,10 @@ function callArduino(cmd) {
             cmd = cmd + SerialPortDelimiter
         }
         serialport.write(cmd)
+        setTimeout(function() {
+            channelBusy = false
+            reject(new Error('Timeout occurred'))
+        }, timeoutMs)
     });
 }
 
@@ -58,6 +62,9 @@ function callArduinoTimeout(cmd, timeoutMs) {
     }
     if (channelBusy) {
         throw new Error("Another request is running to Arduino. You should wait for it finishes")
+    }
+    if (!timeoutMs) {
+        throw new Error("Timeout param must be set")
     }
     channelBusy = true
 
@@ -80,12 +87,15 @@ function callArduinoTimeout(cmd, timeoutMs) {
 }
 
 function formatArduinoError(rawErrorStr) {
-    switch (rawErrorStr.trim()) {
-        case 'ERROR 0' : return rawErrorStr + " - no error"
-        case 'ERROR 1' : return rawErrorStr + " - unknown command"
-        case 'ERROR 2' : return rawErrorStr + " - command timeout (node did not respond)"
-        case 'ERROR 3' : return rawErrorStr + " - node with given address doesn't exist"
-        case 'ERROR 4' : return rawErrorStr + " - invalid <num> parameter provided, sensor/switch with given num doesn't exist"
+    rawErrorStr = rawErrorStr.trim()
+    switch (rawErrorStr) {
+        case 'ERROR 0' : return rawErrorStr + " - no errors"
+        case 'ERROR 1' : return rawErrorStr + " - empty command; just ignore it"
+        case 'ERROR 2' : return rawErrorStr + " - unknown command"
+        case 'ERROR 3' : return rawErrorStr + " - reaction on command is not implemented on master node"
+        case 'ERROR 4' : return rawErrorStr + " - command timeout (slave node did not respond)"
+        case 'ERROR 5' : return rawErrorStr + " - got some error from slave node during transferring message"
+        case 'ERROR 6' : return rawErrorStr + " - slave node return unexpected msg no or error happen during executing the command"
         default: return rawErrorStr + " - unknown error or unexpected answer"
     }
 }
@@ -96,9 +106,11 @@ function initPort() {
     return new Promise(function(resolve, reject) {
         serialport = new SerialPort(config.arduino.port, (error) => {
             if (error) reject(error)
-            else resolve()
+            else {
+                serialport.pipe(parser)
+                resolve()
+            }
         })
-        serialport.pipe(parser)
     })
 }
 
@@ -116,23 +128,27 @@ function closePort() {
  */
 async function ping(inObj, context) {
     const address = optionalParam(inObj, "address", "integer")
+    let ret = undefined
     if (address) {
         const ans = await callArduino(`AT+PING?${address}`)
         const parts = ans.match(/\+PONG=(\d+)/)
         if (!parts || parts[1] != address) {
-            throw APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+            throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
         }
-        return true
+        ret = [ address ]
     }
-    // multi ping variant
-    const ansarr = await callArduinoTimeout("AT+PING?*")
-    return ansarr.map(function(ans) {
-        const parts = ans.match(/\+PONG=(\d+)/)
-        if (!parts) {
-            throw APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
-        }
-        return parseInt(parts[1])
-    })
+    else {
+        // multi ping variant
+        const ansarr = await callArduinoTimeout("AT+PING?*", 5000)
+        ret = ansarr.map(function(ans) {
+            const parts = ans.match(/\+PONG=(\d+)/)
+            if (!parts) {
+                throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+            }
+            return parseInt(parts[1])
+        })
+    }
+    return { pong : ret }
 }
 
 /**
@@ -145,12 +161,13 @@ async function version(inObj, context) {
     const ans = await callArduino(`AT+VERSION?${address}`)
     const parts = ans.match(/\+VERSION=(\d+),(\d+)/)
     if (!parts || parts[1] != address) {
-        throw APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+        throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
     }
     const ver = parseInt(parts[2])
     return {
-        major : ver >>> 16,
-        minor : ver & 0xFFFF
+        major : (ver >>> 24) & 0xFF,
+        minor : (ver >>> 16) & 0xFF,
+        rev : ver & 0xFFFF
     }
 }
 
@@ -159,9 +176,13 @@ async function version(inObj, context) {
  * @param {WSServer} wsServer
  * */
 function init(wsServer) {
-    // wsServer.addFunction("")
+    wsServer.addFunction("arduino.ping", ping)
+    wsServer.addFunction("arduino.version", version)
 }
 
 
 
-export { init, initPort, closePort, callArduino }
+export {
+    init, initPort, closePort, callArduino,
+    ping, version
+}
