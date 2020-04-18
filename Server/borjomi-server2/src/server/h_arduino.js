@@ -16,37 +16,46 @@ let serialport = null
 const parser = new Readline({ delimiter : SerialPortDelimiter })
 
 
-let channelBusy = false
+let channelBusy = {
+    promise: Promise.resolve()
+}
 
 /**
  * Calls arduino board over serial port and returns raw answer from arduino
  * which is represented by single line
  * @param {String} cmd raw command 
  */
-function callArduino(cmd) {
+function callArduino(cmd, timeoutMs = 5000) {
     if (serialport == null) {
         throw new Error("SerialPort is not open")
     }
-    if (channelBusy) {
-        throw new Error("Another request is running to Arduino. You should wait for it finishes")
-    }
-    channelBusy = true
+    let prevChannelPromise = channelBusy.promise
+    let resolver = {}
+    resolver.promise = new Promise(function(resolve, reject){
+        resolver.resolve = resolve
+    })
+    channelBusy = resolver
 
-    return new Promise(function(resolve, reject, timeoutMs = 5000) {
-        function on_parser_data(data) {
-            parser.off('data', on_parser_data)
-            channelBusy = false
-            resolve(data)
-        }
-        parser.on('data', on_parser_data)
-        if (!cmd.endsWith(SerialPortDelimiter)) {
-            cmd = cmd + SerialPortDelimiter
-        }
-        serialport.write(cmd)
-        setTimeout(function() {
-            channelBusy = false
-            reject(new Error('Timeout occurred'))
-        }, timeoutMs)
+    return new Promise(function(resolve, reject) {
+        prevChannelPromise.then(reopenPort).then( () => {
+            let tmrId = setTimeout(function() {
+                parser.off('data', on_parser_data)
+                reject(new Error('Timeout occurred'))
+                closePort()
+                resolver.resolve()
+            }, timeoutMs)
+            function on_parser_data(data) {
+                parser.off('data', on_parser_data)
+                clearTimeout(tmrId)
+                resolve(data)
+                resolver.resolve()
+            }
+            parser.on('data', on_parser_data)
+            if (!cmd.endsWith(SerialPortDelimiter)) {
+                cmd = cmd + SerialPortDelimiter
+            }
+            serialport.write(cmd)
+        }, (error) => { reject(error) })
     });
 }
 
@@ -60,29 +69,34 @@ function callArduinoTimeout(cmd, timeoutMs) {
     if (serialport == null) {
         throw new Error("SerialPort is not open")
     }
-    if (channelBusy) {
-        throw new Error("Another request is running to Arduino. You should wait for it finishes")
-    }
     if (!timeoutMs) {
         throw new Error("Timeout param must be set")
     }
-    channelBusy = true
+    
+    let prevChannelPromise = channelBusy.promise
+    let resolver = {}
+    resolver.promise = new Promise(function(resolve, reject){
+        resolver.resolve = resolve
+    })
+    channelBusy = resolver
 
     return new Promise(function(resolve, reject) {
-        var ret = []
-        function on_parser_data(data) {
-            ret.push(data)
-        }
-        parser.on('data', on_parser_data)
-        if (!cmd.endsWith(SerialPortDelimiter)) {
-            cmd = cmd + SerialPortDelimiter
-        }
-        serialport.write(cmd)
-        setTimeout(function() {
-            parser.off('data', on_parser_data)
-            channelBusy = false
-            resolve(ret)
-        }, timeoutMs)
+        prevChannelPromise.then(reopenPort).then( () => {
+            var ret = []
+            function on_parser_data(data) {
+                ret.push(data)
+            }
+            parser.on('data', on_parser_data)
+            if (!cmd.endsWith(SerialPortDelimiter)) {
+                cmd = cmd + SerialPortDelimiter
+            }
+            serialport.write(cmd)
+            setTimeout(function() {
+                parser.off('data', on_parser_data)
+                resolve(ret)
+                resolver.resolve()
+            }, timeoutMs)
+        })
     });
 }
 
@@ -103,13 +117,18 @@ function formatArduinoError(rawErrorStr) {
 
 
 function initPort() {
+    serialport = new SerialPort(config.arduino.port, { autoOpen: false })
+    serialport.on('error', console.log)
+    serialport.pipe(parser)
+    return reopenPort()
+}
+
+function reopenPort() {
     return new Promise(function(resolve, reject) {
-        serialport = new SerialPort(config.arduino.port, (error) => {
+        if (serialport.isOpen) resolve()
+        serialport.open( (error) => {
             if (error) reject(error)
-            else {
-                serialport.pipe(parser)
-                resolve()
-            }
+            else  resolve()
         })
     })
 }
@@ -118,7 +137,9 @@ function closePort() {
     if (!serialport) {
         return
     }
-    serialport.close()
+    if (serialport.isOpen) {
+        serialport.close()
+    }
 }
 
 /**

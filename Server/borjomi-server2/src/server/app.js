@@ -12,6 +12,11 @@ if (config.client.enabled) {
     client = require('./client')
 }
 
+let h_arduino = null
+if (config.arduino.enabled) {
+    h_arduino = require('./h_arduino')
+}
+
 var wsService;
 
 
@@ -25,6 +30,9 @@ class WSService {
         this.wss.addFunction('getMessageAnswer', h_message.getMessageAnswer)
         this.wss.addFunction('updateMessageStatus', h_message.updateMessageStatus)
         this.wss.addFunction('setMessageAnswer', h_message.setMessageAnswer)
+        if (h_arduino) {
+            h_arduino.init(this.wss)
+        }
     }
 
     async startWSService() {
@@ -34,6 +42,9 @@ class WSService {
         m_server.init(this.wss)
         if (client) {
             client.init(this.wss)
+        }
+        if (h_arduino) {
+            await h_arduino.initPort()
         }
     }
 }
