@@ -1,0 +1,19 @@
+<mat-dialog-content class="dialog-content">
+    <mat-form-field>
+      <input matInput name="username" placeholder="Username"
+            [formControl]="usernameFormControl" required>
+      <mat-error translate>FieldRequired</mat-error>
+    </mat-form-field>
+    <mat-form-field>       
+        <input matInput name="password" placeholder="Password"
+              [formControl]="passwordFormControl" required>
+        <mat-error translate>FieldRequired</mat-error>
+    </mat-form-field>
+</mat-dialog-content>
+<button mat-raised-button 
+        color="primary" 
+        mat-dialog-close
+        (click)="login()">
+        Login
+</button>
+<button mat-button mat-dialog-close color="secondary">Close</button>
