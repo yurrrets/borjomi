@@ -1,3 +1,4 @@
+import { APIError } from "../src/common/error";
 
 // From other common files
 const ErrorCodes = {
@@ -78,6 +79,7 @@ function AppWebSocket(wsUri) {
         let obj = JSON.parse(evt.data)
         if (!obj) return
         if (obj.message) this.eventer.emit('serverMessage', obj.message)
+        else if (obj.event) this.eventer.emit('serverEvent', obj)
         else this.eventer.emit('serverJsonObj', obj)
         this.eventer.emit('serverAnyJsonObj', obj)
     })
@@ -178,11 +180,12 @@ async function logout() {
 }
 
 async function createNewMessage(type, executor, validForMs, data) {
-    return await wsCallFunction({}, data, {
+    return await wsCallFunction({}, {
         'function': "newMessage",
         'type': type,
         'executor': executor,
-        'validForMs': validForMs
+        'validForMs': validForMs,
+        'params': data
     })
 }
 
@@ -208,5 +211,47 @@ async function setMessageAnswer(msgId, errCode, errText, result) {
         'errorCode': errCode,
         'errorText': errText,
         'result': result
+    })
+}
+
+
+// Transforms call to remote function to send message.
+// Rules:
+// input.function -> message type
+// input.function removed
+// then: input -> mesage params
+// msg answer: 
+// 1) MessageStatus.DoneOk: messageAnswer.answer.result -> return 
+// 2) else: reject with messageAnswer.answer.errorCode, messageAnswer.answer.errorText
+async function sendMsgLikeWsCallFunction(executor, data, timeout = 10000) {
+    return new Promise(function(resolve, reject) {
+        const msgType = data.function
+        data.function = undefined
+        createNewMessage(msgType, executor, timeout, data).then(function(newMsg) {
+            let msgID = newMsg.messageId || -1
+        
+            let onServerEvent = function(evt) {
+                if (evt.event != "messageAnswer" || evt.messageId != msgID) return
+                websocket.off('serverEvent', onServerEvent)
+                websocket.off('error', onError)
+                if (evt.messageStatus == MessageStatus.DoneOk) {
+                    resolve(mergeDeep({ errCode: 0 }, evt.answer.result))
+                }
+                else {
+                    reject(new APIError(`Message id ${msgID} failed: ${evt.answer.errorText}`, evt.answer.errorCode))
+                }
+            }
+            let onError = function(evt) {
+                websocket.off('serverEvent', onServerEvent)
+                websocket.off('error', onError)
+                reject(evt)
+            }
+            
+            websocket.on('serverEvent', onServerEvent)
+            websocket.on('error', onError)
+            setTimeout(onError, timeout, new Error("Timeout occurred"))
+        }, function(err) {
+            reject(err)
+        })
     })
 }
