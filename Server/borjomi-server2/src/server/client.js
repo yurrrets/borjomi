@@ -207,15 +207,24 @@ async function onClientMessage(msg, wsServer) {
         mappedMsg.requestor = 0
         mappedMsg.executor = 0
 
-        if (!wsServer.messageMap.has(mappedMsg.type)) {
-            throw new APIError("Message handler not found.", ErrorCodes.FunctionNotFound)
+        if (wsServer.messageMap.has(mappedMsg.type)) {
+            let func = wsServer.messageMap.get(mappedMsg.type)
+            let context = wsServer.serverContext
+            let ret = await func(mappedMsg, context)
+            
+            await answerMessage(msg.id, ret)
         }
         
-        let func = wsServer.messageMap.get(mappedMsg.type)
-        let context = wsServer.serverContext
-        let ret = await func(mappedMsg, context)
-        
-        await answerMessage(msg.id, ret)
+        else if (wsServer.functionMap.has(mappedMsg.type)) {
+            let func = wsServer.functionMap.get(mappedMsg.type)
+            let context = wsServer.serverContext
+            let ret = await func(mappedMsg.params, context)
+            
+            await answerMessage(msg.id, ret)
+        }
+
+        else 
+            throw new APIError("Message handler not found.", ErrorCodes.FunctionNotFound)
     }
     catch(e) {
         await answerMessage(msg.id, {
