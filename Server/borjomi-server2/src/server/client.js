@@ -220,7 +220,10 @@ async function onClientMessage(msg, wsServer) {
             let context = wsServer.serverContext
             let ret = await func(mappedMsg.params, context)
             
-            await answerMessage(msg.id, ret)
+            await answerMessage(msg.id, {
+                errorCode: 0,
+                result: ret
+            })
         }
 
         else 
