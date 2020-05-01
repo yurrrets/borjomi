@@ -314,7 +314,14 @@ async function readMessageAnswer(msgId) {
         let msga = new message.MessageAnswer()
         msga.errorCode = row.error_code
         msga.errorText = row.error_text
-        msga.result = row.notes
+        if (row.notes) {
+            try {
+                msga.result = JSON.parse(row.notes)
+            }
+            catch {
+                msga.result = { "_" : row.notes }
+            }
+        }
         return msga
     }
     finally {
