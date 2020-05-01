@@ -104,6 +104,7 @@ body {
 
 </style>
 
+<script type="text/javascript" src="config.js"></script>
 <script type="text/javascript" src="utils.js"></script>
 <script type="text/javascript" src="wsclient.js"></script>
 
@@ -138,8 +139,6 @@ body {
     // }
 
 
-    // var wsUri = "ws://localhost:3001";
-    var wsUri = "ws://192.168.0.101:3001";
     
     function checkSocket() {
         if (websocket != null) {
@@ -202,24 +201,41 @@ body {
     window.addEventListener('load',makeConnect,false)
 
     let currentArduinoNode = -1
+    let currentLoginData = { }
 
     function makeConnect() {
-        initWebSocket(wsUri)
-        websocket.on('open', (evt) => {
-            handshake()
+        initWebSocket(config.wsUri)
+        websocket.on('open', async (evt) => {
+            await handshake()
+
+            if (!config.local) {
+                // will be user input
+                currentLoginData.token = await login(config.credentials.login, config.credentials.password)
+                currentLoginData.childAccounts = (await getChildAccounts()).childAccounts
+                currentLoginData.executorId = currentLoginData.childAccounts[0].id
+            }
         })
     }
 
+
+    async function execFunction(data) {
+        if (config.local) {
+            return await wsCallFunction(data)
+        }
+        else {
+            return await sendMsgLikeWsCallFunction(currentLoginData.executorId, data)
+        }
+    }
     
     async function arduino_ping() {
-        return await wsCallFunction({
+        return await execFunction({
             'function': "arduino.ping",
             'address': currentArduinoNode
         })
     }
 
     async function arduino_version() {
-        return await wsCallFunction({
+        return await execFunction({
             'function': "arduino.version",
             'address': currentArduinoNode
         })

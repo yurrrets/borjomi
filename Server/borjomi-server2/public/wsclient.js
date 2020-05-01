@@ -1,4 +1,3 @@
-import { APIError } from "../src/common/error";
 
 // From other common files
 const ErrorCodes = {
@@ -179,8 +178,14 @@ async function logout() {
     })
 }
 
+async function getChildAccounts() {
+    return await wsCallFunction({
+        'function': "getChildAccounts"
+    })
+}
+
 async function createNewMessage(type, executor, validForMs, data) {
-    return await wsCallFunction({}, {
+    return await wsCallFunction({
         'function': "newMessage",
         'type': type,
         'executor': executor,
@@ -238,7 +243,7 @@ async function sendMsgLikeWsCallFunction(executor, data, timeout = 10000) {
                     resolve(mergeDeep({ errCode: 0 }, evt.answer.result))
                 }
                 else {
-                    reject(new APIError(`Message id ${msgID} failed: ${evt.answer.errorText}`, evt.answer.errorCode))
+                    reject(new Error(`Message id ${msgID} failed: ${evt.answer.errorText}`, evt.answer.errorCode))
                 }
             }
             let onError = function(evt) {
