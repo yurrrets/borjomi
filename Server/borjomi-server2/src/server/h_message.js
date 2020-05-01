@@ -30,7 +30,7 @@ async function newMessage(inObj, context) {
     // }
 
     // check if user has permission to send message
-    if (executor !== 0 && !(await hasChildAccount({ id: executor }, context))) {
+    if (executor !== 0 && !(await hasChildAccount({ id: executor }, context)).result) {
         throw new APIError(`Can't send message to executor ${executor}. Not a child account`, ErrorCodes.InvalidParams)
     }
 

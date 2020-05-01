@@ -50,7 +50,7 @@ async function onBrokerNewMessage(wsServer) {
                     const appWs = kvp[0]
                     /** @type { WSContext } */
                     const wsContext = kvp[1]
-                    const userID = getLoggedUserID(wsContext)
+                    const userID = getLoggedUserID(wsContext).id
                     if (msg.executor !== userID) {
                         continue
                     }
@@ -82,7 +82,7 @@ async function onBrokerMessageStatusChanged(wsServer, msgId) {
             const appWs = kvp[0]
             /** @type { WSContext } */
             const wsContext = kvp[1]
-            const userID = getLoggedUserID(wsContext)
+            const userID = getLoggedUserID(wsContext).id
             if (msg.requestor !== userID) {
                 continue
             }
@@ -114,7 +114,7 @@ async function onBrokerMessageAnswer(wsServer, msgId) {
             const appWs = kvp[0]
             /** @type { WSContext } */
             const wsContext = kvp[1]
-            const userID = getLoggedUserID(wsContext)
+            const userID = getLoggedUserID(wsContext).id
             if (msg.requestor !== userID) {
                 continue
             }

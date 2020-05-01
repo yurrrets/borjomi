@@ -26,6 +26,10 @@ class WSService {
         this.wss.addFunction('ping', async function () {}) // ping superfunction
         this.wss.addFunction('login', login.login)
         this.wss.addFunction('logout', login.logout)
+        this.wss.addFunction('getLoggedUserID', login.getLoggedUserID)
+        this.wss.addFunction('getChildAccounts', login.getChildAccounts)
+        this.wss.addFunction('hasChildAccount', login.hasChildAccount)
+        
         this.wss.addFunction('newMessage', h_message.newMessage)
         this.wss.addFunction('getMessageAnswer', h_message.getMessageAnswer)
         this.wss.addFunction('updateMessageStatus', h_message.updateMessageStatus)

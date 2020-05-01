@@ -64,12 +64,12 @@ function loginServer(context) {
 function getLoggedUserID(context) {
     const loginInfo = context.loginInfo
     if (!loginInfo) {
-        return -1
+        return { id: -1 }
     }
     if (loginInfo.isServer) {
-        return 0
+        return { id: 0 }
     }
-    return loginInfo.userID
+    return { id: loginInfo.userID }
 }
 
 /**
@@ -87,7 +87,7 @@ function ensureLogin(context) {
 
 async function getChildAccounts(inObj, context) {
     ensureLogin(context)
-    return await db.getChildAccounts(context.loginInfo.userID)
+    return { childAccounts: await db.getChildAccounts(context.loginInfo.userID) }
 }
 
 async function hasChildAccount(inObj, context) {
@@ -95,13 +95,13 @@ async function hasChildAccount(inObj, context) {
     if (!inObj || !inObj.id) {
         throw new APIError("id parameter required", ErrorCodes.InvalidParams)
     }
-    const child_accs = await getChildAccounts({}, context)
+    const child_accs = (await getChildAccounts({}, context)).childAccounts
     for (const val of child_accs) {
         if (val.id == inObj.id) {
-            return true
+            return { result: true }
         }
     }
-    return false
+    return { result: false }
 }
 
 export {

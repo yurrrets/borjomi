@@ -51,12 +51,12 @@ describe('login', function() {
         it('check login.getChildAccounts func', async function() {
             let context = createWsContext()
             const {token} = await login.login({username: 'test', password: 'test'}, context)
-            const child_accs = await login.getChildAccounts({}, context);
+            const child_accs = (await login.getChildAccounts({}, context)).childAccounts
             assert.notEqual(child_accs.length, 0)
             for (const val of child_accs) {
-                assert.equal(await login.hasChildAccount({ id: val.id }, context), true)
+                assert.equal((await login.hasChildAccount({ id: val.id }, context)).result, true)
             }
-            assert.equal(await login.hasChildAccount({ id: -1 }, context), false)
+            assert.equal((await login.hasChildAccount({ id: -1 }, context)).result, false)
             assert.rejects(async function () { await login.hasChildAccount({ }, context) }, APIError)
             await login.logout({}, context)
         });
