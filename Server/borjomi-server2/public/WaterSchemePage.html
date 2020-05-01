@@ -258,8 +258,15 @@ body {
     function updateNodeStatus() {
         if (currentArduinoNode < 0) return
         setTimeout( async () => {
-            await arduino_ping()
-            await arduino_version()
+            try {
+                let asw = await arduino_ping()
+                debug("arduino_ping answer:", JSON.stringify(asw))
+                asw = await arduino_version()
+                debug("arduino_version answer:", JSON.stringify(asw))
+            }
+            catch (e) {
+                error("updateNodeStatus() error:", e);
+            }
         })
     }
     
