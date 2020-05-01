@@ -9,7 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
@@ -24,7 +23,6 @@ import { MatMenuModule } from '@angular/material/menu';
     MatListModule,
     MatSidenavModule,
     MatToolbarModule,
-    TranslateModule,
     MatMenuModule
   ],
   exports: [
@@ -37,7 +35,6 @@ import { MatMenuModule } from '@angular/material/menu';
     MatListModule,
     MatSidenavModule,
     MatToolbarModule,
-    TranslateModule,
     MatMenuModule
   ],
   declarations: [],
