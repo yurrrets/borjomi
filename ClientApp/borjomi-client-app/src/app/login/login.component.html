@@ -1,19 +1,23 @@
-<mat-dialog-content class="dialog-content">
+<mat-card-content>
+  <form [formGroup]="authForm" (ngSubmit)="login()">
+  <p>
     <mat-form-field>
       <input matInput name="username" placeholder="Username"
-            [formControl]="usernameFormControl" required>
+            formControlName="usernameFormControl" required>
       <mat-error translate>FieldRequired</mat-error>
     </mat-form-field>
+  </p>
+    <p>
     <mat-form-field>       
         <input matInput name="password" placeholder="Password"
-              [formControl]="passwordFormControl" required>
+        formControlName="passwordFormControl" required>
         <mat-error translate>FieldRequired</mat-error>
     </mat-form-field>
-</mat-dialog-content>
-<button mat-raised-button 
-        color="primary" 
-        mat-dialog-close
-        (click)="login()">
-        Login
-</button>
-<button mat-button mat-dialog-close color="secondary">Close</button>
+  </p>
+
+<div class="button">
+  <button type="submit" mat-raised-button>Login</button>
+</div>
+  </form>
+</mat-card-content>
+
