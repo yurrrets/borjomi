@@ -23,3 +23,5 @@ env.json
 /help_scripts
 /*.tgz
 .vscode
+
+package-lock.json
