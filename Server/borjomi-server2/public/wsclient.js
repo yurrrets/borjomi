@@ -136,7 +136,12 @@ async function wsCallFunction(data, timeout = 10000) {
             if (ans.reqID != reqID) return
             websocket.off('serverJsonObj', onServerJsonObj)
             websocket.off('error', onError)
-            resolve(ans)
+            if (ans.errorCode !== 0) {
+                reject(new Error(`Error occurred: ${ans.errorText}; errorCode: ${ans.errorCode}`))
+            }
+            else {
+                resolve(ans)
+            }
         }
         let onError = function(evt) {
             websocket.off('serverJsonObj', onServerJsonObj)
