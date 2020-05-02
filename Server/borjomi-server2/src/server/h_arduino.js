@@ -8,7 +8,7 @@ const message = require('../common/message')
 const SerialPort = require('serialport')
 const Readline = SerialPort.parsers.Readline
 
-const SerialPortDelimiter = '\n'
+const SerialPortDelimiter = '\r\n'
 
 
 /** @type SerialPort */
@@ -192,6 +192,161 @@ async function version(inObj, context) {
     }
 }
 
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function capabilities(inObj, context) {
+    const address = requireParam(inObj, "address", "integer")
+    const ans = await callArduino(`AT+CAPABILITIES?${address}`)
+    const parts = ans.match(/\+CAPABILITIES=(\d+),(.*)/)
+    if (!parts || parts[1] != address) {
+        throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+    }
+    const allcaps = parts[2]
+    const allmatch = [...allcaps.matchAll(/(\w*):(\d+);/g)]
+    let ret = { 
+        caps: []
+    }
+    for (const m of allmatch) {
+        ret.caps.push([ m[1], parseInt(m[2]) ])
+    }
+    return ret
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function getsetCmd(inObj, context, cmd) {
+    const address = requireParam(inObj, "address", "integer")
+    const num = requireParam(inObj, "num", "integer")
+    const state = optionalParam(inObj, "state", "integer")
+
+    if (state === undefined) {
+        const ans = await callArduino(`AT+${cmd}?${address},${num}`)
+        const regex = new RegExp(/\+/.source + cmd + /=(\d+),(\d+),(\d+)/.source)
+        const parts = ans.match(regex)
+        if (!parts || parts[1] != address || parts[2] != num) {
+            throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+        }
+        const currstate = parseInt(parts[3])
+        return {
+            state: currstate
+        }
+    }
+    else {
+        const setstate = state
+        const ans = await callArduino(`AT+${cmd}=${address},${num},${setstate}`)
+        if (ans != "OK") {
+            console.log(`Real ans: _${ans}_`)
+            throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+        }
+        return { }
+    }
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function getCmd(inObj, context, cmd) {
+    const address = requireParam(inObj, "address", "integer")
+    const num = requireParam(inObj, "num", "integer")
+
+    const ans = await callArduino(`AT+${cmd}?${address},${num}`)
+    const regex = new RegExp(/\+/.source + cmd + /=(\d+),(\d+),(.*)/.source)
+    const parts = ans.match(regex)
+    if (!parts || parts[1] != address || parts[2] != num) {
+        throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
+    }
+    return parts[3]
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function getIntVal(inObj, context, cmd) {
+    return { value: parseInt(await getCmd(inObj, context, cmd)) }
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function getFloatVal(inObj, context, cmd) {
+    return { value: parseFloat(await getCmd(inObj, context, cmd)) }
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function water(inObj, context) {
+    return await getsetCmd(inObj, context, "WATER")
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function soil(inObj, context) {
+    return await getIntVal(inObj, context, "SOIL")
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function pressure(inObj, context) {
+    return await getFloatVal(inObj, context, "PRESSURE")
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function current(inObj, context) {
+    return await getFloatVal(inObj, context, "CURRENT")
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function voltage(inObj, context) {
+    return await getFloatVal(inObj, context, "VOLTAGE")
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function dcadapter(inObj, context) {
+    return await getsetCmd(inObj, context, "DCADAPTER")
+}
+
+/**
+ * 
+ * @param {object} inObj 
+ * @param {WSContext} context 
+ */
+async function pump(inObj, context) {
+    return await getsetCmd(inObj, context, "PUMP")
+}
+
 /** 
  * 
  * @param {WSServer} wsServer
@@ -199,6 +354,14 @@ async function version(inObj, context) {
 function init(wsServer) {
     wsServer.addFunction("arduino.ping", ping)
     wsServer.addFunction("arduino.version", version)
+    wsServer.addFunction("arduino.capabilities", capabilities)
+    wsServer.addFunction("arduino.water", water)
+    wsServer.addFunction("arduino.soil", soil)
+    wsServer.addFunction("arduino.pressure", pressure)
+    wsServer.addFunction("arduino.current", current)
+    wsServer.addFunction("arduino.voltage", voltage)
+    wsServer.addFunction("arduino.dcadapter", dcadapter)
+    wsServer.addFunction("arduino.pump", pump)
 }
 
 

@@ -107,6 +107,7 @@ body {
 <script type="text/javascript" src="config.js"></script>
 <script type="text/javascript" src="utils.js"></script>
 <script type="text/javascript" src="wsclient.js"></script>
+<script type="text/javascript" src="wsarduino.js"></script>
 
 <script type="text/javascript">
     window.addEventListener('load',loadLogs,false)
@@ -138,9 +139,6 @@ body {
     //     }
     // }
 
-
-     var wsUri = "ws://localhost:3001";
-    //var wsUri = "ws://192.168.0.101:3001";
     
     function checkSocket() {
         if (websocket != null) {
@@ -220,7 +218,7 @@ body {
     }
 
 
-    async function execFunction(data) {
+    async function execRemoteFunction(data) {
         if (config.local) {
             return await wsCallFunction(data)
         }
@@ -229,21 +227,7 @@ body {
         }
     }
     
-    async function arduino_ping() {
-        return await execFunction({
-            'function': "arduino.ping",
-            'address': currentArduinoNode
-        })
-    }
-
-    async function arduino_version() {
-        return await execFunction({
-            'function': "arduino.version",
-            'address': currentArduinoNode
-        })
-    }
-
-
+    
     function svgInit() {
         var nodes = document.getElementsByClassName('arduino_node')
         for (let node of nodes) {
@@ -261,10 +245,12 @@ body {
         if (currentArduinoNode < 0) return
         setTimeout( async () => {
             try {
-                let asw = await arduino_ping()
+                let asw = await arduino_ping(currentArduinoNode)
                 debug("arduino_ping answer:", JSON.stringify(asw))
-                asw = await arduino_version()
+                asw = await arduino_version(currentArduinoNode)
                 debug("arduino_version answer:", JSON.stringify(asw))
+                asw = await arduino_capabilities(currentArduinoNode)
+                debug("arduino_capabilities answer:", JSON.stringify(asw))
             }
             catch (e) {
                 error("updateNodeStatus() error:", e);
@@ -302,7 +288,32 @@ body {
                 <p>
                     <h3 style="float: left" id="node_label">Select node</h3>
                     <span style="float: right">[ <a href="#" onClick="updateNodeStatus();">Update status</a> ]</span>
+                    <span style="float: none">&nbsp;</span>
                 </p>
+                <div>&nbsp;</div>
+                <div id="cap_water"><p>
+                    Water Switch
+                    <a href="#" onClick="arduino_water(currentArduinoNode, 0, true);">On</a>
+                    <a href="#" onClick="arduino_water(currentArduinoNode, 0, false);">Off</a>
+                    <a href="#" onClick="arduino_water(currentArduinoNode, 0);">State?</a>
+                </p></div>
+                <div id="cap_dcadapter"><p>
+                    DC Adapter
+                    <a href="#" onClick="arduino_dcadapter(currentArduinoNode, 0, true);">On</a>
+                    <a href="#" onClick="arduino_dcadapter(currentArduinoNode, 0, false);">Off</a>
+                    <a href="#" onClick="arduino_dcadapter(currentArduinoNode, 0);">State?</a>
+                </p></div>
+                <div id="cap_pump"><p>
+                    Pump
+                    <a href="#" onClick="arduino_pump(currentArduinoNode, 0, true);">On</a>
+                    <a href="#" onClick="arduino_pump(currentArduinoNode, 0, false);">Off</a>
+                    <a href="#" onClick="arduino_pump(currentArduinoNode, 0);">State?</a>
+                </p></div>
+
+                <a id="cap_soil" href="#" onClick="arduino_soil(currentArduinoNode, 0);">Soil?</a>
+                <a id="cap_pressure" href="#" onClick="arduino_pressure(currentArduinoNode, 0);">Pressure?</a>
+                <a id="cap_current" href="#" onClick="arduino_current(currentArduinoNode, 0);">Current?</a>
+                <a id="cap_voltage" href="#" onClick="arduino_voltage(currentArduinoNode, 0);">Voltage?</a>                
             </div>
             <div style="width:100%;height:50%">
                 <p>
