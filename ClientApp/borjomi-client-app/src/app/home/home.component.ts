@@ -10,38 +10,28 @@ import { Subscription } from 'rxjs';
   })
   
 export class HomeComponent implements OnInit {
-  wsSubscription: Subscription;  
+  dataSubscription: Subscription;  
     
   constructor(private wsService: WebSocketService,
       private router: Router ) {}  
     
   ngOnInit(): void {
-      this.initIoConnection(); 
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+    }
+
+    this.dataSubscription = this.wsService.getChildAccounts()
+      .subscribe(data => {
+        console.log(data);
+      
+      
+      },
+      err => console.log(err),
+      () =>  console.log( 'The observable stream is complete'))
+    ;
   } 
     
-  initIoConnection() { 
-    this.wsSubscription =
-      this.wsService.connect()
-      .subscribe(
-          message => {          
-          console.log(message); 
-              this.onSocketMessage(message);  
-          },
-          err => console.log( 'err'),
-          () => console.log( 'The observable stream is complete')
-      ); 
-         
-  }
-  onSocketMessage(message: any) {
-    throw new Error("Method not implemented.");
-  }
     
-  closeSocket(){
-    this.wsSubscription.unsubscribe();
-  }
-
-  ngOnDestroy() {
-    this.closeSocket();  
-  }
+  
    
 }

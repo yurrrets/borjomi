@@ -4,7 +4,8 @@ import { WebSocketService } from '../core/services/websocket.service';
 import { AuthService } from '../core/services/auth.service';
 import { Router } from '@angular/router';
 import { Func } from '../core/model/function';
-import { Subscription } from 'rxjs';
+import { Subscription, timer, race, of } from 'rxjs';
+import { concatMap, delay, filter, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'borjomi-login',
@@ -15,7 +16,7 @@ import { Subscription } from 'rxjs';
 export class LoginComponent implements OnInit, OnDestroy {  
   authForm: FormGroup;
   isSubmitted  =  false;
-  wsSubscription: Subscription;
+  private dataSubscription: Subscription;
 
   constructor(
     private authService: AuthService, 
@@ -23,7 +24,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private router: Router) { }  
 
   ngOnInit(): void {
-    this.initIoConnection(); 
+    //this.initIoConnection(); 
+    this.handshake(); 
     this.authForm  =  new FormGroup({
       usernameFormControl: new FormControl('', Validators.required),
       passwordFormControl: new FormControl('', Validators.required)
@@ -31,8 +33,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   } 
 
   initIoConnection() { 
-    this.wsSubscription =
-      this.wsService.connect()
+      /*this.wsService.connect()
        .subscribe(
         message => {          
           console.log(message); 
@@ -40,7 +41,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         },
         err => console.log( 'err'),
         () =>  console.log( 'The observable stream is complete')
-      );
+      );*/
     
   }
   onSocketMessage(evt) {
@@ -50,6 +51,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.authService.signIn(obj.token);
       this.router.navigateByUrl('/home');
     }    
+  }
+
+  handshake() {   
+    this.wsService.handshake();    
   }
 
   get formControls() { return this.authForm.controls; }
@@ -64,16 +69,28 @@ export class LoginComponent implements OnInit, OnDestroy {
       username: this.authForm.get('usernameFormControl').value,
       password: this.authForm.get('passwordFormControl').value
     };
-    let lmsg = this.wsService.sendMessage(JSON.stringify(message));
-    console.log(lmsg);
+   
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+    }
+
+    this.dataSubscription = this.wsService.login(message)
+      .subscribe(data => {
+      console.log(data);
+      this.authService.signIn(data.token);
+      this.router.navigateByUrl('/home');
+      },
+      err => console.log(err),
+      () =>  console.log( 'The observable stream is complete'))
+    ;
+    
+    
   }  
 
-  closeSocket(){
-    this.wsSubscription.unsubscribe();
-  }
+ 
 
   ngOnDestroy() {
-    this.closeSocket();  
+    this.dataSubscription.unsubscribe();  
   }
   
 }

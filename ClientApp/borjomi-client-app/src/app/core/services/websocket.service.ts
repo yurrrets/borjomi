@@ -1,55 +1,96 @@
-import { Injectable } from '@angular/core';
-import { Observable} from 'rxjs';
+import { Injectable, EventEmitter } from '@angular/core';
+import { Observable, Subject} from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Func } from '../model/function';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+ 
+const wsSubject = webSocket({
+    url: environment.wsUrl,
+    protocol: 'ws',
+    serializer: msg => JSON.stringify({
+        //channel: "webDevelopment", 
+        msg: msg}),
+    deserializer: ({data}) => {
+        let obj = JSON.parse(data);
+        if (!obj) return;
+        return obj;
+    },
+    openObserver: {
+        next: () => console.log('Underlying WebSocket connection open')
+    } 
+});
 
 //const SERVER_URL = "ws://localhost:3001";
 
 @Injectable()
-export class WebSocketService{
-    ws: WebSocket;
+export class WebSocketService{      
     serverUrl: string = environment.wsUrl;
-   
-    connect(): Observable<any> {  
-        if ( this.ws && this.ws.readyState === this.ws.OPEN )
-                this.ws.close();         
-        this.ws = new WebSocket(this.serverUrl);
-        console.log("connecting to...");       
-       
-        return new Observable(
-           observer => { 
-            this.ws.onopen = (event) =>{
-                console.log("CONNECTED");
-                let message = {function: Func.HANDSHAKE,version: 1,reqID: 1};
-                this.sendMessage(this.customJSONStringify(message));
-            };  
-            this.ws.onmessage = (event) =>observer.next(event.data);  
-              
-            this.ws.onerror = (event) => observer.error(event);
+    webSocketSubject: any;
+    connected: boolean = false;
+    networkError: boolean = false;
+    msgId: number;
 
-            this.ws.onclose = (event) => observer.complete();
-    
-            //return () => this.ws.close(1000, "The user disconnected");
+    private connect(): WebSocketSubject<any> {      
+        if (!this.webSocketSubject)  
+        {          
+            const closeSubject = new Subject<CloseEvent>();
+            closeSubject.subscribe(_ => {
+              this.webSocketSubject = null;
+              if (this.connected) {
+                this.networkError = true;
+              }
+            });
+      
+            this.webSocketSubject = webSocket({
+              url: this.serverUrl,            
+              protocol: 'ws',
+              serializer: msg => {
+                  return JSON.stringify(msg, (k,val)=>{
+                      if (typeof val === 'number'){
+                      if (isFinite(val)) return val;
+                      return {_dtype:'number', value: val.toString() }
+                      }                      
+                      return val;
+                  });
+              },
+              deserializer: ({data}) => {
+                  let obj = JSON.parse(data);
+                  if (!obj) return;
+                  return obj;
+              },
+              openObserver: {
+                  next: () => console.log('Underlying WebSocket connection open')
+              },   
+              closeObserver: closeSubject       
+            });
+        }
+        return this.webSocketSubject;
+    }
+
+    async handshake() {
+        let zzz = this.connect().multiplex(() => 'subscribe-handshake', () => 'unsubscribe-handshake', message => message.version)
+        zzz.subscribe(msg=> console.log(msg));
+        this.connect().next({
+            'function': 'Handshake',
+            'version': 1
         });      
+        zzz.subscribe();        
+    }
+
+    login(obj: any){
+        let zzz = this.connect().multiplex(() => 'subscribe-login', () => 'unsubscribe-login', message => message.token);
+        this.connect().next(obj);       
+        console.log(zzz);
+        //unsubscribe
+        return zzz;
+    }
+
+    getChildAccounts() {
+        let zzz = this.connect().multiplex(() => 'subscribe-getChildAccounts', () => 'unsubscribe-getChildAccounts', message => message.childAccounts);
+        this.connect().next({'function': "getChildAccounts"});       
+        console.log(zzz);
+        //unsubscribe
+        return zzz;
         
-    }       
-  
-    sendMessage(message: any) {
-        if(this.ws.readyState !== this.ws.OPEN)
-            return "Message was not sent";
-
-        this.ws.send(message);
-        return `Sent to server ${message}`;
-    }  
-
-    customJSONStringify(obj: any) { 
-        return JSON.stringify(obj, (k,val)=>{
-            if (typeof val === 'number'){
-              if (isFinite(val)) return val;
-              return {_dtype:'number', value: val.toString() }
-            }
-            return val;
-        })
     }
         
   }
