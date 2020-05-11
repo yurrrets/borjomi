@@ -13,6 +13,7 @@
 #include "can_commands.h"
 #include "nodes.h"
 #include "cmd_handler.h"
+#include "pc_start.h"
 
 #include <EEPROM.h>
 
@@ -21,11 +22,14 @@
 #define CAN_CS_PIN  (9)
 #define CMD_ANSWER_TIMEOUT (1000)
 
+#define PC_START_PIN (8)   // digital pin
+
 SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
 StreamExt btExtSerial(btSerial);
 BTCommandParser btCommandIO(btExtSerial);
 CanCommands canCommands(CAN_CS_PIN);
 MasterNodeID NodeConfig;
+PcStart pcStart(PC_START_PIN);
 
 bool lastCommandAnswered;
 unsigned long lastCommandMillis;
@@ -37,6 +41,8 @@ void setup()
 #ifdef DEBUG
     Serial.begin(9600);
 #endif
+
+    pcStart.setup();
 
     EEPROM.get(0, NodeConfig);
     if (NodeConfig.checkCrc() && NodeConfig.nodeId)
@@ -71,6 +77,8 @@ void setup()
 
 void loop()
 {
+    pcStart.loop();
+
     if (!lastCommandAnswered && (millis() - lastCommandMillis > CMD_ANSWER_TIMEOUT))
     {
         btCommandIO.answerError(BTERR_TIMEOUT);
