@@ -10,3 +10,5 @@ src/main.cpp
 src/config.h
 src/button.cpp
 src/button.h
+src/pc_start.cpp
+src/pc_start.h
