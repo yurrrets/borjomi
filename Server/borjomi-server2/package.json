@@ -6,13 +6,15 @@
   "license": "ISC",
   "dependencies": {
     "esm": "^3.2.25",
+    "http-server": "^0.12.3",
     "mysql2": "^2.1.0",
     "serialport": "^8.0.8",
     "ws": "^7.3.0"
   },
   "scripts": {
     "dev": "npm-run-all --parallel server client",
-    "client": "react-scripts start",
+    "client-old": "react-scripts start",
+    "client": "http-server ./public",
     "server": "node -r esm ./bin/wsService",
     "test": "mocha -r esm",
     "test-client": "react-scripts test",

@@ -257,6 +257,18 @@ body {
             }
         })
     }
+
+    function pingAllNodes() {
+        setTimeout( async () => {
+            try {
+                let asw = await arduino_ping()
+                debug("arduino_ping* answer:", JSON.stringify(asw))
+            }
+            catch (e) {
+                error("pingAllNodes() error:", e);
+            }
+        })
+    }
     
 </script>
 
@@ -288,6 +300,7 @@ body {
                 <p>
                     <h3 style="float: left" id="node_label">Select node</h3>
                     <span style="float: right">[ <a href="#" onClick="updateNodeStatus();">Update status</a> ]</span>
+                    <span style="float: right">[ <a href="#" onClick="pingAllNodes();">Ping all</a> ]</span>
                     <span style="float: none">&nbsp;</span>
                 </p>
                 <div>&nbsp;</div>
