@@ -2,7 +2,7 @@ const { WSServer, WSContext } = require('./wsserver')
 const db = require('./db')
 const message = require('../common/message')
 import { APIError, ErrorCodes } from '../common/error';
-import { getLoggedUserID } from './login'
+import { getLoggedUserID } from './h_login'
 import { AppWebSocket } from '../common/appws'
 import { mergeDeep } from '../common/utils'
 const h_message = require('./h_message')

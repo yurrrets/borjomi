@@ -3,7 +3,7 @@ const config = require('./config')
 const db = require('./db')
 const { ErrorCodes, APIError } = require("../common/error")
 const { WSServer, requireParam } = require('./wsserver')
-const login = require('./login')
+const login = require('./h_login')
 const h_message = require('./h_message')
 const m_server = require('./m_server')
 

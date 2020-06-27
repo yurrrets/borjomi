@@ -66,11 +66,11 @@ describe('db', function() {
             const msg1 = await db.createMessage("ring", 3, 4)
             assert.ok(msg1 && msg1.id)
 
-            const flag1 = await db.registerMessageAnswer(msg1.id, null, "Some error", "my bbbbbiggggg notes")
+            const flag1 = await db.registerMessageAnswer(msg1.id, null, "Some error", { "_" : "my bbbbbiggggg notes"} )
             const msga1 = await db.readMessageAnswer(msg1.id)
             assert.equal(msga1.errorCode, ErrorCodes.GeneralError)
             assert.equal(msga1.errorText, "Some error")
-            assert.equal(msga1.result, "my bbbbbiggggg notes")
+            assert.equal(msga1.result["_"], "my bbbbbiggggg notes")
 
             await db.removeMessage(msg1.id)
 

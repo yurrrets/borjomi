@@ -1,5 +1,5 @@
 var assert = require('assert');
-const login = require('../src/server/login')
+const login = require('../src/server/h_login')
 import { WSContext } from '../src/server/wsserver'
 import { APIError } from '../src/common/error';
 import { createContext } from 'vm';

@@ -2,7 +2,7 @@ import { requireParam, optionalParam } from './wsserver'
 import { APIError, ErrorCodes } from '../common/error'
 const db = require('./db')
 const message = require('../common/message')
-import { ensureLogin, hasChildAccount } from './login'
+import { ensureLogin, hasChildAccount } from './h_login'
 import { WSContext } from './wsserver'
 import { mergeDeep, customJSONStringify } from '../common/utils'
 

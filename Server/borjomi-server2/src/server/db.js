@@ -4,6 +4,7 @@ var pool = null
 const crypto = require('crypto')
 const message = require('../common/message')
 import { APIError, ErrorCodes } from '../common/error';
+import { customJSONStringify } from '../common/utils'
 
 
 async function init() {
@@ -263,6 +264,9 @@ async function getMessageIDsByStatus(status) {
 }
 
 async function registerMessageAnswer(msgId, errCode, errMessage, result) {
+    if (result && typeof(result) != "object") {
+        throw new APIError("Error: 'result' parameter should be an object if provided", ErrorCodes.InvalidParams)
+    }
     if (typeof(errCode) != "number") {
         errCode = ErrorCodes.GeneralError
     }
@@ -287,7 +291,7 @@ async function registerMessageAnswer(msgId, errCode, errMessage, result) {
         const [rst] = await connection.query(
             `INSERT INTO message_answer (message_id, error_code, error_text, notes)
              VALUES (?, ?, ?, ?)`,
-            [msgId, errCode, errMessage, result]
+            [msgId, errCode, errMessage, customJSONStringify(result)]
         )
         return rst.insertId
     }
