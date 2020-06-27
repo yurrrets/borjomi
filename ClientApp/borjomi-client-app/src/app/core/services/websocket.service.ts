@@ -80,7 +80,6 @@ export class WebSocketService{
         let zzz = this.connect().multiplex(() => 'subscribe-login', () => 'unsubscribe-login', message => message.token);
         this.connect().next(obj);       
         console.log(zzz);
-        //unsubscribe
         return zzz;
     }
 
@@ -88,7 +87,6 @@ export class WebSocketService{
         let zzz = this.connect().multiplex(() => 'subscribe-getChildAccounts', () => 'unsubscribe-getChildAccounts', message => message.childAccounts);
         this.connect().next({'function': "getChildAccounts"});       
         console.log(zzz);
-        //unsubscribe
         return zzz;
         
     }
