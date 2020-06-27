@@ -204,7 +204,7 @@ body {
     let currentLoginData = { }
 
     function makeConnect() {
-        initWebSocket(config.wsUri)
+        initWebSocket(config.wsUri.replace('{location.hostname}', window.location.hostname))
         websocket.on('open', async (evt) => {
             await handshake()
 
