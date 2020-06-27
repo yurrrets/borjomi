@@ -24,4 +24,6 @@ env.json
 /*.tgz
 .vscode
 
-package-lock.json
+# local configs
+/config.json
+/public/config.js
