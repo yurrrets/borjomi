@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:Borjomi-Main-cache
-EELAYER 29 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -15,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L MCU_Module:Arduino_Nano_v3.x A1
+L Borjomi-Main-rescue:Arduino_Nano_v3.x-MCU_Module A1
 U 1 1 5B6D71E4
 P 4550 2750
 F 0 "A1" H 4850 1750 50  0000 C CNN
@@ -81,7 +80,7 @@ Wire Wire Line
 Wire Wire Line
 	5800 2100 5800 1450
 Wire Wire Line
-	5800 1450 3850 1450
+	5800 1450 3900 1450
 $Comp
 L power:GND #PWR04
 U 1 1 5B6F6C10
@@ -135,20 +134,16 @@ Wire Wire Line
 Wire Wire Line
 	1750 4200 1950 4200
 Wire Wire Line
-	1950 4200 1950 4750
-Wire Wire Line
 	8200 2600 8200 4650
-Wire Wire Line
-	1900 4650 8200 4650
 $Comp
 L power:GND #PWR03
 U 1 1 5B7075AE
-P 3500 3900
-F 0 "#PWR03" H 3500 3650 50  0001 C CNN
-F 1 "GND" H 3505 3727 50  0000 C CNN
-F 2 "" H 3500 3900 50  0001 C CNN
-F 3 "" H 3500 3900 50  0001 C CNN
-	1    3500 3900
+P 3500 5650
+F 0 "#PWR03" H 3500 5400 50  0001 C CNN
+F 1 "GND" H 3505 5477 50  0000 C CNN
+F 2 "" H 3500 5650 50  0001 C CNN
+F 3 "" H 3500 5650 50  0001 C CNN
+	1    3500 5650
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -180,7 +175,6 @@ NoConn ~ 4050 2150
 NoConn ~ 4050 2350
 NoConn ~ 4050 2250
 NoConn ~ 4050 2750
-NoConn ~ 4050 2950
 NoConn ~ 5050 3450
 NoConn ~ 5050 3350
 NoConn ~ 5050 3250
@@ -246,11 +240,7 @@ Wire Wire Line
 Wire Wire Line
 	8200 2500 8300 2500
 Wire Wire Line
-	1950 4750 8300 4750
-Wire Wire Line
-	3850 2650 4050 2650
-Wire Wire Line
-	3850 1450 3850 2650
+	3900 1450 3900 2650
 $Comp
 L Diode:1N5408 D1
 U 1 1 5CAC420C
@@ -429,17 +419,11 @@ Wire Wire Line
 	4750 850  6050 850 
 Connection ~ 4750 1600
 Wire Wire Line
-	6050 1050 3950 1050
+	6050 1050 4000 1050
 Wire Wire Line
-	3950 1050 3950 2550
+	4000 1050 4000 2550
 Wire Wire Line
-	3950 2550 4050 2550
-Wire Wire Line
-	4050 3150 3750 3150
-Wire Wire Line
-	3750 3150 3750 1150
-Wire Wire Line
-	3750 1150 6050 1150
+	3700 3150 3700 1150
 NoConn ~ 6750 900 
 NoConn ~ 6750 1100
 $Comp
@@ -492,18 +476,16 @@ Wire Wire Line
 Wire Wire Line
 	1850 3150 1850 3400
 Wire Wire Line
-	3500 3450 3500 3900
+	3500 3450 3500 5250
 Connection ~ 3500 3450
 Wire Wire Line
 	1750 2950 2000 2950
 Wire Wire Line
 	2000 2950 2000 4150
 Wire Wire Line
-	2000 4150 5550 4150
+	2000 4150 5500 4150
 Wire Wire Line
-	5550 4150 5550 3150
-Wire Wire Line
-	5550 3150 5050 3150
+	5500 4150 5500 3150
 NoConn ~ 1750 2850
 $Comp
 L RelayModule:5V_1_Channel_Relay_Module U4
@@ -530,4 +512,82 @@ $EndComp
 Wire Wire Line
 	2000 1950 2000 2300
 NoConn ~ 1750 1850
+Wire Wire Line
+	1950 4200 1950 4750
+Wire Wire Line
+	1950 4750 8300 4750
+Wire Wire Line
+	1900 4650 8200 4650
+NoConn ~ 1750 5050
+NoConn ~ 1750 5350
+$Comp
+L RelayModule:5V_1_Channel_Relay_Module U6
+U 1 1 5F4B5258
+P 2950 5250
+F 0 "U6" H 2950 5600 50  0000 C CNN
+F 1 "Relay_LaptopSwitch" H 2950 5500 50  0000 C CNN
+F 2 "RelayModule:Relay_Module_1_Channel_Holes0.9" H 2950 5250 50  0001 C CNN
+F 3 "" H 2950 5250 50  0001 C CNN
+	1    2950 5250
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3400 3550 3400 5350
+Wire Wire Line
+	3400 5350 3300 5350
+Connection ~ 3400 3550
+Wire Wire Line
+	3300 5250 3500 5250
+Connection ~ 3500 5250
+Wire Wire Line
+	3500 5250 3500 5650
+Wire Wire Line
+	4050 3150 3700 3150
+Wire Wire Line
+	3700 1150 6050 1150
+Wire Wire Line
+	4000 2550 4050 2550
+Wire Wire Line
+	3900 2650 4050 2650
+Wire Wire Line
+	4050 2950 3800 2950
+Wire Wire Line
+	3800 2950 3800 1300
+Wire Wire Line
+	3800 1300 5650 1300
+Wire Wire Line
+	5650 1300 5650 5150
+Wire Wire Line
+	5500 3150 5050 3150
+NoConn ~ 2600 5350
+$Comp
+L Connector:RJ14 J6
+U 1 1 5F4A4CD0
+P 1350 5250
+F 0 "J6" H 1100 4900 50  0000 C CNN
+F 1 "LaptopSwitch" H 1550 4900 50  0000 C CNN
+F 2 "Connector:RJ14_YH-57-21_5722_6P4C" H 1350 5250 50  0001 C CNN
+F 3 "https://www.rcscomponents.kiev.ua/product/rozetka-yh-57-21-5722-6p4c_12940.html" H 1350 5250 50  0001 C CNN
+	1    1350 5250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1750 5150 2600 5150
+Wire Wire Line
+	1750 5250 2600 5250
+$Comp
+L Device:Jumper JP1
+U 1 1 5F4B8C4C
+P 4550 5150
+F 0 "JP1" H 4550 5414 50  0000 C CNN
+F 1 "Jumper" H 4550 5323 50  0000 C CNN
+F 2 "Connector:SimpleJumper_Pitch5.08mm_Drill0.7mm_2pad" H 4550 5150 50  0001 C CNN
+F 3 "~" H 4550 5150 50  0001 C CNN
+	1    4550 5150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3300 5150 4250 5150
+Wire Wire Line
+	4850 5150 5650 5150
 $EndSCHEMATC
