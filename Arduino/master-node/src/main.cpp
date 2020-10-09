@@ -24,9 +24,11 @@
 
 #define PC_START_PIN (8)   // digital pin
 
+auto &ioSerial = Serial;
 SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
-StreamExt btExtSerial(btSerial);
-BTCommandParser btCommandIO(btExtSerial);
+
+StreamExt ioExtSerial(ioSerial);
+BTCommandParser ioCommandParser(ioExtSerial);
 CanCommands canCommands(CAN_CS_PIN);
 MasterNodeID NodeConfig;
 PcStart pcStart(PC_START_PIN);
@@ -39,7 +41,8 @@ unsigned long lastCommandMillis;
 void setup()
 {
 #ifdef DEBUG
-    Serial.begin(9600);
+    auto &dbgSerial = btSerial;
+    dbgSerial.begin(9600);
 #endif
 
     pcStart.setup();
@@ -48,14 +51,14 @@ void setup()
     if (NodeConfig.checkCrc() && NodeConfig.nodeId)
     {
 #ifdef DEBUG
-        Serial.print("I'm the Master Node ID 0x");
-        Serial.print(NodeConfig.nodeId, HEX);
+        dbgSerial.print("I'm the Master Node ID 0x");
+        dbgSerial.print(NodeConfig.nodeId, HEX);
 #endif
     }
     else
     {
 #ifdef DEBUG
-        Serial.println("I'm the Master Node with UNDEFINED ID!");
+        dbgSerial.println("I'm the Master Node with UNDEFINED ID!");
 #endif
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
@@ -63,8 +66,8 @@ void setup()
     lastCommandAnswered = true;
 
     // set the data rate for the SoftwareSerial port
-    btSerial.begin(9600);
-//    btSerial.println("Hello, World!");
+    ioSerial.begin(9600);
+//    ioSerial.println("Hello, World!");
 
     canCommands.setup();
 
@@ -81,23 +84,23 @@ void loop()
 
     if (!lastCommandAnswered && (millis() - lastCommandMillis > CMD_ANSWER_TIMEOUT))
     {
-        btCommandIO.answerError(BTERR_TIMEOUT);
+        ioCommandParser.answerError(BTERR_TIMEOUT);
         lastCommandAnswered = true;
     }
 
-    if (lastCommandAnswered && btSerial.available()) {
-        BTCommand btCmd = btCommandIO.read();
+    if (lastCommandAnswered && ioSerial.available()) {
+        BTCommand btCmd = ioCommandParser.read();
         if (btCmd.errcode)
         {
             // send errCode as answer
-            btCommandIO.answerError(btCmd.errcode);
+            ioCommandParser.answerError(btCmd.errcode);
             lastCommandAnswered = true;
         }
         else
         {
             if (btCmd.address == MASTER_NODE)
             {
-                processLocalCommand(btCmd, btCommandIO);
+                processLocalCommand(btCmd, ioCommandParser);
                 return;
             }
 
@@ -129,12 +132,12 @@ void loop()
                 canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
                 if (btCmd.address == MULTICAST_NODE)
                 {
-                    processLocalCommand(btCmd, btCommandIO);
+                    processLocalCommand(btCmd, ioCommandParser);
                     lastCommandAnswered = true; // we don't know the exact number of answers
                 }
                 break;
             default:
-                btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
+                ioCommandParser.answerError(BTERR_CMD_NOT_IMPLEMENTED);
                 lastCommandAnswered = true;
             }
         }
@@ -161,7 +164,7 @@ void loop()
                     canCommands.getRequest().code == CMD_PING &&
                     canCommands.getAnswer().code == CMD_PONG)
             {
-                btCommandIO.answerPong(canCommands.getAnswer().value);
+                ioCommandParser.answerPong(canCommands.getAnswer().value);
             }
             else if (canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
                     canCommands.getAnswer().code == CMD_OK)
@@ -169,30 +172,30 @@ void loop()
                 // switch reaction depending on command
                 switch (canCommands.getRequest().code) {
                 case CMD_VERSION:
-                    btCommandIO.answerVersion(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    ioCommandParser.answerVersion(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
                     break;
                 case CMD_CAPABILITIES:
-                    btCommandIO.answerCapabilities(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                    ioCommandParser.answerCapabilities(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
                     break;
                 case CMD_SET_WATER_SWITCH:
-                    btCommandIO.answerOK();
+                    ioCommandParser.answerOK();
                     break;
                 case CMD_GET_WATER_SWITCH:
-                    btCommandIO.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                    ioCommandParser.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                     break;
                 case CMD_READ_SOIL_MOISTURE:
-                    btCommandIO.answerSoilMoisture(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                    ioCommandParser.answerSoilMoisture(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                     break;
                 case CMD_ANALOG_READ:
-                    btCommandIO.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                    ioCommandParser.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
                     break;
                 default:
-                    btCommandIO.answerError(BTERR_UNKNOWN_CMD);
+                    ioCommandParser.answerError(BTERR_UNKNOWN_CMD);
                     break;
                 }
             }
             else
-                btCommandIO.answerError(BTERR_INVALID_ANSWER);
+                ioCommandParser.answerError(BTERR_INVALID_ANSWER);
             lastCommandAnswered = true;
         }
         else if (canCommands.getRequest().code == CMD_PING &&
@@ -200,7 +203,7 @@ void loop()
                  canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
                  canCommands.getAnswer().code == CMD_PONG)
         {
-            btCommandIO.answerPong(canCommands.getAnswer().value);
+            ioCommandParser.answerPong(canCommands.getAnswer().value);
         }
         break;
     }
@@ -210,7 +213,7 @@ void loop()
     {
         if (!lastCommandAnswered)
         {
-            btCommandIO.answerError(BTERR_INVALID_ANSWER);
+            ioCommandParser.answerError(BTERR_INVALID_ANSWER);
             lastCommandAnswered = true;
         }
         break;
