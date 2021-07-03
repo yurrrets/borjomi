@@ -73,7 +73,10 @@ void MainWindow::on_pbClearLog_clicked()
 
 void MainWindow::fillNodeButtons()
 {
-    static const QStringList NodeButtonNames = { masterNode, "10", "20", "30", "40", "50", "60", "70", "80", "90" };
+    static const QStringList NodeButtonNames = {
+        "10", "20", "30", "40", "50", "60", "70", "80", "90", "100",
+        "110", "120", "130", "140", "150", "160", "170", "180"
+    };
     for (int current = 0; current < NodeButtonNames.count(); current++)
     {
         int row = current / 3;
