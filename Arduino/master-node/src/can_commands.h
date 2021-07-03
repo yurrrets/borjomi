@@ -4,7 +4,7 @@
 #include <mcp_can.h>
 #include "can_message.h"
 
-#define CAN0_INT 2
+#define CAN0_INT 5
 
 class CanCommands
 {

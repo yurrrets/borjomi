@@ -3,9 +3,18 @@
 #include "bt_commands.h"
 #include "nodes.h"
 #include "cmd_codes.h"
+#include "cap_implementation.h"
+#include "common.h"
 
 
-extern MasterNodeID NodeConfig;
+#define CHECK_DEV_NO(devNo) \
+    if (btCmd.devno != 0) { \
+        btCommandIO.answerError(BTERR_INVALID_DEV_ID); \
+        return; \
+    }
+
+#define CHECK_SENSOR_NO(type, no) CHECK_DEV_NO(no)
+#define CHECK_SWITCH_NO(type, no) CHECK_DEV_NO(no)
 
 
 void processLocalCommand(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -95,81 +104,55 @@ void cmdPing(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 
 void cmdReadPressureSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
-    {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
-        return;
-    }
-    int value = analogRead(PINS_PRESSURE_SENSOR[btCmd.devno]);
-    float val_bars = NodeConfig.pressureCoeffs.apply(value);
+    CHECK_SENSOR_NO(S_PRESSURE, btCmd.devno);
+    float val_bars = readSensorValue(S_PRESSURE);
     btCommandIO.answerPressure(NodeConfig.nodeId, btCmd.devno, val_bars);
 }
 
 void cmdReadCurrentSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
-    {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
-        return;
-    }
-    int value = analogRead(PINS_CURRENT_SENSOR[btCmd.devno]);
-    float val_A = NodeConfig.dcCurrentCoeffs.apply(value);
+    CHECK_SENSOR_NO(S_DC_CURRENT, btCmd.devno);
+    float val_A = readSensorValue(S_DC_CURRENT);
     btCommandIO.answerDCCurrent(NodeConfig.nodeId, btCmd.devno, val_A);
 }
 
 void cmdReadVoltageSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
-    {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
-        return;
-    }
-    int value = analogRead(PINS_VOLTAGE_SENSOR[btCmd.devno]);
-    float val_V = NodeConfig.dcVoltageCoeffs.apply(value);
+    CHECK_SENSOR_NO(S_DC_VOLTAGE, btCmd.devno);
+    float val_V = readSensorValue(S_DC_VOLTAGE);
     btCommandIO.answerDCVoltage(NodeConfig.nodeId, btCmd.devno, val_V);
 }
 
 void cmdSetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
+    CHECK_SWITCH_NO(CS_DC_ADAPTER, btCmd.devno);
+    if (btCmd.value == CVAL_ON && !IsDcVoltageCorrect())
     {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
+        btCommandIO.answerError(BTERR_INVALID_STATE);
         return;
     }
-    digitalWrite(PINS_DC_ADAPTER_SWITCH[btCmd.devno], btCmd.value == CVAL_ON ? HIGH : LOW);
+    setControlSwitchVal(CS_DC_ADAPTER, btCmd.value == CVAL_ON);
     btCommandIO.answerOK();
 }
 
 void cmdGetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
-    {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
-        return;
-    }
-    int value = digitalRead(PINS_DC_ADAPTER_SWITCH[btCmd.devno]);
+    CHECK_SWITCH_NO(CS_DC_ADAPTER, btCmd.devno);
+    bool value = getControlSwitchVal(CS_DC_ADAPTER);
     btCommandIO.answerDCAdapterState(NodeConfig.nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
 }
 
 void cmdSetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
-    {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
-        return;
-    }
-    digitalWrite(PINS_PUMP_SWITCH[btCmd.devno], btCmd.value == CVAL_ON ? HIGH : LOW);
+    CHECK_SWITCH_NO(CS_PUMP, btCmd.devno);
+    setControlSwitchVal(CS_PUMP, btCmd.value == CVAL_ON);
     btCommandIO.answerOK();
 }
 
 void cmdGetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
-    if (btCmd.devno != 0)
-    {
-        btCommandIO.answerError(BTERR_INVALID_ANSWER);
-        return;
-    }
-    int value = digitalRead(PINS_PUMP_SWITCH[btCmd.devno]);
+    CHECK_SWITCH_NO(CS_PUMP, btCmd.devno);
+    bool value = getControlSwitchVal(CS_PUMP);
     btCommandIO.answerPumpState(NodeConfig.nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
 }
 

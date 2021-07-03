@@ -29,6 +29,9 @@ MCP_CAN CAN0(9);                               // Set CS to pin 10
 CanMessage msg;
 SlaveNodeID NodeConfig;
 
+#ifdef DEBUG
+Stream &dbgSerial = Serial;
+#endif
 
 void setup()
 {
@@ -47,18 +50,17 @@ void setup()
         NodeConfig.waterSwitchCount = min(NodeConfig.waterSwitchCount, 1);
         NodeConfig.soilMoistureCount = min(NodeConfig.soilMoistureCount, 1);
 #ifdef DEBUG
-        Serial.print("I'm the Slave Node ID 0x");
-        Serial.print(NodeConfig.nodeId, HEX);
-        Serial.print(", water switches = ");
-        Serial.print(NodeConfig.waterSwitchCount);
-        Serial.print(", soil moistures = ");
-        Serial.println(NodeConfig.soilMoistureCount);
+        dbgSerial
+                << "I'm the Slave Node ID 0x" << hex(NodeConfig.nodeId)
+                << ", water switches = " << NodeConfig.waterSwitchCount
+                << ", soil moistures = " << NodeConfig.soilMoistureCount
+                << endl;
 #endif
     }
     else
     {
 #ifdef DEBUG
-        Serial.println("I'm the Slave Node with UNDEFINED ID!");
+        dbgSerial.println("I'm the Slave Node with UNDEFINED ID!");
 #endif
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
@@ -67,13 +69,13 @@ void setup()
     if(CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
     {
 #ifdef DEBUG
-        Serial.println("MCP2515 Initialized Successfully!");
+        dbgSerial.println("MCP2515 Initialized Successfully!");
 #endif
     }
     else
     {
 #ifdef DEBUG
-        Serial.println("Error Initializing MCP2515...");
+        dbgSerial.println("Error Initializing MCP2515...");
 #endif
     }
 
@@ -91,54 +93,54 @@ void loop()
         CAN0.readMsgBuf(&rxId, &len, (byte *)&msg);      // Read data: len = data length
         if (len != sizeof(CanMessage))
         {
-            Serial.println("Invalid CAN msg");
+            dbgSerial.println("Invalid CAN msg");
             return;
         }
 
         if((rxId & 0x80000000) == 0x80000000)     // Determine if ID is standard (11 bits) or extended (29 bits)
         {
 #ifdef DEBUG
-//            Serial.print("Extended ID: 0x");
+//            dbgSerial.print("Extended ID: 0x");
 #endif
             rxId = (rxId & 0x1FFFFFFF);
         }
         else
         {
 #ifdef DEBUG
-//            Serial.print("Standard ID: 0x");
+//            dbgSerial.print("Standard ID: 0x");
 #endif
         }
 #ifdef DEBUG
-        Serial.print(rxId, 16);
+        dbgSerial.print(rxId, 16);
 
-//        Serial.print(" DLC: ");
-        Serial.print(len);
+//        dbgSerial.print(" DLC: ");
+        dbgSerial.print(len);
 #endif
 
         if((rxId & 0x40000000) == 0x40000000)    // Determine if message is a remote request frame.
         {
 #ifdef DEBUG
-//            Serial.println(" REMOTE REQUEST FRAME");
+//            dbgSerial.println(" REMOTE REQUEST FRAME");
 #endif
         }
         else
         {
 #ifdef DEBUG
             bool crcOK = msg.checkCrc();
-            Serial.print(" Crc: ");
-            Serial.print(crcOK ? "ok" : "failed");
-            Serial.print(" MsgNo: ");
-            Serial.print(msg.msgno);
-            Serial.print(" MsgCode: ");
-            Serial.print(msg.code);
-            Serial.println();
+            dbgSerial.print(" Crc: ");
+            dbgSerial.print(crcOK ? "ok" : "failed");
+            dbgSerial.print(" MsgNo: ");
+            dbgSerial.print(msg.msgno);
+            dbgSerial.print(" MsgCode: ");
+            dbgSerial.print(msg.code);
+            dbgSerial.println();
 #endif
 
             if ((rxId != NodeConfig.nodeId && msg.code != CMD_PING) ||
                     (msg.code == CMD_PING && rxId != MULTICAST_NODE && rxId != NodeConfig.nodeId))
             {
 #ifdef DEBUG
-//                Serial.println(" Alien module id, ignoring cmd");
+//                dbgSerial.println(" Alien module id, ignoring cmd");
 #endif
                 return;
             }
@@ -190,20 +192,20 @@ void loop()
             if(sndStat == CAN_OK)
             {
         #ifdef DEBUG
-//                Serial.println("Message Sent Successfully!");
+//                dbgSerial.println("Message Sent Successfully!");
         #endif
             }
             else
             {
         #ifdef DEBUG
-                Serial.print("Error Sending Answer: ");
-                Serial.println((int)sndStat);
+                dbgSerial.print("Error Sending Answer: ");
+                dbgSerial.println((int)sndStat);
         #endif
             }
         }
 
 #ifdef DEBUG
-//        Serial.println();
+//        dbgSerial.println();
 #endif
     }
 }

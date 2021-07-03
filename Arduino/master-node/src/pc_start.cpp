@@ -35,7 +35,7 @@ void PcStart::loop()
 
     if (millis() > CLOSE_SWITCH_TIME_MS && state == S_PREPARE)
     {
-        setSwitch(true); // switch open state
+        setSwitch(true); // switch closed state
         state = S_INPROCESS;
         return;
     }

@@ -14,6 +14,8 @@
 #include "nodes.h"
 #include "cmd_handler.h"
 #include "pc_start.h"
+#include "common.h"
+#include "cap_implementation.h"
 
 #include <EEPROM.h>
 
@@ -22,16 +24,25 @@
 #define CAN_CS_PIN  (9)
 #define CMD_ANSWER_TIMEOUT (1000)
 
+#ifdef PC_START
 #define PC_START_PIN (8)   // digital pin
+#endif
 
+#ifdef DEBUG
+Stream &dbgSerial = Serial;
+#endif
+
+//SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
+//auto &ioSerial = btSerial;
 auto &ioSerial = Serial;
-SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
 
 StreamExt ioExtSerial(ioSerial);
 BTCommandParser ioCommandParser(ioExtSerial);
 CanCommands canCommands(CAN_CS_PIN);
 MasterNodeID NodeConfig;
+#ifdef PC_START
 PcStart pcStart(PC_START_PIN);
+#endif
 
 bool lastCommandAnswered;
 unsigned long lastCommandMillis;
@@ -41,18 +52,27 @@ unsigned long lastCommandMillis;
 void setup()
 {
 #ifdef DEBUG
-    auto &dbgSerial = btSerial;
-    dbgSerial.begin(9600);
+    Serial.begin(9600);
 #endif
 
+    // set the data rate for the SoftwareSerial port
+    ioSerial.begin(9600);
+
+    // wait for serial port to connect. Needed for native USB
+    while (!Serial) {
+        ;
+    }
+//    ioSerial.println("Hello, World!");
+
+#ifdef PC_START
     pcStart.setup();
+#endif
 
     EEPROM.get(0, NodeConfig);
     if (NodeConfig.checkCrc() && NodeConfig.nodeId)
     {
 #ifdef DEBUG
-        dbgSerial.print("I'm the Master Node ID 0x");
-        dbgSerial.print(NodeConfig.nodeId, HEX);
+        dbgSerial << "I'm the Master Node ID " << NodeConfig.nodeId << endl;
 #endif
     }
     else
@@ -65,22 +85,26 @@ void setup()
 
     lastCommandAnswered = true;
 
-    // set the data rate for the SoftwareSerial port
-    ioSerial.begin(9600);
-//    ioSerial.println("Hello, World!");
-
     canCommands.setup();
 
     pinMode(PINS_DC_ADAPTER_SWITCH[0], OUTPUT);
     digitalWrite(PINS_DC_ADAPTER_SWITCH[0], LOW);
     pinMode(PINS_PUMP_SWITCH[0], OUTPUT);
     digitalWrite(PINS_PUMP_SWITCH[0], LOW);
+
+    analogReference(EXTERNAL);
 }
 
 
 void loop()
 {
+#ifdef PC_START
     pcStart.loop();
+#endif
+
+    // check if voltage is correct
+    if (getControlSwitchVal(CS_DC_ADAPTER) && !IsDcVoltageCorrect())
+        setControlSwitchVal(CS_DC_ADAPTER, false); // turn it off
 
     if (!lastCommandAnswered && (millis() - lastCommandMillis > CMD_ANSWER_TIMEOUT))
     {

@@ -28,6 +28,12 @@
 /// slave node return unexpected msg no or error happen during executing the command
 #define BTERR_UNEXPECTED_ANSWER     (6)
 
+/// invalid device num index
+#define BTERR_INVALID_DEV_ID        (7)
+
+/// command execution is not allowed in current conditions (sensor values, switch states, etc.)
+#define BTERR_INVALID_STATE         (8)
+
 struct BTCommand
 {
     BTCommand() : errcode(0), cmd(0), devno(0), address(0), value(0) { }

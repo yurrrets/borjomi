@@ -1,6 +1,6 @@
 # Arduino Make file. Refer to https://github.com/sudar/Arduino-Makefile
 
-BOARD_TAG    = nano     # nano or nano328
+BOARD_TAG    = mini328     # nano or nano328 (old bootloader) or mini328 (new bootloader)
 
 LOCAL_CPP_SRCS  ?= $(wildcard src/*.cpp)
 
@@ -10,7 +10,7 @@ ARDUINO_LIBS = ArduinoSTL MCP_CAN SPI CRC EEPROM common-node
 
 include /usr/share/arduino/Arduino.mk
 
-DEVICE_PATH=/dev/ttyUSB*
+DEVICE_PATH=/dev/ttyUSB1
 
 CPPFLAGS += -std=c++11
 

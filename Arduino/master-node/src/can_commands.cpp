@@ -14,13 +14,13 @@ void CanCommands::setup()
     if(CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
     {
 #ifdef DEBUG
-        Serial.println("MCP2515 Initialized Successfully!");
+        dbgSerial.println("MCP2515 Initialized Successfully!");
 #endif
     }
     else
     {
 #ifdef DEBUG
-        Serial.println("Error Initializing MCP2515...");
+        dbgSerial.println("Error Initializing MCP2515...");
 #endif
     }
 
@@ -28,13 +28,13 @@ void CanCommands::setup()
     if (CAN0.setMode(MCP_NORMAL) == MCP2515_OK)
     {
 #ifdef DEBUG
-        Serial.println("setMode Successful");
+        dbgSerial.println("setMode Successful");
 #endif
     }
     else
     {
 #ifdef DEBUG
-        Serial.println("setMode failed");
+        dbgSerial.println("setMode failed");
 #endif
     }
 
@@ -54,30 +54,32 @@ CanCommands::ReadStatus CanCommands::read()
     if (rxId != MASTER_NODE)
     {
 #ifdef DEBUG
-        Serial.print(" Message for non-master node caught. Target node ID: ");
-        Serial.print(rxId);
-        Serial.println();
+        dbgSerial.print(" Message for non-master node caught. Target node ID: ");
+        dbgSerial.print(rxId);
+        dbgSerial.println();
 #endif
         return S_OTHER_NODE;
     }
 
     if (len != sizeof(CanMessage))
     {
-        Serial.println("Invalid CAN msg");
+#ifdef DEBUG
+        dbgSerial.println("Invalid CAN msg");
+#endif
         return S_INVALID_MSG;
     }
 
     bool crcOK = answer.checkCrc();
 #ifdef DEBUG
-    Serial.print(" Answer Crc: ");
-    Serial.print(crcOK ? "ok" : "failed");
-    Serial.print(" AnswerNo: ");
-    Serial.print(answer.msgno);
-    Serial.print(" AnswerCode: ");
-    Serial.print(answer.code);
-    Serial.print(" AnswerValue: ");
-    Serial.print(answer.value);
-    Serial.println();
+    dbgSerial.print(" Answer Crc: ");
+    dbgSerial.print(crcOK ? "ok" : "failed");
+    dbgSerial.print(" AnswerNo: ");
+    dbgSerial.print(answer.msgno);
+    dbgSerial.print(" AnswerCode: ");
+    dbgSerial.print(answer.code);
+    dbgSerial.print(" AnswerValue: ");
+    dbgSerial.print(answer.value);
+    dbgSerial.println();
 #endif
     return crcOK ? S_OK : S_INVALID_CRC;
 }
@@ -92,18 +94,26 @@ uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t 
     request.updateCrc();
 
     // send data:  ID = 0x100, Standard CAN Frame, Data length = 8 bytes, 'data' = array of data bytes to send
+#ifdef DEBUG
+    dbgSerial
+            << "Sending msg: no=" << request.msgno
+            << " code=" << request.code
+            << " devno=" << request.devno
+            << " value=" << request.value
+            << endl;
+#endif
     byte sndStat = CAN0.sendMsgBuf(addrId, 0, 8, (byte *)&request);
     if(sndStat == CAN_OK)
     {
 #ifdef DEBUG
-        Serial.println("Message Sent Successfully!");
+        dbgSerial.println("Message Sent Successfully!");
 #endif
     }
     else
     {
 #ifdef DEBUG
-        Serial.print("Error Sending Message: ");
-        Serial.println((int)sndStat);
+        dbgSerial.print("Error Sending Message: ");
+        dbgSerial.println((int)sndStat);
 #endif
     }
     return sndStat;
