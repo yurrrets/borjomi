@@ -117,7 +117,7 @@ function formatArduinoError(rawErrorStr) {
 
 
 function initPort() {
-    serialport = new SerialPort(config.arduino.port, { autoOpen: false })
+    serialport = new SerialPort(config.arduino.port, config.arduino.openOptions)
     serialport.on('error', console.log)
     serialport.pipe(parser)
     return reopenPort()

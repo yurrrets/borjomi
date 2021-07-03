@@ -22,7 +22,19 @@ let config = {
     },
     arduino: {
         enabled    : false,
-        port       : "/dev/rfcomm0"
+        port       : "/dev/ttyUSB0",
+        openOptions: {
+            autoOpen : false,
+            baudRate : 9600,
+            xon      : false,
+            xoff     : false,
+            xany     : false,
+            parity   : 'none',
+            dataBits : 8,
+            stopBits : 1,
+            rtscts   : true,
+            dtr      : false
+        }
     }
 }
 
