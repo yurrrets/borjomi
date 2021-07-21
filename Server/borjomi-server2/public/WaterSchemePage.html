@@ -102,6 +102,16 @@ body {
     fill-opacity: 0;
 }
 
+#splitter_box {
+    stroke-width: 3;
+    stroke: #111111;
+    fill-opacity: 0;
+}
+
+.nodeLabel {
+    font: italic 13px sans-serif;
+}
+
 </style>
 
 <script type="text/javascript" src="config.js"></script>
@@ -111,6 +121,7 @@ body {
 
 <script type="text/javascript">
     window.addEventListener('load',loadLogs,false)
+    window.addEventListener('load',addNodeLabels,false)
     var debugTextArea = null;
     function _silence(...messages) { }
     function _print_dbgTextArea(...messages) {
@@ -125,6 +136,31 @@ body {
     }
     function clearLog() {
         debugTextArea.value = ""
+    }
+    function addNodeLabels() {
+        nodeGroup = document.getElementById("layer_nodes");
+        lblGroup = document.getElementById("layer_node_label");
+        
+        for (node of nodeGroup.children) {
+            lbl = document.createElementNS("http://www.w3.org/2000/svg", "text")
+            lblGroup.appendChild(lbl)
+            lbl.innerHTML = node.getAttribute("borjomi:address")
+            lbl.setAttribute("class", "nodeLabel")
+            const x = parseInt(node.getAttribute("cx"))
+            const y = parseInt(node.getAttribute("cy")) + 4
+            const r = parseInt(node.getAttribute("r"))
+            let dx = 0, dy = 0
+            const elrect = lbl.getBoundingClientRect()
+            switch (node.getAttribute("ui:labelpos"))
+            {
+                case "left": dx = -5 - r - elrect.width; break;
+                case "right": dx = 5 + r; break;
+                case "top": dx = -elrect.width/2; dy = -10 - r; break;
+                case "bottom": dx = -elrect.width/2; dy = 10 + r; break;
+            }
+            lbl.setAttribute("x", x+dx)
+            lbl.setAttribute("y", y+dy)
+        }
     }
 
     // function sendMessage() {
@@ -287,12 +323,40 @@ body {
             <g id="pump">
                 <rect id="pump_station" x="80" y="220" width="30" height="40" />
             </g>
+            <g id="splitter">
+                <rect id="splitter_box" x="220" y="70" width="16" height="16" />
+            </g>
+            <g>
+                <line x1="95" y1="240" x2="20" y2="240" stroke="black" />
+                <line x1="20" y1="240" x2="20" y2="78" stroke="black" />
+                <line x1="20" y1="78" x2="220" y2="78" stroke="black" />
+                <line x1="228" y1="86" x2="228" y2="220" stroke="black" />
+
+                <line x1="45" y1="195" x2="20" y2="195" stroke="black" />
+                <line x1="45" y1="150" x2="20" y2="150" stroke="black" />
+                <line x1="45" y1="105" x2="20" y2="105" stroke="black" />
+
+                <line x1="100" y1="78" x2="100" y2="55" stroke="black" />
+                <line x1="150" y1="78" x2="150" y2="55" stroke="black" />
+
+                <line x1="228" y1="105" x2="270" y2="105" stroke="black" />
+                <line x1="228" y1="130" x2="190" y2="130" stroke="black" />
+                <line x1="228" y1="175" x2="190" y2="175" stroke="black" />
+                <line x1="228" y1="220" x2="270" y2="220" stroke="black" />
+            </g>
             <g id="layer_nodes">
-                <circle id="node_8" class="arduino_node" cx="200" cy="200" r="12" borjomi:address="8" />
-                <circle id="node_90" class="arduino_node" cx="45" cy="195" r="8" borjomi:address="90" />
-                <circle id="node_20" class="arduino_node" cx="45" cy="150" r="8" borjomi:address="20" />
-                <circle id="node_100" class="arduino_node" cx="45" cy="105" r="8" borjomi:address="100" />
-                <circle id="node_120" class="arduino_node" cx="45" cy="55" r="8" borjomi:address="120" />
+                <circle id="node_8" class="arduino_node" cx="95" cy="240" r="12" borjomi:address="8" ui:labelpos="right" />
+                <circle id="node_50" class="arduino_node" cx="45" cy="195" r="8" borjomi:address="50" ui:labelpos="right" />
+                <circle id="node_40" class="arduino_node" cx="45" cy="150" r="8" borjomi:address="40" ui:labelpos="right" />
+                <circle id="node_30" class="arduino_node" cx="45" cy="105" r="8" borjomi:address="30" ui:labelpos="right" />
+                <circle id="node_60" class="arduino_node" cx="100" cy="55" r="8" borjomi:address="60" ui:labelpos="top" />
+                <circle id="node_70" class="arduino_node" cx="150" cy="55" r="8" borjomi:address="70" ui:labelpos="top" />
+                <circle id="node_80" class="arduino_node" cx="270" cy="105" r="8" borjomi:address="80" ui:labelpos="right" />
+                <circle id="node_90" class="arduino_node" cx="190" cy="130" r="8" borjomi:address="90" ui:labelpos="left" />
+                <circle id="node_10" class="arduino_node" cx="190" cy="175" r="8" borjomi:address="10" ui:labelpos="left" />
+                <circle id="node_20" class="arduino_node" cx="270" cy="220" r="8" borjomi:address="20" ui:labelpos="right" />
+            </g>
+            <g id="layer_node_label">
             </g>
             </svg>
         </div>
