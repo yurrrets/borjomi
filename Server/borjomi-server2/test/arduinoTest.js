@@ -1,10 +1,9 @@
 var assert = require('assert');
-const login = require('../src/server/h_arduino')
 import { APIError } from '../src/common/error';
 import { WSContext } from '../src/server/wsserver'
 import { Broker } from '../src/server/broker';
 const util = require('util')
-const arduino = require('../src/server/h_arduino')
+const arduino = require('../src/server/arduino')
 
 
 function createWsContext() {
@@ -37,18 +36,18 @@ describe('arduino', function() {
         context = createWsContext()
         it('ping', async function() {
             // check for wrong node
-            await assert.rejects(async function() { await arduino.ping({ address: 1 }, context) }, APIError)
+            await assert.rejects(async function() { await arduino.ping(1) }, APIError)
             // ping node 8
-            let ans = await arduino.ping({ address: 8 }, context)
+            let ans = await arduino.ping(8)
             // console.log("Arduino ping node 8: " + util.inspect(ans))
-            assert.ok(ans.pong.includes(8))
+            assert.ok(ans == 8)
             // ping all nodes
-            ans = await arduino.ping({}, context)
+            ans = await arduino.pingAll()
             // console.log("Arduino ping node *: " + util.inspect(ans))
-            assert.ok(ans.pong.includes(8))
+            assert.ok(ans.includes(8))
         });
         it('version', async function() {
-            let ver = await arduino.version({ address: 8 })
+            let ver = await arduino.version(8)
             console.log(`Arduino node 8 version: ${ver.major}.${ver.minor}.${ver.rev}`)
             assert.ok(Number.isInteger(ver.major) && Number.isInteger(ver.minor) && Number.isInteger(ver.rev))
         });
