@@ -12,8 +12,10 @@ if (config.client.enabled) {
     client = require('./client')
 }
 
+let arduino = null
 let h_arduino = null
 if (config.arduino.enabled) {
+    arduino = require('./arduino')
     h_arduino = require('./h_arduino')
 }
 
@@ -47,8 +49,8 @@ class WSService {
         if (client) {
             client.init(this.wss)
         }
-        if (h_arduino) {
-            await h_arduino.initPort()
+        if (arduino) {
+            await arduino.initPort()
         }
     }
 }

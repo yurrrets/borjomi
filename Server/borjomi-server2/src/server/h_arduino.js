@@ -12,10 +12,10 @@ async function ping(inObj, context) {
     const address = optionalParam(inObj, "address", "integer")
     let ret = undefined
     if (address) {
-        ret = [ ar.ping(address) ]
+        ret = [ await ar.ping(address) ]
     }
     else {
-        ret = ar.pingAll()
+        ret = await ar.pingAll()
     }
     return { pong : ret }
 }
@@ -27,7 +27,7 @@ async function ping(inObj, context) {
  */
 async function version(inObj, context) {
     const address = requireParam(inObj, "address", "integer")
-    return ar.version(address)
+    return await ar.version(address)
 }
 
 /**
@@ -38,7 +38,7 @@ async function version(inObj, context) {
 async function capabilities(inObj, context) {
     const address = requireParam(inObj, "address", "integer")
     return { 
-        caps: ar.capabilities(address)
+        caps: await ar.capabilities(address)
     }
 }
 
