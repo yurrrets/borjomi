@@ -14,9 +14,11 @@ if (config.client.enabled) {
 
 let arduino = null
 let h_arduino = null
+let h_script_prog = null
 if (config.arduino.enabled) {
     arduino = require('./arduino')
     h_arduino = require('./h_arduino')
+    h_script_prog = require('./h_script_prog')
 }
 
 var wsService;
@@ -38,6 +40,7 @@ class WSService {
         this.wss.addFunction('setMessageAnswer', h_message.setMessageAnswer)
         if (h_arduino) {
             h_arduino.init(this.wss)
+            h_script_prog.init(this.wss)
         }
     }
 

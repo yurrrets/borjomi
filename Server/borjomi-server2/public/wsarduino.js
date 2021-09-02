@@ -97,3 +97,22 @@ async function arduino_pump(address, num, state) {
     }
     return ret
 }
+
+
+async function scriptprog_status() {
+    return await execRemoteFunction({
+        'function': "script.status"
+    })
+}
+
+async function scriptprog_run() {
+    return await execRemoteFunction({
+        'function': "script.run"
+    })
+}
+
+async function scriptprog_stop() {
+    return await execRemoteFunction({
+        'function': "script.stop"
+    })
+}

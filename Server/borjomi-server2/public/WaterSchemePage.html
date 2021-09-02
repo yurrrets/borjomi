@@ -305,6 +305,43 @@ body {
             }
         })
     }
+
+
+    function scriptProgStatus() {
+        setTimeout( async () => {
+            try {
+                let asw = await scriptprog_status()
+                debug("scriptprog_status answer:", JSON.stringify(asw))
+            }
+            catch (e) {
+                error("scriptProgStatus() error:", e);
+            }
+        })
+    }
+
+    function scriptProgRun() {
+        setTimeout( async () => {
+            try {
+                let asw = await scriptprog_run()
+                debug("scriptprog_run answer:", JSON.stringify(asw))
+            }
+            catch (e) {
+                error("scriptProgRun() error:", e);
+            }
+        })
+    }
+
+    function scriptProgStop() {
+        setTimeout( async () => {
+            try {
+                let asw = await scriptprog_stop()
+                debug("scriptprog_stop answer:", JSON.stringify(asw))
+            }
+            catch (e) {
+                error("scriptProgStop() error:", e);
+            }
+        })
+    }
     
 </script>
 
@@ -367,6 +404,11 @@ body {
                     <h3 style="float: left" id="node_label">Select node</h3>
                     <span style="float: right">[ <a href="#" onClick="updateNodeStatus();">Update status</a> ]</span>
                     <span style="float: right">[ <a href="#" onClick="pingAllNodes();">Ping all</a> ]</span>
+                    
+                    <span style="float: right"> Script</span>
+                    <span style="float: right">[ <a href="#" onClick="scriptProgStatus();">Status</a> ]</span>
+                    <span style="float: right">[ <a href="#" onClick="scriptProgRun();">Run</a> ]</span>
+                    <span style="float: right">[ <a href="#" onClick="scriptProgStop();">Stop</a> ]</span>
                     <span style="float: none">&nbsp;</span>
                 </p>
                 <div>&nbsp;</div>
