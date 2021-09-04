@@ -7,6 +7,7 @@
   "dependencies": {
     "esm": "^3.2.25",
     "http-server": "^0.12.3",
+    "log4js": "^6.3.0",
     "mysql2": "^2.1.0",
     "serialport": "^8.0.8",
     "ws": "^7.3.0"

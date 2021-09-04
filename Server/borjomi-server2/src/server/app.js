@@ -1,3 +1,6 @@
+const log4js = require("log4js");
+const logger = log4js.getLogger()
+
 const WebSocket = require('ws')
 const config = require('./config')
 const db = require('./db')
@@ -45,24 +48,38 @@ class WSService {
     }
 
     async startWSService() {
-        console.log('starting service');
+        logger.info('starting service');
         this.wss.init({ 'port': 3001 })
         login.loginServer(this.wss.serverContext)
         m_server.init(this.wss)
+
         if (client) {
+            logger.info('initing client')
             client.init(this.wss)
         }
         if (arduino) {
+            logger.info('initing arduino')
             await arduino.initPort()
         }
     }
 }
 
 async function startWithDB(){
-    await db.init()
-    // wsService.startWSService();
-    wsService = new WSService()
-    await wsService.startWSService();
+    log4js.configure(config.logger)
+
+    try {
+        logger.info('initing database')
+        await db.init()
+    } catch (e) {
+        logger.error('init database failed', e)
+    }
+    
+    try {
+        wsService = new WSService()
+        await wsService.startWSService();
+    } catch (e) {
+        logger.error('startWSService failed', e)
+    }
 }
 
 function stopWithDB(){

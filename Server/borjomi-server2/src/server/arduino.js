@@ -1,3 +1,6 @@
+const log4js = require("log4js");
+const logger = log4js.getLogger('arduino')
+
 const config = require('./config')
 const { ErrorCodes, APIError } = require("../common/error")
 
@@ -33,7 +36,9 @@ function callArduino(cmd, timeoutMs = 5000) {
     channelBusy = resolver
 
     return new Promise(function(resolve, reject) {
-        prevChannelPromise.then(reopenPort).then( () => {
+        prevChannelPromise
+        .then(reopenPort)
+        .then( () => {
             let tmrId = setTimeout(function() {
                 parser.off('data', on_parser_data)
                 reject(new Error('Timeout occurred'))
@@ -41,7 +46,7 @@ function callArduino(cmd, timeoutMs = 5000) {
                 resolver.resolve()
             }, timeoutMs)
             function on_parser_data(data) {
-                // console.log("Readed: " + data)
+                logger.trace("readed:", data.trim())
                 parser.off('data', on_parser_data)
                 clearTimeout(tmrId)
                 resolve(data)
@@ -51,9 +56,10 @@ function callArduino(cmd, timeoutMs = 5000) {
             if (!cmd.endsWith(SerialPortDelimiter)) {
                 cmd = cmd + SerialPortDelimiter
             }
-            // console.log("Writing: " + cmd)
+            logger.trace("callArduino writing:", cmd.trim())
             serialport.write(cmd)
-        }, (error) => { reject(error) })
+        })
+        .catch(reject)
     });
 }
 
@@ -79,22 +85,28 @@ function callArduinoTimeout(cmd, timeoutMs) {
     channelBusy = resolver
 
     return new Promise(function(resolve, reject) {
-        prevChannelPromise.then(reopenPort).then( () => {
+        prevChannelPromise
+        .then(reopenPort)
+        .then( () => {
             var ret = []
             function on_parser_data(data) {
+                logger.trace("readed:", data.trim())
                 ret.push(data)
             }
             parser.on('data', on_parser_data)
             if (!cmd.endsWith(SerialPortDelimiter)) {
                 cmd = cmd + SerialPortDelimiter
             }
+            logger.trace("callArduinoTimeout writing:", cmd.trim())
             serialport.write(cmd)
             setTimeout(function() {
+                logger.trace("callArduinoTimeout finished")
                 parser.off('data', on_parser_data)
                 resolve(ret)
                 resolver.resolve()
             }, timeoutMs)
         })
+        .catch(reject)
     });
 }
 
@@ -125,7 +137,9 @@ function reopenPort() {
     return new Promise(function(resolve, reject) {
         if (serialport.isOpen) resolve()
         serialport.open( (error) => {
-            if (error) reject(error)
+            if (error) {
+                reject(error)
+            }
             else {
                 const on_parser_data = (data) => { } // ignore any data
                 parser.on('data', on_parser_data)
@@ -211,13 +225,12 @@ async function getsetCmd(cmd, address, num, state) {
         return parseInt(parts[3])
     }
     else {
-        const setstate = state
+        const setstate = state ? 1 : 0
         const ans = await callArduino(`AT+${cmd}=${address},${num},${setstate}`)
         if (ans != "OK") {
             console.log(`Real ans: _${ans}_`)
             throw new APIError(formatArduinoError(ans), ErrorCodes.FunctionCallFailed)
         }
-        return
     }
 }
 

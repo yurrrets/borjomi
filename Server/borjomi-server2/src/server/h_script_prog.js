@@ -1,3 +1,6 @@
+const log4js = require('log4js')
+const logger = log4js.getLogger()
+
 import { optionalParam, requireParam } from './wsserver'
 const { WSServer, WSContext } = require('./wsserver')
 const message = require('../common/message')
@@ -18,14 +21,20 @@ async function _runScriptProgram()
 {
     let ret = false
     try {
+        logger.info("starting scriptProg1")
         await scriptProg1.start()
         ret = true
     }
+    catch(e) {
+        logger.error("scriptProg1 failed", e)
+    }
     finally {
+        logger.info("finishing scriptProg1")
         try {
             await scriptProg1.finish()
         }
         catch (e) {
+            logger.error("scriptProg1.finish failed", e)
             ret = false
         }
         finally {
@@ -39,6 +48,7 @@ async function _runScriptProgram()
 function _startScriptProgram() {
     currentStatus = ScriptProgStatus.RUNNING
     currentScriptProg = _runScriptProgram
+    _runScriptProgram()
 }
 
 async function _stopScriptProgram() {

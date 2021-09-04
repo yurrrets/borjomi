@@ -2,6 +2,14 @@ import { mergeDeep } from '../common/utils'
 
 
 let config = {
+    logger: {
+        appenders: {
+            console: { type: 'console' }
+        },
+        categories: {
+            default: { appenders: ['console'], level: 'trace' }
+        }
+    },
     db: {
         host     : "localhost",
         user     : 'borjomi',

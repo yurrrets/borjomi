@@ -1,5 +1,8 @@
 'use strict';
 
+const log4js = require('log4js')
+const logger = log4js.getLogger()
+
 const { ErrorCodes, APIError } = require("../common/error")
 const WebSocket = require('ws')
 import { AppWebSocket, API_VERSION } from "../common/appws"
@@ -141,7 +144,7 @@ class WSServer {
     init(options) {
         this.wss = new WebSocket.Server(options)
         this.wss.on("connection", (ws,req) => {
-            console.log("client connected");
+            logger.info("client connected");
             var appWs = new AppWebSocket(ws, true)
             this._contextMap.set(appWs, new WSContext(appWs, this))
             // const ip = req.headers['x-forwarded-for'].split(/\s*,\s*/)[0];
@@ -160,7 +163,7 @@ class WSServer {
     }
 
     close() {
-        console.log("closing server");
+        logger.info("closing server");
         if (this.wss)
             this.wss.close()
         this.wss = undefined

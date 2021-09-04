@@ -74,6 +74,16 @@ async function getCmd(inObj, context, ar_func) {
     return { value: await ar_func(address, num) }
 }
 
+async function getIntVal(inObj, context, ar_func) {
+    const ret = await getCmd(inObj, context, ar_func)
+    return { value: parseInt(ret.value) }
+}
+
+async function getFloatVal(inObj, context, ar_func) {
+    const ret = await getCmd(inObj, context, ar_func)
+    return { value: parseFloat(ret.value) }
+}
+
 /**
  * 
  * @param {object} inObj 
