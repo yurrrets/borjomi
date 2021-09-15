@@ -10,7 +10,7 @@ ARDUINO_LIBS = ArduinoSTL MCP_CAN SPI CRC EEPROM common-node
 
 include /usr/share/arduino/Arduino.mk
 
-DEVICE_PATH=/dev/ttyUSB1
+DEVICE_PATH=/dev/ttyUSB0
 
 CPPFLAGS += -std=c++11
 
