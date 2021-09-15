@@ -12,8 +12,8 @@
     extern Stream &dbgSerial;
 #endif
 
-#define DC_VOLTAGE_MIN   (11.5)
-#define DC_VOLTAGE_MAX   (13.2)
+#define DC_VOLTAGE_MIN   (5) //(11.5)
+#define DC_VOLTAGE_MAX   (15) //(13.5)
 
 #endif // CONFIG_H
 
