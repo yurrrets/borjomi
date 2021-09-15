@@ -155,7 +155,7 @@ class AppWebSocket {
 
         // TODO: correct error handling
         connection.on('error', function (error) {
-            console.log("Connection Error: " + error.toString());
+            logger.error("connection error: ", error);
         });
         connection.on('close', () => {
             for ( let prom of  this.commandPromise.values() )
@@ -163,7 +163,7 @@ class AppWebSocket {
             this.commandPromise.clear()
             if (this._onClose)
                 this._onClose(this)
-            console.log('Connection Closed');
+            logger.info('client disconnected');
         });
 
         connection.on('message', (message) => {
