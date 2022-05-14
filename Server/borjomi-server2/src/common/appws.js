@@ -1,5 +1,7 @@
 const { ErrorCodes, APIError } = require("./error")
 import {customJSONparse,customJSONStringify} from '../common/utils'
+const log4js = require('log4js')
+const logger = log4js.getLogger()
 
 var API_VERSION = 1
 
