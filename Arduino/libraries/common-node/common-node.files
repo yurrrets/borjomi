@@ -1,9 +1,0 @@
-version.mk
-can_message.h
-can_message.cpp
-capabilities.h
-cmd_codes.h
-nodes.h
-stream_ext.cpp
-stream_ext.h
-tools.h

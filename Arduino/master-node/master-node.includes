@@ -1,8 +1,0 @@
-src
-../libraries/MCP_CAN
-../libraries/SPI
-../libraries/common-node
-/usr/share/arduino/hardware/arduino/cores/arduino
-/usr/share/arduino/hardware/tools/avr/lib/avr/include
-/usr/share/arduino/libraries/SoftwareSerial/src
-/usr/share/arduino/libraries/ArduinoSTL/src

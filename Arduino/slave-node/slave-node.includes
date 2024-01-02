@@ -1,8 +1,0 @@
-src
-../libraries/MCP_CAN
-../libraries/SPI
-../libraries/CRC
-../libraries/common-node
-/usr/share/arduino/libraries/EEPROM/src
-/usr/share/arduino/hardware/arduino/cores/arduino
-/usr/share/arduino/hardware/tools/avr/lib/avr/include
