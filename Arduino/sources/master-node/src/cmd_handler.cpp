@@ -74,19 +74,19 @@ void processLocalCommand(const BTCommand &btCmd, BTCommandParser &btCommandIO)
     }
 }
 
-void cmdNotImplemented(const BTCommand &btCmd, BTCommandParser &btCommandIO)
+void cmdNotImplemented(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
 {
     btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
 }
 
-void cmdVersion(const BTCommand &btCmd, BTCommandParser &btCommandIO)
+void cmdVersion(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
 {
     btCommandIO.answerVersion(
                 NodeConfig.nodeId,
                 MAKE_VERSION(BORJOMI_VERSION_MJ, BORJOMI_VERSION_MN, BORJOMI_VERSION_REV));
 }
 
-void cmdCapabilities(const BTCommand &btCmd, BTCommandParser &btCommandIO)
+void cmdCapabilities(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
 {
     uint32_t value = 0;
     value |= makeCapability(CB_PRESSURE_SENSOR, 1);
@@ -97,7 +97,7 @@ void cmdCapabilities(const BTCommand &btCmd, BTCommandParser &btCommandIO)
     btCommandIO.answerCapabilities(NodeConfig.nodeId, value);
 }
 
-void cmdPing(const BTCommand &btCmd, BTCommandParser &btCommandIO)
+void cmdPing(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
 {
     btCommandIO.answerPong(NodeConfig.nodeId);
 }
