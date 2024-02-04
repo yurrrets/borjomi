@@ -5,6 +5,8 @@
 #include "cmd_codes.h"
 #include "tools.h"
 
+#define INVALID_CAN_MSG_NO   (0)
+
 #pragma pack(push, 1)
 
 struct CanMessage
@@ -16,7 +18,7 @@ struct CanMessage
     uint32_t value;
 
     CanMessage()
-      : crc(0), msgno(0), code(CMD_INVALID), devno(0), value(0)
+      : crc(0), msgno(INVALID_CAN_MSG_NO), code(CMD_INVALID), devno(0), value(0)
     { }
 
     void updateCrc() { crc = Crc8Partial(*this); }
@@ -24,7 +26,5 @@ struct CanMessage
 };
 
 #pragma pack(pop)
-
-
 
 #endif // CANMESSAGE_H

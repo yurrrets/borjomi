@@ -8,6 +8,7 @@
 
 #define MULTICAST_NODE    (0)
 #define UNKNOWN_NODE      (1)
+#define NO_NODE           (uint8_t(-1))
 #define MASTER_NODE       (8)
 // SLAVE_NODE should be (n*10), where n == 1, 2, 3, ...
 

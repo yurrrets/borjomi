@@ -3,6 +3,8 @@
 #include "config.h"
 #include "stream_ext.h"
 #include "capabilities.h"
+#include "cmd_handler.h"
+#include "nodes.h"
 
 
 class ReadFinisher
@@ -29,6 +31,11 @@ public:
 BTCommandParser::BTCommandParser(StreamExt &stream)
     : stream(stream)
 {
+}
+
+bool BTCommandParser::available()
+{
+    return stream.available();
 }
 
 BTCommand BTCommandParser::read()
@@ -354,4 +361,148 @@ void BTCommandParser::answerGeneralVal(const char *body, unsigned long addrId, u
     stream.print(devNo);
     stream.print(",");
     stream.println(val);
+}
+
+BTCommandProcessor::BTCommandProcessor(BTCommandParser &btCommandParser, CanCommands &canCommands)
+    : btCommandParser(btCommandParser), canCommands(canCommands), waitCanMsgno(INVALID_CAN_MSG_NO)
+{
+}
+
+void BTCommandProcessor::setup()
+{
+}
+
+void BTCommandProcessor::loop()
+{
+    if (canCommands.readStatus() == CanCommands::S_TIMEOUT_ERR)
+    {
+        btCommandParser.answerError(BTERR_TIMEOUT);
+        return;
+    }
+
+    if (!canCommands.isBusy() && btCommandParser.available()) {
+        BTCommand btCmd = btCommandParser.read();
+        if (btCmd.errcode)
+        {
+            // send errCode as answer
+            btCommandParser.answerError(btCmd.errcode);
+        }
+        else
+        {
+            if (btCmd.address == MASTER_NODE)
+            {
+                processLocalCommand(btCmd, btCommandParser);
+                return;
+            }
+
+            // process bt command
+            switch (btCmd.cmd) {
+            case CMD_VERSION:
+            case CMD_CAPABILITIES:
+            case CMD_SET_WATER_SWITCH:
+            case CMD_GET_WATER_SWITCH:
+            case CMD_READ_SOIL_MOISTURE:
+            case CMD_READ_PRESSURE_SENSOR:
+            case CMD_READ_CURRENT_SENSOR:
+            case CMD_SET_DC_ADAPTER_SWITCH:
+            case CMD_GET_DC_ADAPTER_SWITCH:
+            case CMD_READ_VOLTAGE_SENSOR:
+            case CMD_SET_PUMP_SWITCH:
+            case CMD_GET_PUMP_SWITCH:
+            case CMD_ANALOG_WRITE:
+            case CMD_ANALOG_READ:
+            case CMD_DIGITAL_WRITE:
+            case CMD_DIGITAL_READ:
+            case CMD_DIGITAL_PIN_MODE:
+            case CMD_PING:
+                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
+                waitCanMsgno = canCommands.getRequest().msgno;
+                if (btCmd.cmd == CMD_PING && btCmd.address == MULTICAST_NODE)
+                {
+                    processLocalCommand(btCmd, btCommandParser);
+                }
+                break;
+            default:
+                btCommandParser.answerError(BTERR_CMD_NOT_IMPLEMENTED);
+            }
+        }
+    }
+
+    // send can msg error
+    //        btCommandIO.answerError(BTERR_INVALID_SLAVE_NODE);
+    //        lastCommandAnswered = true;
+
+    switch (canCommands.readStatus()) {
+    case CanCommands::S_NO_DATA:
+    case CanCommands::S_OTHER_NODE:
+        break;
+    case CanCommands::S_OK:
+    {
+        if (canCommands.getAnswer().msgno != waitCanMsgno)
+        {
+            // BTCommandProcessor didn't send this request
+            break;
+        }
+        waitCanMsgno = INVALID_CAN_MSG_NO;
+
+//            Serial.print("lastProcessCommand: ");
+//            Serial.print(lastProcessCommand);
+//            Serial.print(" answer.code: ");
+//            Serial.println(canCommands.getAnswer().code);
+
+        if (canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
+                canCommands.getRequest().code == CMD_PING &&
+                canCommands.getAnswer().code == CMD_PONG)
+        {
+            btCommandParser.answerPong(canCommands.getAnswer().value);
+        }
+        else if (canCommands.getAnswer().msgno == canCommands.getRequest().msgno &&
+                canCommands.getAnswer().code == CMD_OK)
+        {
+            // switch reaction depending on command
+            switch (canCommands.getRequest().code) {
+            case CMD_VERSION:
+                btCommandParser.answerVersion(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                break;
+            case CMD_CAPABILITIES:
+                btCommandParser.answerCapabilities(canCommands.getLastRequestAddress(), canCommands.getAnswer().value);
+                break;
+            case CMD_SET_WATER_SWITCH:
+                btCommandParser.answerOK();
+                break;
+            case CMD_GET_WATER_SWITCH:
+                btCommandParser.answerWaterState(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                break;
+            case CMD_READ_SOIL_MOISTURE:
+                btCommandParser.answerSoilMoisture(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                break;
+            case CMD_ANALOG_READ:
+                btCommandParser.answerAnalogRead(canCommands.getLastRequestAddress(), canCommands.getAnswer().devno, canCommands.getAnswer().value);
+                break;
+            default:
+                btCommandParser.answerError(BTERR_UNKNOWN_CMD);
+                break;
+            }
+        }
+        else
+        {
+            btCommandParser.answerError(BTERR_INVALID_ANSWER);
+        }
+
+        break;
+    }
+    case CanCommands::S_INVALID_MSG:
+    case CanCommands::S_INVALID_CRC:
+    default:
+    {
+        if (waitCanMsgno == INVALID_CAN_MSG_NO)
+        {
+            // BTCommandProcessor didn't send this request
+            break;
+        }
+        waitCanMsgno = INVALID_CAN_MSG_NO;
+        btCommandParser.answerError(BTERR_INVALID_ANSWER);
+        break;
+    }
+    }
 }

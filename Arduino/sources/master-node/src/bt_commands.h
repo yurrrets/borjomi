@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "config.h"
+#include "can_commands.h"
 
 // Error codes
 
@@ -50,6 +51,7 @@ class BTCommandParser
 {
 public:
     BTCommandParser(StreamExt &stream);
+    bool available();
     BTCommand read();
     void answerError(uint8_t errcode);
     void answerOK();
@@ -72,6 +74,19 @@ private:
     void fillGetSetCmd(uint8_t cmdSetCode, uint8_t cmdGetCode, BTCommand &res);
     template <typename T>
     void answerGeneralVal(const char *body, unsigned long addrId, uint8_t devNo, T val);
+};
+
+class BTCommandProcessor
+{
+public:
+    BTCommandProcessor(BTCommandParser &btCommandParser, CanCommands &canCommands);
+    void setup();
+    void loop();
+
+private:
+    BTCommandParser &btCommandParser;
+    CanCommands &canCommands;
+    uint8_t waitCanMsgno;
 };
 
 #endif // BT_COMMANDS_H
