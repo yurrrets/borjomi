@@ -10,6 +10,7 @@ target_compile_options(ArduinoFlags INTERFACE
     "-ffunction-sections"
     "-fdata-sections"
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-std=c++17>"
     "-mmcu=${ARDUINO_MCU}"
 )
 target_compile_definitions(ArduinoFlags INTERFACE
