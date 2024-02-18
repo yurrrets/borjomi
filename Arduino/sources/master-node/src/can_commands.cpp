@@ -2,10 +2,8 @@
 #include "config.h"
 #include "nodes.h"
 
-
-#define CMD_ANSWER_TIMEOUT_MS         (1000)
+#define CMD_ANSWER_TIMEOUT_MS (1000)
 #define CMD_PING_MULTICAST_TIMEOUT_MS (3000)
-
 
 CanCommands::CanCommands(uint8_t pinCS)
     : CAN0(pinCS), lastAddrId(0), status(S_NO_DATA), busy(false), lastRequestTime(0)
@@ -14,8 +12,9 @@ CanCommands::CanCommands(uint8_t pinCS)
 
 void CanCommands::setup()
 {
-    // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
-    if(CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
+    // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters
+    // disabled.
+    if (CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
     {
 #ifdef DEBUG
         dbgSerial.println("MCP2515 Initialized Successfully!");
@@ -42,7 +41,7 @@ void CanCommands::setup()
 #endif
     }
 
-    pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
+    pinMode(CAN0_INT, INPUT); // Configuring pin for /INT input
 }
 
 void CanCommands::loop()
@@ -57,7 +56,7 @@ void CanCommands::loop()
     if (status == S_NO_DATA)
     {
         auto execTimeMs = millis() - lastRequestTime;
-        if (getRequest().code == CMD_PING && getLastRequestAddress() == MULTICAST_NODE)
+        if (getLastRequestAddress() == MULTICAST_NODE)
         {
             if (execTimeMs > CMD_PING_MULTICAST_TIMEOUT_MS)
             {
@@ -74,25 +73,36 @@ void CanCommands::loop()
                 status = S_TIMEOUT_ERR;
             }
         }
+        return;
     }
-    else if (status == S_INVALID_MSG || status == S_INVALID_CRC)
+    if (status == S_OTHER_NODE)
     {
-        // error detected, just clear busy flag
-        // TODO: maybe it's better just to ignore the message, possibly it's some other activity
-        // on the bus, and not an answer to our message
-        busy = false;
+        // ignore the message
+        return;
     }
+
+    // two cases, but anyway we clears busy flag
+    //
+    // status == S_INVALID_MSG || status == S_INVALID_CRC :
+    // error detected, just clear busy flag
+    // TODO: maybe it's better just to ignore the message, possibly it's some other activity
+    // on the bus, and not an answer to our message
+    //
+    // status == S_OK :
+    // everything ok, just clear busy flag
+
+    busy = false;
 }
 
 CanCommands::ReadStatus CanCommands::read()
 {
-    if(digitalRead(CAN0_INT))
+    if (digitalRead(CAN0_INT))
         return S_NO_DATA; // no data over CAN bus
 
     long unsigned int rxId;
     unsigned char len = 0;
 
-    CAN0.readMsgBuf(&rxId, &len, (byte *)&answer);      // Read data: len = data length
+    CAN0.readMsgBuf(&rxId, &len, (byte *)&answer); // Read data: len = data length
 
     if (rxId != MASTER_NODE)
     {
@@ -127,7 +137,8 @@ CanCommands::ReadStatus CanCommands::read()
     return crcOK ? S_OK : S_INVALID_CRC;
 }
 
-uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t devno, uint32_t value)
+uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t devno,
+                                 uint32_t value)
 {
     if (busy)
     {
@@ -137,7 +148,7 @@ uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t 
     busy = true;
     lastRequestTime = millis();
     lastAddrId = addrId;
-    
+
     request.msgno++;
     if (request.msgno == INVALID_CAN_MSG_NO)
     {
@@ -148,17 +159,14 @@ uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t 
     request.value = value;
     request.updateCrc();
 
-    // send data:  ID = 0x100, Standard CAN Frame, Data length = 8 bytes, 'data' = array of data bytes to send
+    // send data:  ID = 0x100, Standard CAN Frame, Data length = 8 bytes, 'data' = array of data
+    // bytes to send
 #ifdef DEBUG
-    dbgSerial
-            << "Sending msg: no=" << request.msgno
-            << " code=" << request.code
-            << " devno=" << request.devno
-            << " value=" << request.value
-            << endl;
+    dbgSerial << "Sending msg: no=" << request.msgno << " code=" << request.code
+              << " devno=" << request.devno << " value=" << request.value << endl;
 #endif
     byte sndStat = CAN0.sendMsgBuf(addrId, 0, 8, (byte *)&request);
-    if(sndStat == CAN_OK)
+    if (sndStat == CAN_OK)
     {
 #ifdef DEBUG
         dbgSerial.println("Message Sent Successfully!");
