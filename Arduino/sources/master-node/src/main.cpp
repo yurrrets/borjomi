@@ -17,12 +17,19 @@
 #include "cap_implementation.h"
 #include "scenarios.h"
 
+#include "LiquidCrystalDisplayEx.h"
+#include "LiquidCrystalDisplayEx.ipp"
+
 #include <EEPROM.h>
 
 #define BT_RX_PIN   (4)
 #define BT_TX_PIN   (10)
 #define CAN_CS_PIN  (9)
 #define BTN_MAIN_PIN (12) // TODO: define true pin
+
+#define LCD_CS_PIN    (8) // TODO: define true pin
+#define LCD_CLOCK_PIN (12)
+#define LCD_MOSI_PIN  (11)
 
 #ifdef PC_START
 #define PC_START_PIN (8)   // digital pin
@@ -43,6 +50,9 @@ BTCommandProcessor btCommandProcessor(ioCommandParser, canCommands);
 Button mainButton(BTN_MAIN_PIN);
 ScenarioRunner scenarioRunner(canCommands);
 
+LiquidCrystalShiftRegIface lcdIface(LCD_CS_PIN, LCD_CLOCK_PIN, LCD_MOSI_PIN);
+LiquidCrystalDisplay lcd(lcdIface);
+
 MasterNodeID NodeConfig;
 Scenario mainScenario;
 #ifdef PC_START
@@ -50,6 +60,7 @@ PcStart pcStart(PC_START_PIN);
 #endif
 
 
+void updateLcd();
 
 void setup()
 {
@@ -85,6 +96,7 @@ void setup()
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
 
+    lcd.begin(16, 2);
     canCommands.setup();
     btCommandProcessor.setup();
     mainButton.setup();
@@ -123,4 +135,72 @@ void loop()
             scenarioRunner.start(&mainScenario);
         }
     }
+
+    updateLcd();
+}
+
+template <typename Printer>
+inline void printMS(Printer &printer, uint16_t seconds)
+{
+    uint16_t tmp = seconds / 60;
+    if (tmp < 10)
+    {
+        printer.print(" ");
+    }
+    printer.print(tmp);
+    printer.print(":");
+
+    tmp = seconds % 60;
+    if (tmp < 10)
+    {
+        printer.print("0");
+    }
+    printer.print(tmp);
+}
+
+template <typename Printer> inline void printHMS(Printer &printer, uint16_t seconds)
+{
+    {
+        uint16_t tmp = seconds / 3600;
+        if (tmp == 0)
+        {
+            printer.print("  ");
+        }
+        else
+        {
+            // hope 'hours' part is not more than 9, otherwise total len of string
+            // would be more than expected
+            printer.print(tmp);
+            printer.print(":");
+        }
+    }
+    printMS(printer, seconds);
+}
+
+void updateLcd()
+{
+    if (!scenarioRunner.isRunning())
+    {
+        lcd.setCursor(0, 0);
+        lcd.print("Ready           "); // update whole row
+        lcd.setCursor(0, 1);
+        lcd.print("press btn to start");
+        lcd.autoscroll();
+        return;
+    }
+
+    lcd.noAutoscroll();
+
+    lcd.setCursor(0, 0);
+    lcd.print("step ");
+    lcd.print(scenarioRunner.currentStep() + 1);
+    lcd.print("/");
+    lcd.print(scenarioRunner.totalSteps());
+
+    lcd.setCursor(11, 0);
+    printMS(lcd, scenarioRunner.timeLeftForCurrentStep());
+
+    lcd.setCursor(0, 1);
+    lcd.print("left    ");
+    printHMS(lcd, scenarioRunner.totalTimeLeft());
 }
