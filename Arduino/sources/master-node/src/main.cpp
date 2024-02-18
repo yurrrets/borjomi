@@ -15,12 +15,14 @@
 #include "pc_start.h"
 #include "common.h"
 #include "cap_implementation.h"
+#include "scenarios.h"
 
 #include <EEPROM.h>
 
 #define BT_RX_PIN   (4)
 #define BT_TX_PIN   (10)
 #define CAN_CS_PIN  (9)
+#define BTN_MAIN_PIN (12) // TODO: define true pin
 
 #ifdef PC_START
 #define PC_START_PIN (8)   // digital pin
@@ -38,8 +40,11 @@ StreamExt ioExtSerial(ioSerial);
 CanCommands canCommands(CAN_CS_PIN);
 BTCommandParser ioCommandParser(ioExtSerial);
 BTCommandProcessor btCommandProcessor(ioCommandParser, canCommands);
+Button mainButton(BTN_MAIN_PIN);
+ScenarioRunner scenarioRunner(canCommands);
 
 MasterNodeID NodeConfig;
+Scenario mainScenario;
 #ifdef PC_START
 PcStart pcStart(PC_START_PIN);
 #endif
@@ -82,6 +87,7 @@ void setup()
 
     canCommands.setup();
     btCommandProcessor.setup();
+    mainButton.setup();
 
     pinMode(PINS_DC_ADAPTER_SWITCH[0], OUTPUT);
     digitalWrite(PINS_DC_ADAPTER_SWITCH[0], LOW);
@@ -104,4 +110,17 @@ void loop()
 
     canCommands.loop();
     btCommandProcessor.loop();
+    mainButton.loop();
+
+    if (mainButton.clicked())
+    {
+        if (scenarioRunner.isRunning())
+        {
+            scenarioRunner.stop();
+        }
+        else
+        {
+            scenarioRunner.start(&mainScenario);
+        }
+    }
 }
