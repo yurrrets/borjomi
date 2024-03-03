@@ -4,8 +4,6 @@
 #include <mcp_can.h>
 #include "can_message.h"
 
-#define CAN0_INT 5
-
 class CanCommands
 {
 public:
@@ -20,7 +18,7 @@ public:
     };
 
     /// This is CAN's CS pin
-    CanCommands(uint8_t pinCS);
+    CanCommands(MCP_CAN &can, uint8_t canIntPin);
     void setup();
     void loop();
     ReadStatus readStatus() const { return status; }
@@ -32,7 +30,8 @@ public:
     uint8_t sendRequest(unsigned long addrId, uint8_t command, uint8_t devno, uint32_t value);
 
 private:
-    MCP_CAN CAN0;
+    MCP_CAN &CAN0;
+    uint8_t canIntPin;
     unsigned long lastAddrId;
     CanMessage request;
     CanMessage answer;

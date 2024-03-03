@@ -3,8 +3,7 @@
 
 #include "nodes.h"
 
-extern MasterNodeID NodeConfig;
-
+MasterNodeID &getNodeConfig();
 bool IsDcVoltageCorrect();
 
 #endif // COMMON_H

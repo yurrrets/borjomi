@@ -82,7 +82,7 @@ void cmdNotImplemented(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO
 void cmdVersion(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
 {
     btCommandIO.answerVersion(
-                NodeConfig.nodeId,
+                getNodeConfig().nodeId,
                 MAKE_VERSION(BORJOMI_VERSION_MJ, BORJOMI_VERSION_MN, BORJOMI_VERSION_REV));
 }
 
@@ -94,33 +94,33 @@ void cmdCapabilities(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
     value |= makeCapability(CB_DC_ADAPTER_SWITCH, 1);
     value |= makeCapability(CB_VOLTAGE_SENSOR, 1);
     value |= makeCapability(CB_PUMP_SWITCH, 1);
-    btCommandIO.answerCapabilities(NodeConfig.nodeId, value);
+    btCommandIO.answerCapabilities(getNodeConfig().nodeId, value);
 }
 
 void cmdPing(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
 {
-    btCommandIO.answerPong(NodeConfig.nodeId);
+    btCommandIO.answerPong(getNodeConfig().nodeId);
 }
 
 void cmdReadPressureSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     CHECK_SENSOR_NO(S_PRESSURE, btCmd.devno);
     float val_bars = readSensorValue(S_PRESSURE);
-    btCommandIO.answerPressure(NodeConfig.nodeId, btCmd.devno, val_bars);
+    btCommandIO.answerPressure(getNodeConfig().nodeId, btCmd.devno, val_bars);
 }
 
 void cmdReadCurrentSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     CHECK_SENSOR_NO(S_DC_CURRENT, btCmd.devno);
     float val_A = readSensorValue(S_DC_CURRENT);
-    btCommandIO.answerDCCurrent(NodeConfig.nodeId, btCmd.devno, val_A);
+    btCommandIO.answerDCCurrent(getNodeConfig().nodeId, btCmd.devno, val_A);
 }
 
 void cmdReadVoltageSensor(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     CHECK_SENSOR_NO(S_DC_VOLTAGE, btCmd.devno);
     float val_V = readSensorValue(S_DC_VOLTAGE);
-    btCommandIO.answerDCVoltage(NodeConfig.nodeId, btCmd.devno, val_V);
+    btCommandIO.answerDCVoltage(getNodeConfig().nodeId, btCmd.devno, val_V);
 }
 
 void cmdSetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -139,7 +139,7 @@ void cmdGetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     CHECK_SWITCH_NO(CS_DC_ADAPTER, btCmd.devno);
     bool value = getControlSwitchVal(CS_DC_ADAPTER);
-    btCommandIO.answerDCAdapterState(NodeConfig.nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
+    btCommandIO.answerDCAdapterState(getNodeConfig().nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
 }
 
 void cmdSetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -153,7 +153,7 @@ void cmdGetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     CHECK_SWITCH_NO(CS_PUMP, btCmd.devno);
     bool value = getControlSwitchVal(CS_PUMP);
-    btCommandIO.answerPumpState(NodeConfig.nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
+    btCommandIO.answerPumpState(getNodeConfig().nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
 }
 
 void cmdAnalogWrite(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -165,7 +165,7 @@ void cmdAnalogWrite(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 void cmdAnalogRead(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     int value = analogRead(btCmd.devno);
-    btCommandIO.answerAnalogRead(NodeConfig.nodeId, btCmd.devno, value);
+    btCommandIO.answerAnalogRead(getNodeConfig().nodeId, btCmd.devno, value);
 }
 
 void cmdDigitalWrite(const BTCommand &btCmd, BTCommandParser &btCommandIO)
@@ -177,7 +177,7 @@ void cmdDigitalWrite(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 void cmdDigitalRead(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 {
     int value = digitalRead(btCmd.devno);
-    btCommandIO.answerAnalogRead(NodeConfig.nodeId, btCmd.devno, value);
+    btCommandIO.answerAnalogRead(getNodeConfig().nodeId, btCmd.devno, value);
 }
 
 void cmdDigitalPinMode(const BTCommand &btCmd, BTCommandParser &btCommandIO)

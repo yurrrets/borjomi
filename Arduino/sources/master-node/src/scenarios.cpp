@@ -1,6 +1,5 @@
 #include "scenarios.h"
 #include "cap_implementation.h"
-#include "nodes.h"
 
 // First step is always special "warm up" step #0.
 // Then steps from scenario follow.
@@ -30,11 +29,20 @@ void ScenarioRunner::loop()
     {
         step = -1;
     }
-    if ((step < 0) || (timeLeftForCurrentStep() == 0 && node >= currentStepNodeCount()))
+    if ((step < 0) || (!startPhase && node >= currentStepNodeCount()))
     {
         step++;
+        stepStartTime = millis();
         node = 0;
+        stepPartialSucceesFlag = false;
+        startPhase = true;
         return;
+    }
+
+    if (startPhase && timeLeftForCurrentStep() == 0)
+    {
+        startPhase = false;
+        node = 0;
     }
 
     // start/finish are actual when there's smth. to do;
@@ -44,10 +52,10 @@ void ScenarioRunner::loop()
         return;
     }
 
-    if (timeLeftForCurrentStep() == 0)
-        finishPartStep();
-    else
+    if (startPhase)
         startPartStep();
+    else
+        finishPartStep();
 }
 
 void ScenarioRunner::start(Scenario *scenario)
@@ -82,6 +90,11 @@ bool ScenarioRunner::isRunning() const
     return running;
 }
 
+bool ScenarioRunner::hasError() const
+{
+    return errorFlag;
+}
+
 int8_t ScenarioRunner::currentStep() const
 {
     return step;
@@ -104,8 +117,15 @@ uint16_t ScenarioRunner::totalTimeSec() const
 
 uint16_t ScenarioRunner::timeLeftForCurrentStep() const
 {
-    unsigned long stepRunTime = millis() - stepStartTime;
-    long diff = stepTimeSec(currentStep()) - stepRunTime;
+    // special case: detect the situation when all nodes on current step failed
+    // there's no sense to wait until step finish, we can finish it now
+    if (startPhase && node >= currentStepNodeCount() && !stepPartialSucceesFlag)
+    {
+        return 0;
+    }
+
+    unsigned long stepRunTimeMs = millis() - stepStartTime;
+    long diff = stepTimeSec(currentStep()) - (stepRunTimeMs / 1000);
     return diff < 0 ? 0 : diff;
 }
 
@@ -179,10 +199,14 @@ void ScenarioRunner::startPartStep()
     {
         setControlSwitchVal(CS_PUMP, true);
         setControlSwitchVal(CS_DC_ADAPTER, true);
+        stepPartialSucceesFlag = true;
         node = 1;
     }
     else if (isCoolDownStep(step))
     {
+        setControlSwitchVal(CS_PUMP, false);
+        setControlSwitchVal(CS_DC_ADAPTER, false);
+        stepPartialSucceesFlag = true;
         node = 1;
     }
     else
@@ -199,8 +223,6 @@ void ScenarioRunner::finishPartStep()
     }
     else if (isCoolDownStep(step))
     {
-        setControlSwitchVal(CS_PUMP, false);
-        setControlSwitchVal(CS_DC_ADAPTER, false);
         node = 1;
     }
     else
@@ -221,7 +243,9 @@ void ScenarioRunner::processCanCommand(bool reqOpenOrClose)
         if (canCommands.getAnswer().msgno == lastCanMsgNo)
         {
             // it's our answer
+            // reset lastCanMsgNo for indicating we're not waiting for an asnwer
             lastCanMsgNo = INVALID_CAN_MSG_NO;
+            stepPartialSucceesFlag = true;
             node++;
         }
         break;

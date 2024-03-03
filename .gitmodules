@@ -1,0 +1,3 @@
+[submodule "Arduino/tests/googletest"]
+	path = Arduino/tests/googletest
+	url = https://github.com/google/googletest.git

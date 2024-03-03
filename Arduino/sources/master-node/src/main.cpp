@@ -25,9 +25,10 @@
 #define BT_RX_PIN   (4)
 #define BT_TX_PIN   (10)
 #define CAN_CS_PIN  (9)
-#define BTN_MAIN_PIN (12) // TODO: define true pin
+#define CAN_INT_PIN (5)
+#define BTN_MAIN_PIN (2) // TODO: define true pin
 
-#define LCD_CS_PIN    (8) // TODO: define true pin
+#define LCD_CS_PIN    (6) // TODO: define true pin
 #define LCD_CLOCK_PIN (12)
 #define LCD_MOSI_PIN  (11)
 
@@ -44,7 +45,8 @@ Stream &dbgSerial = Serial;
 auto &ioSerial = Serial;
 
 StreamExt ioExtSerial(ioSerial);
-CanCommands canCommands(CAN_CS_PIN);
+MCP_CAN can0(CAN_CS_PIN);
+CanCommands canCommands(can0, CAN_INT_PIN);
 BTCommandParser ioCommandParser(ioExtSerial);
 BTCommandProcessor btCommandProcessor(ioCommandParser, canCommands);
 Button mainButton(BTN_MAIN_PIN);
@@ -60,13 +62,17 @@ PcStart pcStart(PC_START_PIN);
 #endif
 
 
+MasterNodeID &getNodeConfig()
+{
+    return NodeConfig;
+}
+
 void updateLcd();
 
 void setup()
 {
-#ifdef DEBUG
-    Serial.begin(9600);
-#endif
+    lcd.begin(16, 2);
+    lcd.write("starting...");
 
     // set the data rate for the SoftwareSerial port
     ioSerial.begin(9600);
@@ -96,8 +102,7 @@ void setup()
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
 
-    lcd.begin(16, 2);
-    canCommands.setup();
+    // canCommands.setup();
     btCommandProcessor.setup();
     mainButton.setup();
 
@@ -107,6 +112,9 @@ void setup()
     digitalWrite(PINS_PUMP_SWITCH[0], LOW);
 
     analogReference(EXTERNAL);
+
+    lcd.setCursor(0, 0);
+    lcd.write("starting done");
 }
 
 
@@ -120,7 +128,7 @@ void loop()
     if (getControlSwitchVal(CS_DC_ADAPTER) && !IsDcVoltageCorrect())
         setControlSwitchVal(CS_DC_ADAPTER, false); // turn it off
 
-    canCommands.loop();
+    // canCommands.loop();
     btCommandProcessor.loop();
     mainButton.loop();
 
@@ -160,35 +168,45 @@ inline void printMS(Printer &printer, uint16_t seconds)
 
 template <typename Printer> inline void printHMS(Printer &printer, uint16_t seconds)
 {
+    uint16_t tmp = seconds / 3600;
+    if (tmp == 0)
     {
-        uint16_t tmp = seconds / 3600;
-        if (tmp == 0)
-        {
-            printer.print("  ");
-        }
-        else
-        {
-            // hope 'hours' part is not more than 9, otherwise total len of string
-            // would be more than expected
-            printer.print(tmp);
-            printer.print(":");
-        }
+        printer.print("  ");
+    }
+    else
+    {
+        // hope 'hours' part is not more than 9, otherwise total len of string
+        // would be more than expected
+        printer.print(tmp);
+        printer.print(":");
     }
     printMS(printer, seconds);
 }
 
 void updateLcd()
 {
+    static bool prevIsRunning = true;
+
     if (!scenarioRunner.isRunning())
     {
+        if (!prevIsRunning)
+        {
+            return;
+        }
+        prevIsRunning = false;
+
         lcd.setCursor(0, 0);
         lcd.print("Ready           "); // update whole row
         lcd.setCursor(0, 1);
-        lcd.print("press btn to start");
-        lcd.autoscroll();
+        lcd.print("press to start->");
         return;
     }
 
+    if (prevIsRunning)
+    {
+        return;
+    }
+    prevIsRunning = true;
     lcd.noAutoscroll();
 
     lcd.setCursor(0, 0);
@@ -201,6 +219,6 @@ void updateLcd()
     printMS(lcd, scenarioRunner.timeLeftForCurrentStep());
 
     lcd.setCursor(0, 1);
-    lcd.print("left    ");
+    lcd.print("left     ");
     printHMS(lcd, scenarioRunner.totalTimeLeft());
 }

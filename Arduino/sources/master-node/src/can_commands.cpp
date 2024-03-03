@@ -5,8 +5,8 @@
 #define CMD_ANSWER_TIMEOUT_MS (1000)
 #define CMD_PING_MULTICAST_TIMEOUT_MS (3000)
 
-CanCommands::CanCommands(uint8_t pinCS)
-    : CAN0(pinCS), lastAddrId(0), status(S_NO_DATA), busy(false), lastRequestTime(0)
+CanCommands::CanCommands(MCP_CAN &can, uint8_t canIntPin)
+    : CAN0(can), canIntPin(canIntPin), lastAddrId(0), status(S_NO_DATA), busy(false), lastRequestTime(0)
 {
 }
 
@@ -41,7 +41,7 @@ void CanCommands::setup()
 #endif
     }
 
-    pinMode(CAN0_INT, INPUT); // Configuring pin for /INT input
+    pinMode(canIntPin, INPUT); // Configuring pin for /INT input
 }
 
 void CanCommands::loop()
@@ -96,7 +96,7 @@ void CanCommands::loop()
 
 CanCommands::ReadStatus CanCommands::read()
 {
-    if (digitalRead(CAN0_INT))
+    if (digitalRead(canIntPin))
         return S_NO_DATA; // no data over CAN bus
 
     long unsigned int rxId;

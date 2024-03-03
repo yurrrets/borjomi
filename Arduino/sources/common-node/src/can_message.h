@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "cmd_codes.h"
-#include "tools.h"
 
 #define INVALID_CAN_MSG_NO   (0)
 
@@ -21,8 +20,8 @@ struct CanMessage
       : crc(0), msgno(INVALID_CAN_MSG_NO), code(CMD_INVALID), devno(0), value(0)
     { }
 
-    void updateCrc() { crc = Crc8Partial(*this); }
-    bool checkCrc() const { return crc == Crc8Partial(*this); }
+    void updateCrc();
+    bool checkCrc() const;
 };
 
 #pragma pack(pop)

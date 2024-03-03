@@ -10,17 +10,17 @@ float readSensorValue(SensorType sensorType)
     case S_PRESSURE:
     {
         int value = analogRead(PINS_PRESSURE_SENSOR[0]);
-        return NodeConfig.pressureCoeffs.apply(value);
+        return getNodeConfig().pressureCoeffs.apply(value);
     }
     case S_DC_CURRENT:
     {
         int value = analogRead(PINS_CURRENT_SENSOR[0]);
-        return NodeConfig.dcCurrentCoeffs.apply(value);
+        return getNodeConfig().dcCurrentCoeffs.apply(value);
     }
     case S_DC_VOLTAGE:
     {
         int value = analogRead(PINS_VOLTAGE_SENSOR[0]);
-        return NodeConfig.dcVoltageCoeffs.apply(value);
+        return getNodeConfig().dcVoltageCoeffs.apply(value);
     }
     default:
         return 0;
