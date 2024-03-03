@@ -3,45 +3,46 @@
 
 #include <SoftwareSerial.h>
 
+#include "can_message.h"
+#include "cmd_codes.h"
 #include "config.h"
 #include "stream_ext.h"
-#include "cmd_codes.h"
-#include "can_message.h"
 
-#include "button.h"
 #include "bt_commands.h"
+#include "button.h"
 #include "can_commands.h"
+#include "cap_implementation.h"
+#include "common.h"
 #include "nodes.h"
 #include "pc_start.h"
-#include "common.h"
-#include "cap_implementation.h"
 #include "scenarios.h"
 
+#include "LiquidCrystalDisplayCache.h"
 #include "LiquidCrystalDisplayEx.h"
 #include "LiquidCrystalDisplayEx.ipp"
 
 #include <EEPROM.h>
 
-#define BT_RX_PIN   (4)
-#define BT_TX_PIN   (10)
-#define CAN_CS_PIN  (9)
+#define BT_RX_PIN (4)
+#define BT_TX_PIN (10)
+#define CAN_CS_PIN (9)
 #define CAN_INT_PIN (5)
 #define BTN_MAIN_PIN (2) // TODO: define true pin
 
-#define LCD_CS_PIN    (6) // TODO: define true pin
+#define LCD_CS_PIN (6) // TODO: define true pin
 #define LCD_CLOCK_PIN (12)
-#define LCD_MOSI_PIN  (11)
+#define LCD_MOSI_PIN (11)
 
 #ifdef PC_START
-#define PC_START_PIN (8)   // digital pin
+#define PC_START_PIN (8) // digital pin
 #endif
 
 #ifdef DEBUG
 Stream &dbgSerial = Serial;
 #endif
 
-//SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
-//auto &ioSerial = btSerial;
+// SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
+// auto &ioSerial = btSerial;
 auto &ioSerial = Serial;
 
 StreamExt ioExtSerial(ioSerial);
@@ -53,14 +54,14 @@ Button mainButton(BTN_MAIN_PIN);
 ScenarioRunner scenarioRunner(canCommands);
 
 LiquidCrystalShiftRegIface lcdIface(LCD_CS_PIN, LCD_CLOCK_PIN, LCD_MOSI_PIN);
-LiquidCrystalDisplay lcd(lcdIface);
+LiquidCrystalDisplay lcd_hw(lcdIface);
+LiquidCrystalDisplayCache<16, 2, decltype(lcd_hw)> lcd(lcd_hw);
 
 MasterNodeID NodeConfig;
 Scenario mainScenario;
 #ifdef PC_START
 PcStart pcStart(PC_START_PIN);
 #endif
-
 
 MasterNodeID &getNodeConfig()
 {
@@ -71,17 +72,18 @@ void updateLcd();
 
 void setup()
 {
-    lcd.begin(16, 2);
+    lcd.begin();
     lcd.write("starting...");
 
     // set the data rate for the SoftwareSerial port
     ioSerial.begin(9600);
 
     // wait for serial port to connect. Needed for native USB
-    while (!Serial) {
+    while (!Serial)
+    {
         ;
     }
-//    ioSerial.println("Hello, World!");
+    //    ioSerial.println("Hello, World!");
 
 #ifdef PC_START
     pcStart.setup();
@@ -117,7 +119,6 @@ void setup()
     lcd.write("starting done");
 }
 
-
 void loop()
 {
 #ifdef PC_START
@@ -147,8 +148,7 @@ void loop()
     updateLcd();
 }
 
-template <typename Printer>
-inline void printMS(Printer &printer, uint16_t seconds)
+template <typename Printer> inline void printMS(Printer &printer, uint16_t seconds)
 {
     uint16_t tmp = seconds / 60;
     if (tmp < 10)
@@ -185,29 +185,22 @@ template <typename Printer> inline void printHMS(Printer &printer, uint16_t seco
 
 void updateLcd()
 {
-    static bool prevIsRunning = true;
+    struct Autoflush
+    {
+        ~Autoflush()
+        {
+            lcd.flush();
+        }
+    } autoflush;
 
     if (!scenarioRunner.isRunning())
     {
-        if (!prevIsRunning)
-        {
-            return;
-        }
-        prevIsRunning = false;
-
         lcd.setCursor(0, 0);
         lcd.print("Ready           "); // update whole row
         lcd.setCursor(0, 1);
         lcd.print("press to start->");
         return;
     }
-
-    if (prevIsRunning)
-    {
-        return;
-    }
-    prevIsRunning = true;
-    lcd.noAutoscroll();
 
     lcd.setCursor(0, 0);
     lcd.print("step ");
