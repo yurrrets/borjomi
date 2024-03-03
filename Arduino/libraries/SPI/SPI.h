@@ -214,7 +214,11 @@ public:
 		return SPDR;
 	}
 	inline static uint16_t transfer16(uint16_t data) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+		// disable gcc warning: ISO C++ prohibits anonymous structs
 		union { uint16_t val; struct { uint8_t lsb; uint8_t msb; }; } in, out;
+#pragma GCC diagnostic pop
 		in.val = data;
 		if ((SPCR & _BV(DORD))) {
 			SPDR = in.lsb;
