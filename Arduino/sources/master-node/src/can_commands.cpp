@@ -1,6 +1,7 @@
 #include "can_commands.h"
 #include "config.h"
 #include "nodes.h"
+#include "log.h"
 
 #define CMD_ANSWER_TIMEOUT_MS (1000)
 #define CMD_PING_MULTICAST_TIMEOUT_MS (3000)
@@ -12,36 +13,30 @@ CanCommands::CanCommands(MCP_CAN &can, uint8_t canIntPin)
 
 void CanCommands::setup()
 {
+    pinMode(canIntPin, INPUT); // Configuring pin for /INT input
+
     // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters
     // disabled.
     if (CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
     {
-#ifdef DEBUG
-        dbgSerial.println("MCP2515 Initialized Successfully!");
-#endif
+        LOG_DEBUG("CAN: MCP2515 Initialized Successfully!");
     }
     else
     {
-#ifdef DEBUG
-        dbgSerial.println("Error Initializing MCP2515...");
-#endif
+        LOG_ERROR("CAN: Error Initializing MCP2515...");
+        return;
     }
 
     // Change to normal mode to allow messages to be transmitted
     if (CAN0.setMode(MCP_NORMAL) == MCP2515_OK)
     {
-#ifdef DEBUG
-        dbgSerial.println("setMode Successful");
-#endif
+        LOG_DEBUG("CAN: setMode Successful");
     }
     else
     {
-#ifdef DEBUG
-        dbgSerial.println("setMode failed");
-#endif
+        LOG_ERROR("CAN: setMode failed");
+        return;
     }
-
-    pinMode(canIntPin, INPUT); // Configuring pin for /INT input
 }
 
 void CanCommands::loop()

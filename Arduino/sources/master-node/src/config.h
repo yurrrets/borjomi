@@ -7,10 +7,6 @@
 
 //#define PC_START
 
-#ifdef DEBUG
-    class Stream;
-    extern Stream &dbgSerial;
-#endif
 
 #define DC_VOLTAGE_MIN   (5) //(11.5)
 #define DC_VOLTAGE_MAX   (15) //(13.5)
