@@ -3,6 +3,7 @@
 
 #include <SoftwareSerial.h>
 
+#include "log.h"
 #include "can_message.h"
 #include "cmd_codes.h"
 #include "config.h"
@@ -30,16 +31,13 @@
 #define BTN_MAIN_PIN (2) // TODO: define true pin
 
 #define LCD_CS_PIN (6) // TODO: define true pin
-#define LCD_CLOCK_PIN (12)
-#define LCD_MOSI_PIN (11)
 
 #ifdef PC_START
 #define PC_START_PIN (8) // digital pin
 #endif
 
-#ifdef DEBUG
-Stream &dbgSerial = Serial;
-#endif
+
+Print &dbgOutput = Serial;
 
 // SoftwareSerial btSerial(BT_RX_PIN, BT_TX_PIN, 0);
 // auto &ioSerial = btSerial;
@@ -53,7 +51,7 @@ BTCommandProcessor btCommandProcessor(ioCommandParser, canCommands);
 Button mainButton(BTN_MAIN_PIN);
 ScenarioRunner scenarioRunner(canCommands);
 
-LiquidCrystalShiftRegIface lcdIface(LCD_CS_PIN, LCD_CLOCK_PIN, LCD_MOSI_PIN);
+LiquidCrystalShiftRegSPIIface lcdIface(LCD_CS_PIN);
 LiquidCrystalDisplay lcd_hw(lcdIface);
 LiquidCrystalDisplayCache<16, 2, decltype(lcd_hw)> lcd(lcd_hw);
 
@@ -72,9 +70,6 @@ void updateLcd();
 
 void setup()
 {
-    lcd.begin();
-    lcd.write("starting...");
-
     // set the data rate for the SoftwareSerial port
     ioSerial.begin(9600);
 
@@ -83,7 +78,11 @@ void setup()
     {
         ;
     }
-    //    ioSerial.println("Hello, World!");
+    LOG_INFO("Starting");
+
+    lcd.begin();
+    lcd.write("starting...");
+    lcd.flush();
 
 #ifdef PC_START
     pcStart.setup();
@@ -92,19 +91,15 @@ void setup()
     EEPROM.get(0, NodeConfig);
     if (NodeConfig.checkCrc() && NodeConfig.nodeId)
     {
-#ifdef DEBUG
-        dbgSerial << "I'm the Master Node ID " << NodeConfig.nodeId << endl;
-#endif
+        LOG_INFO("I'm the Master Node ID ", NodeConfig.nodeId);
     }
     else
     {
-#ifdef DEBUG
-        dbgSerial.println("I'm the Master Node with UNDEFINED ID!");
-#endif
+        LOG_WARNING("I'm the Master Node with UNDEFINED ID!");
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
 
-    // canCommands.setup();
+    canCommands.setup();
     btCommandProcessor.setup();
     mainButton.setup();
 
@@ -117,6 +112,9 @@ void setup()
 
     lcd.setCursor(0, 0);
     lcd.write("starting done");
+    lcd.flush();
+
+    LOG_INFO("Setup done");
 }
 
 void loop()
@@ -132,6 +130,7 @@ void loop()
     // canCommands.loop();
     btCommandProcessor.loop();
     mainButton.loop();
+    scenarioRunner.loop();
 
     if (mainButton.clicked())
     {
@@ -185,13 +184,13 @@ template <typename Printer> inline void printHMS(Printer &printer, uint16_t seco
 
 void updateLcd()
 {
-    struct Autoflush
-    {
-        ~Autoflush()
-        {
-            lcd.flush();
-        }
-    } autoflush;
+    // struct Autoflush
+    // {
+    //     ~Autoflush()
+    //     {
+    //         lcd.flush();
+    //     }
+    // } autoflush;
 
     if (!scenarioRunner.isRunning())
     {
@@ -199,6 +198,7 @@ void updateLcd()
         lcd.print("Ready           "); // update whole row
         lcd.setCursor(0, 1);
         lcd.print("press to start->");
+        lcd.flush();
         return;
     }
 
@@ -214,4 +214,5 @@ void updateLcd()
     lcd.setCursor(0, 1);
     lcd.print("left     ");
     printHMS(lcd, scenarioRunner.totalTimeLeft());
+    lcd.flush();
 }

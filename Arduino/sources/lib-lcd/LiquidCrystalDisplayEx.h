@@ -183,25 +183,52 @@ protected:
 
 struct LiquidCrystalShiftRegIface : public LiquidCrystalIface, public LiquidCrystalIface4bit
 {
-  LiquidCrystalShiftRegIface(uint8_t latch, uint8_t clock, uint8_t data)
-    : _latch_pin(latch), _clock_pin(clock), _data_pin(data), _value(0)
-  {
-  }
-
-  void init() override;
+  LiquidCrystalShiftRegIface() : _value(0) {}
   void setRs(uint8_t val) override;
   void setRw(uint8_t val) override;
   void setEnable(uint8_t val) override;
   void write4bits(uint8_t val) override;
 
 protected:
+  uint8_t _value;
+  virtual void update() = 0;
+};
+
+struct LiquidCrystalShiftRegShiftOutIface : public LiquidCrystalShiftRegIface
+{
+  LiquidCrystalShiftRegShiftOutIface(uint8_t latch, uint8_t clock, uint8_t data)
+    : _latch_pin(latch), _clock_pin(clock), _data_pin(data)
+  {
+  }
+  void init() override;
+
+protected:
   uint8_t _latch_pin;
   uint8_t _clock_pin;
   uint8_t _data_pin;
-  uint8_t _value;
 
-  void update();
+  void update() override;
 };
+
+#ifdef _SPI_H_INCLUDED
+// Is not so good method. Would be good to have is_defined_v<T>,
+// but it's hard to implement such template using SFINAE but w/o std lib.
+// So for now just check with #ifdef
+struct LiquidCrystalShiftRegSPIIface : public LiquidCrystalShiftRegIface
+{
+  LiquidCrystalShiftRegSPIIface(uint8_t latch)
+    : _latch_pin(latch)
+  {
+  }
+  void init() override;
+
+protected:
+  uint8_t _latch_pin;
+
+  void update() override;
+};
+
+#endif
 
 template <typename Interface>
 class LiquidCrystalDisplay : public Print

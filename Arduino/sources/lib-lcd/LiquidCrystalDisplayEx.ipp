@@ -111,13 +111,6 @@ void LiquidCrystalPinIface8bit<isRwConnected>::initPins(uint8_t d0, uint8_t d1, 
   _data_pins[7] = d7;
 }
 
-void LiquidCrystalShiftRegIface::init()
-{
-  pinMode(_latch_pin, OUTPUT);
-  pinMode(_clock_pin, OUTPUT);
-  pinMode(_data_pin, OUTPUT);
-}
-
 void LiquidCrystalShiftRegIface::setRs(uint8_t val)
 {
   bitWrite(_value, 0, val);
@@ -138,11 +131,23 @@ void LiquidCrystalShiftRegIface::setEnable(uint8_t val)
 
 void LiquidCrystalShiftRegIface::write4bits(uint8_t val)
 {
+  // preserve Rs, Rw, Enable in 4 lowest bits
+  // update val in higher bits
   _value = (_value & 0x0F) | ((val & 0x0F) << 4); 
   update();
 }
 
-void LiquidCrystalShiftRegIface::update()
+void LiquidCrystalShiftRegShiftOutIface::init()
+{
+  pinMode(_latch_pin, OUTPUT);
+  pinMode(_clock_pin, OUTPUT);
+  pinMode(_data_pin, OUTPUT);
+  digitalWrite(_latch_pin, HIGH);
+  digitalWrite(_clock_pin, LOW);
+  digitalWrite(_data_pin, LOW);
+}
+
+void LiquidCrystalShiftRegShiftOutIface::update()
 {
   // take the latchPin low so
   // the LEDs don't change while you're sending in bits:
@@ -155,6 +160,31 @@ void LiquidCrystalShiftRegIface::update()
   delayMicroseconds(10);
 }
 
+#ifdef _SPI_H_INCLUDED
+
+void LiquidCrystalShiftRegSPIIface::init()
+{
+  pinMode(_latch_pin, OUTPUT);
+  digitalWrite(_latch_pin, HIGH);
+  SPI.begin();
+}
+
+void LiquidCrystalShiftRegSPIIface::update()
+{
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
+  // take the latchPin low so
+  // the LEDs don't change while you're sending in bits:
+  digitalWrite(_latch_pin, LOW);
+  // shift out the bits:
+  SPI.transfer(_value);
+  //take the latch pin high so the LEDs will light up:
+  digitalWrite(_latch_pin, HIGH);
+  SPI.endTransaction();
+  // pause before next value:
+  delayMicroseconds(10);
+}
+
+#endif
 
 // When the display powers up, it is configured as follows:
 //

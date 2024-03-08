@@ -9,7 +9,7 @@
 // LiquidCrystalPinIface4bit<false> lcd_iface(rs, en, d4, d5, d6, d7);
 
 constexpr int latchPin = 8, clockPin = 12, dataPin = 11;
-LiquidCrystalShiftRegIface lcd_iface(latchPin, clockPin, dataPin);
+LiquidCrystalShiftRegShiftOutIface lcd_iface(latchPin, clockPin, dataPin);
 
 LiquidCrystalDisplay lcd(lcd_iface);
 
