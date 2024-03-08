@@ -71,12 +71,22 @@ class ScenariosTest : public testing::Test
                 // can_bus.begin(MCP_ANY, CAN_500KBPS, MCP_16MHZ);
                 canCommands.setup();
                 checkCurrentStateChanged();
+
+                if (additional_setup_step)
+                {
+                    additional_setup_step();
+                }
             },
             [&] {
                 can_bus.loop();
                 canCommands.loop();
                 runner.loop();
                 checkCurrentStateChanged();
+
+                if (additional_loop_step)
+                {
+                    additional_loop_step();
+                }
             });
     }
 
@@ -115,6 +125,9 @@ class ScenariosTest : public testing::Test
     bool runnerHasError = false;
     bool runnerIsRunning = false;
     std::vector<Event> events;
+
+    std::function<void()> additional_setup_step;
+    std::function<void()> additional_loop_step;
 };
 
 bool operator==(const CurrectStepChangedEvent &a, const CurrectStepChangedEvent &b)
@@ -476,8 +489,7 @@ TEST_F(ScenariosTest, whole_step_failed)
     // nodes 30 and 60 do not answer (e.g. because they're not connected)
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
         {std::make_shared<SlaveNodeSims>(can_bus, 30, SlaveNodeSims::Behavior::NoAnswer),
-         std::make_shared<SlaveNodeSims>(can_bus, 40),
-         std::make_shared<SlaveNodeSims>(can_bus, 50),
+         std::make_shared<SlaveNodeSims>(can_bus, 40), std::make_shared<SlaveNodeSims>(can_bus, 50),
          std::make_shared<SlaveNodeSims>(can_bus, 60, SlaveNodeSims::Behavior::NoAnswer)});
     for (auto node : slave_nodes)
     {
@@ -514,6 +526,65 @@ TEST_F(ScenariosTest, whole_step_failed)
             .timeMs = 44016, .pin = PINS_PUMP_SWITCH[0], .value = false, .pinMode = OUTPUT},
         DigitalPinChangedEvent{
             .timeMs = 44016, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = false, .pinMode = OUTPUT},
+    };
+    EXPECT_THAT(events, IsSupersequenceOf(expected_events));
+}
+
+TEST_F(ScenariosTest, scenario_stop)
+{
+    Scenario scenario{
+        .steps =
+            {
+                ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{NO_NODE, 0}},
+                             .runTimeSec = 20},
+                ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{NO_NODE, 0}},
+                             .runTimeSec = 30},
+                ScenarioStep{.nodes = {ScenarioStepNode{60, 0}, ScenarioStepNode{NO_NODE, 0}},
+                             .runTimeSec = 50},
+                ScenarioStep{.nodes = {ScenarioStepNode{50, 0}, ScenarioStepNode{NO_NODE, 0}},
+                             .runTimeSec = 40},
+            },
+        .stepCount = 4};
+    std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
+        {std::make_shared<SlaveNodeSims>(can_bus, 30), std::make_shared<SlaveNodeSims>(can_bus, 40),
+         std::make_shared<SlaveNodeSims>(can_bus, 50),
+         std::make_shared<SlaveNodeSims>(can_bus, 60)});
+    for (auto node : slave_nodes)
+    {
+        can_bus.attachDevice(node);
+    }
+
+    bool stopped = false;
+    additional_loop_step = [&] {
+        if (millis() > 20000 && !stopped)
+        {
+            runner.stop();
+            stopped = true;
+        }
+    };
+
+    runner.start(&scenario);
+    EXPECT_TRUE(runner.isRunning());
+
+    ctx.run_for(23 * 1000);
+    EXPECT_FALSE(runner.isRunning());
+    EXPECT_FALSE(runner.hasError());
+
+    // time may flow a little due to simulated delays
+    // and relatively high time increment between two loop() calls
+    std::vector<Event> expected_events{
+        DigitalPinChangedEvent{
+            .timeMs = 0, .pin = PINS_PUMP_SWITCH[0], .value = true, .pinMode = OUTPUT},
+        DigitalPinChangedEvent{
+            .timeMs = 0, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = true, .pinMode = OUTPUT},
+
+        SetWaterSwitchEvent{.timeMs = 10001, .nodeId = 30, .devNo = 0, .value = true},
+
+        // stop called
+        DigitalPinChangedEvent{
+            .timeMs = 20002, .pin = PINS_PUMP_SWITCH[0], .value = false, .pinMode = OUTPUT},
+        DigitalPinChangedEvent{
+            .timeMs = 20002, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = false, .pinMode = OUTPUT},
     };
     EXPECT_THAT(events, IsSupersequenceOf(expected_events));
 }

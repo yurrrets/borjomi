@@ -8,8 +8,11 @@
 
 namespace
 {
-uint16_t StepWarmUpSec = 10;
-uint16_t StepCoolDowsSec = 2;
+constexpr uint16_t StepWarmUpSec = 10;
+constexpr uint16_t StepCoolDowsSec = 2;
+
+// better to use numeric_limits, but can't compile it with Arduino.h
+constexpr int8_t max_node = INT8_MAX;
 } // namespace
 
 ScenarioRunner::ScenarioRunner(CanCommands &canCommands)
@@ -83,6 +86,15 @@ void ScenarioRunner::start(Scenario *scenario)
 void ScenarioRunner::stop()
 {
     // jump to last step
+    // it's not super clear, but should work
+    uint8_t total = totalSteps();
+    if (total >= 2 && step <= total - 2 && node != max_node)
+    {
+        // fast forward to the moment right before latest step
+        step = total - 2;
+        startPhase = false;
+        node = max_node;
+    }
 }
 
 bool ScenarioRunner::isRunning() const
