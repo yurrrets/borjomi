@@ -285,3 +285,76 @@ void ScenarioRunner::processCanCommand(bool reqOpenOrClose)
         break;
     }
 }
+
+void serialize(const Scenario &scenario, Stream &stream)
+{
+    for (uint8_t i = 0; i < scenario.stepCount; i++)
+    {
+        if (i != 0)
+        {
+            stream.print('|'); // new step number
+        }
+        auto &step = scenario.steps[i];
+        stream.print(step.runTimeSec);
+        stream.print(":");
+        for (uint8_t j = 0; j < ScenarioStep::MaxNodeCount; j++)
+        {
+            auto &node = step.nodes[j];
+            if (node.address == NO_NODE)
+            {
+                break;
+            }
+
+            if (j != 0)
+            {
+                stream.print(';');
+            }
+            stream.print((int)node.address);
+            stream.print(',');
+            stream.print((int)node.devNo);
+        }
+    }
+}
+
+bool deserialize(Stream &stream, Scenario &scenario)
+{
+    scenario.stepCount = 0;
+    while (stream.available() && scenario.stepCount < Scenario::MaxStepCount)
+    {
+        auto &step = scenario.steps[scenario.stepCount];
+        step.runTimeSec = stream.parseInt();
+        char c = stream.read();
+        if (c != ':')
+        {
+            return false;
+        }
+        for (uint8_t i = 0; i < ScenarioStep::MaxNodeCount; i++)
+        {
+            c = stream.peek();
+            if (c == '|')
+            {
+                stream.read();
+                step.nodes[i].address = NO_NODE;
+                step.nodes[i].devNo = 0;
+                break;
+            }
+            if (c == ';')
+            {
+                stream.read();
+            }
+            step.nodes[i].address = stream.parseInt();
+            c = stream.read();
+            if (c != ',')
+            {
+                return false;
+            }
+            step.nodes[i].devNo = stream.parseInt();
+            if (!stream.available())
+            {
+                break;
+            }
+        }
+        scenario.stepCount++;
+    }
+    return true;
+}

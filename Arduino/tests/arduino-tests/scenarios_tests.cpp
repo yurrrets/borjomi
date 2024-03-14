@@ -44,6 +44,10 @@ struct IsRunningChanged
 bool operator==(const IsRunningChanged &a, const IsRunningChanged &b);
 std::ostream &operator<<(std::ostream &os, const IsRunningChanged &v);
 
+bool operator==(const ScenarioStepNode &a, const ScenarioStepNode &b);
+bool operator==(const ScenarioStep &a, const ScenarioStep &b);
+bool operator==(const Scenario &a, const Scenario &b);
+
 using OtherEvent = std::variant<CurrectStepChangedEvent, ErrorFlagChanged, IsRunningChanged>;
 using Event = template_concat_t<ArduinoEvent, NodeEvent, OtherEvent>;
 
@@ -161,6 +165,47 @@ std::ostream &operator<<(std::ostream &os, const IsRunningChanged &v)
 {
     os << "IsRunningChanged(timeMs=" << v.timeMs << ", value=" << v.value << ")" << std::endl;
     return os;
+}
+
+bool operator==(const ScenarioStepNode &a, const ScenarioStepNode &b)
+{
+    return a.address == b.address && (a.address == NO_NODE || a.devNo == b.devNo);
+}
+
+bool operator==(const ScenarioStep &a, const ScenarioStep &b)
+{
+    if (a.runTimeSec != b.runTimeSec)
+    {
+        return false;
+    }
+    for (int i = 0; i < ScenarioStep::MaxNodeCount; i++)
+    {
+        if (!(a.nodes[i] == b.nodes[i]))
+        {
+            return false;
+        }
+        if (a.nodes[i].address == NO_NODE)
+        {
+            break;
+        }
+    }
+    return true;
+}
+
+bool operator==(const Scenario &a, const Scenario &b)
+{
+    if (a.stepCount != b.stepCount)
+    {
+        return false;
+    }
+    for (int i = 0; i < a.stepCount; i++)
+    {
+        if (!(a.steps[i] == b.steps[i]))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 TEST_F(ScenariosTest, no_scenario)
@@ -587,4 +632,70 @@ TEST_F(ScenariosTest, scenario_stop)
             .timeMs = 20002, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = false, .pinMode = OUTPUT},
     };
     EXPECT_THAT(events, IsSupersequenceOf(expected_events));
+}
+
+TEST(ScenarioFuncs, SerializeDeserialize)
+{
+    struct TestData
+    {
+        Scenario scenario;
+        std::string serialized;
+    };
+    std::vector<TestData> test_data =
+        {
+            {Scenario{.steps = {}, .stepCount = 0}, ""},
+            {Scenario{.steps = {ScenarioStep{
+                          .nodes = {ScenarioStepNode{20, 1}, ScenarioStepNode{NO_NODE, 0}},
+                          .runTimeSec = 15}},
+                      .stepCount = 1},
+             "15:20,1"},
+            {Scenario{
+                 .steps = {ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{40, 1},
+                                                  ScenarioStepNode{60, 2}, ScenarioStepNode{50, 3}},
+                                        .runTimeSec = 5 * 60}},
+                 .stepCount = 1},
+             "300:30,0;40,1;60,2;50,3"},
+            {Scenario{
+                 .steps =
+                     {
+                         ScenarioStep{.nodes = {ScenarioStepNode{30, 0},
+                                                ScenarioStepNode{NO_NODE, 0}},
+                                      .runTimeSec = 20},
+                         ScenarioStep{.nodes = {ScenarioStepNode{40, 0},
+                                                ScenarioStepNode{NO_NODE, 0}},
+                                      .runTimeSec = 30},
+                         ScenarioStep{.nodes = {ScenarioStepNode{60, 0},
+                                                ScenarioStepNode{NO_NODE, 0}},
+                                      .runTimeSec = 50},
+                         ScenarioStep{.nodes = {ScenarioStepNode{50, 0},
+                                                ScenarioStepNode{NO_NODE, 0}},
+                                      .runTimeSec = 40},
+                     },
+                 .stepCount = 4},
+             "20:30,0|30:40,0|50:60,0|40:50,0"},
+            {Scenario{
+                 .steps =
+                     {
+                         ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
+                                                ScenarioStepNode{NO_NODE, 0}},
+                                      .runTimeSec = 20},
+                         ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
+                                                ScenarioStepNode{NO_NODE, 0}},
+                                      .runTimeSec = 30},
+                     },
+                 .stepCount = 2},
+             "20:30,0;60,0|30:40,0;50,0"},
+        };
+
+    for (auto &item : test_data)
+    {
+        Stream stream;
+        serialize(item.scenario, stream);
+        EXPECT_EQ(stream.str(), item.serialized);
+
+        Scenario scenario_deserialized;
+        stream.seekg(0);
+        EXPECT_TRUE(deserialize(stream, scenario_deserialized));
+        EXPECT_EQ(item.scenario, scenario_deserialized);
+    }
 }

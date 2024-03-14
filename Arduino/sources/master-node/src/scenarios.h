@@ -22,7 +22,8 @@ struct ScenarioStep
 
 struct Scenario
 {
-    ScenarioStep steps[32];
+    static constexpr uint8_t MaxStepCount = 32;
+    ScenarioStep steps[MaxStepCount];
     uint8_t stepCount = 0;
 };
 
@@ -66,5 +67,8 @@ private:
     void finishPartStep();
     void processCanCommand(bool reqOpenOrClose);
 };
+
+void serialize(const Scenario &scenario, Stream &stream);
+bool deserialize(Stream &stream, Scenario &scenario);
 
 #endif // RUN_SCENARIOS_H
