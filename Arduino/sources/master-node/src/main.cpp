@@ -78,10 +78,10 @@ void setup()
     {
         ;
     }
-    LOG_INFO("Starting");
+    LOG_INFO(F("Starting"));
 
     lcd.begin();
-    lcd.write("starting...");
+    lcd.print(F("Starting..."));
     lcd.flush();
 
 #ifdef PC_START
@@ -91,11 +91,11 @@ void setup()
     EEPROM.get(0, NodeConfig);
     if (NodeConfig.checkCrc() && NodeConfig.nodeId)
     {
-        LOG_INFO("I'm the Master Node ID ", NodeConfig.nodeId);
+        LOG_INFO(F("I'm the Master Node ID "), NodeConfig.nodeId);
     }
     else
     {
-        LOG_WARNING("I'm the Master Node with UNDEFINED ID!");
+        LOG_WARNING(F("I'm the Master Node with UNDEFINED ID!"));
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
 
@@ -111,10 +111,10 @@ void setup()
     analogReference(EXTERNAL);
 
     lcd.setCursor(0, 0);
-    lcd.write("starting done");
+    lcd.print(F("starting done"));
     lcd.flush();
 
-    LOG_INFO("Setup done");
+    LOG_INFO(F("Setup done"));
 }
 
 void loop()
@@ -195,15 +195,15 @@ void updateLcd()
     if (!scenarioRunner.isRunning())
     {
         lcd.setCursor(0, 0);
-        lcd.print("Ready           "); // update whole row
+        lcd.print(F("Ready           ")); // update whole row
         lcd.setCursor(0, 1);
-        lcd.print("press to start->");
+        lcd.print(F("press to start->"));
         lcd.flush();
         return;
     }
 
     lcd.setCursor(0, 0);
-    lcd.print("step ");
+    lcd.print(F("step "));
     lcd.print(scenarioRunner.currentStep() + 1);
     lcd.print("/");
     lcd.print(scenarioRunner.totalSteps());
@@ -212,7 +212,7 @@ void updateLcd()
     printMS(lcd, scenarioRunner.timeLeftForCurrentStep());
 
     lcd.setCursor(0, 1);
-    lcd.print("left     ");
+    lcd.print(F("left     "));
     printHMS(lcd, scenarioRunner.totalTimeLeft());
     lcd.flush();
 }

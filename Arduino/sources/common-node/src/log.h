@@ -24,14 +24,14 @@ template <typename... Args> inline void log(Args &&...args)
 }
 
 #ifdef DEBUG_MESSAGES
-#define LOG_DEBUG(...) log("DBG\t", __VA_ARGS__)
-#define LOG_INFO(...) log("INF\t", __VA_ARGS__)
+#define LOG_DEBUG(...) log(F("DBG\t"), __VA_ARGS__)
+#define LOG_INFO(...) log(F("INF\t"), __VA_ARGS__)
 #else
 #define LOG_DEBUG(...)
 #define LOG_INFO(...)
 #endif
 
-#define LOG_WARNING(...) log("WRN\t", __VA_ARGS__)
-#define LOG_ERROR(...) log("ERR\t", __VA_ARGS__)
+#define LOG_WARNING(...) log(F("WRN\t"), __VA_ARGS__)
+#define LOG_ERROR(...) log(F("ERR\t"), __VA_ARGS__)
 
 #endif

@@ -10,6 +10,8 @@
 #define OUTPUT 0x1
 #define INPUT_PULLUP 0x2
 
+#define F(str) str
+
 typedef uint8_t byte;
 
 unsigned long millis(void);

@@ -19,22 +19,22 @@ void CanCommands::setup()
     // disabled.
     if (CAN0.begin(MCP_ANY, CAN_100KBPS, MCP_16MHZ) == CAN_OK)
     {
-        LOG_DEBUG("CAN: MCP2515 Initialized Successfully!");
+        LOG_DEBUG(F("CAN: MCP2515 Initialized Successfully!"));
     }
     else
     {
-        LOG_ERROR("CAN: Error Initializing MCP2515...");
+        LOG_ERROR(F("CAN: Error Initializing MCP2515..."));
         return;
     }
 
     // Change to normal mode to allow messages to be transmitted
     if (CAN0.setMode(MCP_NORMAL) == MCP2515_OK)
     {
-        LOG_DEBUG("CAN: setMode Successful");
+        LOG_DEBUG(F("CAN: setMode Successful"));
     }
     else
     {
-        LOG_ERROR("CAN: setMode failed");
+        LOG_ERROR(F("CAN: setMode failed"));
         return;
     }
 }
