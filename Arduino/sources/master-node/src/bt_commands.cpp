@@ -58,7 +58,7 @@ BTCommand BTCommandParser::read()
     StreamExt::ReadResult rr = stream.readBytesUntilOneOf(Terminators, sizeof(Terminators), buf, sizeof(buf));
     buf[rr.sz] = '\0';
 
-    if (!strcmp("AT+VERSION", buf))
+    if (!strcmp_P(buf, PSTR("AT+VERSION")))
     {
         if (stream.lastReaded() == '?')
         {
@@ -73,7 +73,7 @@ BTCommand BTCommandParser::read()
         }
     }
 
-    if (!strcmp("AT+CAPABILITIES", buf))
+    if (!strcmp_P(buf, PSTR("AT+CAPABILITIES")))
     {
         if (stream.lastReaded() == '?')
         {
@@ -88,7 +88,7 @@ BTCommand BTCommandParser::read()
         }
     }
 
-    if (!strcmp("AT+PING", buf))
+    if (!strcmp_P(buf, PSTR("AT+PING")))
     {
         res.cmd = CMD_PING;
         if (stream.lastReaded() == '*')
@@ -105,49 +105,49 @@ BTCommand BTCommandParser::read()
         return res;
     }
 
-    if (!strcmp("AT+WATER", buf))
+    if (!strcmp_P(buf, PSTR("AT+WATER")))
     {
         fillGetSetCmd(CMD_SET_WATER_SWITCH, CMD_GET_WATER_SWITCH, res);
         return res;
     }
 
-    if (!strcmp("AT+SOIL", buf))
+    if (!strcmp_P(buf, PSTR("AT+SOIL")))
     {
         fillSensorCmd(CMD_READ_SOIL_MOISTURE, res);
         return res;
     }
 
-    if (!strcmp("AT+PRESSURE", buf))
+    if (!strcmp_P(buf, PSTR("AT+PRESSURE")))
     {
         fillSensorCmd(CMD_READ_PRESSURE_SENSOR, res);
         return res;
     }
 
-    if (!strcmp("AT+CURRENT", buf))
+    if (!strcmp_P(buf, PSTR("AT+CURRENT")))
     {
         fillSensorCmd(CMD_READ_CURRENT_SENSOR, res);
         return res;
     }
 
-    if (!strcmp("AT+VOLTAGE", buf))
+    if (!strcmp_P(buf, PSTR("AT+VOLTAGE")))
     {
         fillSensorCmd(CMD_READ_VOLTAGE_SENSOR, res);
         return res;
     }
 
-    if (!strcmp("AT+DCADAPTER", buf))
+    if (!strcmp_P(buf, PSTR("AT+DCADAPTER")))
     {
         fillGetSetCmd(CMD_SET_DC_ADAPTER_SWITCH, CMD_GET_DC_ADAPTER_SWITCH, res);
         return res;
     }
 
-    if (!strcmp("AT+PUMP", buf))
+    if (!strcmp_P(buf, PSTR("AT+PUMP")))
     {
         fillGetSetCmd(CMD_SET_PUMP_SWITCH, CMD_GET_PUMP_SWITCH, res);
         return res;
     }
 
-    if (!strcmp("AT+ANALOG", buf))
+    if (!strcmp_P(buf, PSTR("AT+ANALOG")))
     {
         fillSensorCmd(CMD_ANALOG_READ, res);
         return res;
@@ -172,18 +172,18 @@ BTCommand BTCommandParser::read()
 
 void BTCommandParser::answerError(uint8_t errcode)
 {
-    stream.print("ERROR ");
+    stream.print(F("ERROR "));
     stream.println(errcode);
 }
 
 void BTCommandParser::answerOK()
 {
-    stream.println("OK");
+    stream.println(F("OK"));
 }
 
 void BTCommandParser::answerVersion(unsigned long addrId, uint32_t val)
 {
-    stream.print("+VERSION=");
+    stream.print(F("+VERSION="));
     stream.print(addrId);
     stream.print(",");
     stream.println(val);
@@ -191,7 +191,7 @@ void BTCommandParser::answerVersion(unsigned long addrId, uint32_t val)
 
 void BTCommandParser::answerCapabilities(unsigned long addrId, uint32_t val)
 {
-    stream.print("+CAPABILITIES=");
+    stream.print(F("+CAPABILITIES="));
     stream.print(addrId);
     stream.print(",");
     uint8_t cap = 1;
@@ -237,53 +237,53 @@ void BTCommandParser::answerCapabilities(unsigned long addrId, uint32_t val)
 
 void BTCommandParser::answerPong(unsigned long addrId)
 {
-    stream.print("+PONG=");
+    stream.print(F("+PONG="));
     stream.println(addrId);
 }
 
 void BTCommandParser::answerWaterState(unsigned long addrId, uint8_t devNo, uint8_t state)
 {
-    answerGeneralVal("+WATER=", addrId, devNo, state);
+    answerGeneralVal(F("+WATER="), addrId, devNo, state);
 }
 
 void BTCommandParser::answerDCAdapterState(unsigned long addrId, uint8_t devNo, uint8_t state)
 {
-    answerGeneralVal("+DCADAPTER=", addrId, devNo, state);
+    answerGeneralVal(F("+DCADAPTER="), addrId, devNo, state);
 }
 
 void BTCommandParser::answerPumpState(unsigned long addrId, uint8_t devNo, uint8_t state)
 {
-    answerGeneralVal("+PUMP=", addrId, devNo, state);
+    answerGeneralVal(F("+PUMP="), addrId, devNo, state);
 }
 
 void BTCommandParser::answerSoilMoisture(unsigned long addrId, uint8_t devNo, uint16_t val)
 {
-    answerGeneralVal("+SOIL=", addrId, devNo, val);
+    answerGeneralVal(F("+SOIL="), addrId, devNo, val);
 }
 
 void BTCommandParser::answerPressure(unsigned long addrId, uint8_t devNo, float val)
 {
-    answerGeneralVal("+PRESSURE=", addrId, devNo, val);
+    answerGeneralVal(F("+PRESSURE="), addrId, devNo, val);
 }
 
 void BTCommandParser::answerDCCurrent(unsigned long addrId, uint8_t devNo, float val)
 {
-    answerGeneralVal("+CURRENT=", addrId, devNo, val);
+    answerGeneralVal(F("+CURRENT="), addrId, devNo, val);
 }
 
 void BTCommandParser::answerDCVoltage(unsigned long addrId, uint8_t devNo, float val)
 {
-    answerGeneralVal("+VOLTAGE=", addrId, devNo, val);
+    answerGeneralVal(F("+VOLTAGE="), addrId, devNo, val);
 }
 
 void BTCommandParser::answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint16_t val)
 {
-    answerGeneralVal("+ANALOG=", addrId, pinNo, val);
+    answerGeneralVal(F("+ANALOG="), addrId, pinNo, val);
 }
 
 void BTCommandParser::answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state)
 {
-    answerGeneralVal("+DIGITAL=", addrId, pinNo, state);
+    answerGeneralVal(F("+DIGITAL="), addrId, pinNo, state);
 }
 
 void BTCommandParser::fillSensorCmd(uint8_t cmdCode, BTCommand &res)
@@ -352,8 +352,8 @@ void BTCommandParser::fillGetSetCmd(uint8_t cmdSetCode, uint8_t cmdGetCode, BTCo
     res.value = stream.parseInt();
 }
 
-template <typename T>
-void BTCommandParser::answerGeneralVal(const char *body, unsigned long addrId, uint8_t devNo, T val)
+template <typename StringLike, typename T>
+void BTCommandParser::answerGeneralVal(StringLike body, unsigned long addrId, uint8_t devNo, T val)
 {
     stream.print(body);
     stream.print(addrId);

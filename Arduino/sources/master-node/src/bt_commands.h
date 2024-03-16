@@ -72,8 +72,8 @@ private:
     StreamExt &stream;
     void fillSensorCmd(uint8_t cmdCode, BTCommand &res);
     void fillGetSetCmd(uint8_t cmdSetCode, uint8_t cmdGetCode, BTCommand &res);
-    template <typename T>
-    void answerGeneralVal(const char *body, unsigned long addrId, uint8_t devNo, T val);
+    template <typename StringLike, typename T>
+    void answerGeneralVal(StringLike body, unsigned long addrId, uint8_t devNo, T val);
 };
 
 class BTCommandProcessor
