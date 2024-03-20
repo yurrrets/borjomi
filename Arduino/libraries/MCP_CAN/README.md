@@ -1,12 +1,9 @@
-Sub-Development branch was copied to Master on June 30th, 2016.
-==============
-
 MCP_CAN Library for Arduino
 ==============
 MCP_CAN library v1.5
 This library is compatible with any shield or board that uses the MCP2515 or MCP25625 CAN protocol controller.
 
-This version supports setting the ID filter mode of the protocol controller, the BAUD rate with clock speed with the begin() function.  Baudrates 5k, 10k, 20k, 50k, 100k, 125k, 250k, 500k, & 1000k using 16MHz clock on the MCP2515 are confirmed to work using a Peak-System PCAN-USB dongle as a reference.  Baudrates for 8MHz and 20MHz crystals are yet to be confirmed but were calculated appropiately.
+This version supports setting the ID filter mode of the protocol controller, the BAUD rate with clock speed with the begin() function.  Baudrates 5k, 10k, 20k, 50k, 100k, 125k, 250k, 500k, & 1000k using 16MHz clock on the MCP2515 are confirmed to work using a Peak-System PCAN-USB dongle as a reference.  Baudrates for 8MHz and 20MHz crystals are yet to be confirmed but were calculated appropriately.
 
 **The readMsgBuf() functions bring in the message ID. The getCanId() function is obsolete and no longer exists, don't use it.**
 
@@ -27,6 +24,8 @@ Using the setMode() function the sketch can now put the protocol controller into
 
 User can enable and disable (default) One-Shot transmission mode from the sketch using enOneShotTX() or disOneShotTX() respectively.
 
+To wake up from CAN bus activity while in sleep mode enable the wake up interrupt with setSleepWakeup(1). Passing 0 will disable the wakeup interrupt (default).
+
 Installation
 ==============
 Copy this into the "[.../MySketches/]libraries/" folder and restart the Arduino editor.
@@ -36,7 +35,7 @@ NOTE: If an older version of the library exists (e.g. CAN_BUS_Shield) be sure to
 
 Help and Support
 ==============
-This is primarily for non-bug related issues: Please start a *new thread* in an appropriate area at Seeedstudio forums or Arduino.cc forums and then send me (coryjfowler) a link through the PM system, my user name is the same as it is here.  I will receive an email about the PM and generally get to it with-in a week or less.  Keep in mind, I do this in my spare time.
+This is primarily for non-bug related issues: Please start a *new thread* in an appropriate area at Seeedstudio forums or Arduino.cc forums and then send me (coryjfowler) a link through the PM system, my user name is the same as it is here.  I will receive an email about the PM.  Keep in mind, I do this in my spare time.
 
 
 *Happy Coding!*
