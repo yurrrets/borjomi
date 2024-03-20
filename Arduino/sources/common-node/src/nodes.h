@@ -34,9 +34,6 @@ struct MasterNodeID
     CbLinearModelInfo pressureCoeffs;
     CbLinearModelInfo dcCurrentCoeffs;
     CbLinearModelInfo dcVoltageCoeffs;
-
-    void updateCrc() { crc = Crc8Partial(*this); }
-    bool checkCrc() const { return crc == Crc8Partial(*this); }
 };
 
 struct SlaveNodeID
@@ -45,9 +42,6 @@ struct SlaveNodeID
     long unsigned int nodeId;
     uint8_t waterSwitchCount;
     uint8_t soilMoistureCount;
-
-    void updateCrc() { crc = Crc8Partial(*this); }
-    bool checkCrc() const { return crc == Crc8Partial(*this); }
 };
 
 #pragma pack(pop)

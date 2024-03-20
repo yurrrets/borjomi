@@ -19,6 +19,8 @@ void cmdSetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
 void cmdGetDCAdapterSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO);
 void cmdSetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO);
 void cmdGetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO);
+void cmdSetMainScenario(const BTCommand &btCmd, BTCommandParser &btCommandIO);
+void cmdGetMainScenario(const BTCommand &btCmd, BTCommandParser &btCommandIO);
 
 void cmdAnalogRead(const BTCommand &btCmd, BTCommandParser &btCommandIO);
 void cmdAnalogWrite(const BTCommand &btCmd, BTCommandParser &btCommandIO);

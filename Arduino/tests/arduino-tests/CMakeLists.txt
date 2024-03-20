@@ -19,11 +19,12 @@ file(GLOB src_files *.h *.cpp)
 
 add_executable(arduino-tests 
     ${src_files}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../sources/common-node/src/can_message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../sources/master-node/src/scenarios.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../sources/master-node/src/cap_implementation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../../sources/master-node/src/can_commands.cpp
 )
+
+target_compile_definitions(arduino-tests PRIVATE DEBUG_MESSAGES)
 
 target_include_directories(arduino-tests PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../sources/master-node/src>

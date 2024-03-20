@@ -17,7 +17,7 @@ static const uint8_t PROGMEM dscrc2x16_table[] = {
 
 // Compute a Dallas Semiconductor 8 bit CRC. These show up in the ROM
 // and the registers.  (Use tiny 2x16 entry CRC table)
-uint8_t crc8(const uint8_t *addr, uint8_t len)
+uint8_t crc8(const uint8_t *addr, uint16_t len)
 {
         uint8_t crc = 0;
 
@@ -34,7 +34,7 @@ uint8_t crc8(const uint8_t *addr, uint8_t len)
 // Compute a Dallas Semiconductor 8 bit CRC directly.
 // this is much slower, but a little smaller, than the lookup table.
 //
-uint8_t crc8(const uint8_t *addr, uint8_t len)
+uint8_t crc8(const uint8_t *addr, uint16_t len)
 {
         uint8_t crc = 0;
 

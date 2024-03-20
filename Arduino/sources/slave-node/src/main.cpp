@@ -45,7 +45,7 @@ void setup()
 
 
     EEPROM.get(0, NodeConfig);
-    if (NodeConfig.checkCrc() && NodeConfig.nodeId) // nodeId != 0
+    if (CheckCrc8(NodeConfig) && NodeConfig.nodeId) // nodeId != 0
     {
         NodeConfig.waterSwitchCount = min(NodeConfig.waterSwitchCount, 1);
         NodeConfig.soilMoistureCount = min(NodeConfig.soilMoistureCount, 1);
@@ -126,7 +126,7 @@ void loop()
         else
         {
 #ifdef DEBUG
-            bool crcOK = msg.checkCrc();
+            bool crcOK = CheckCrc8(msg);
             dbgSerial.print(" Crc: ");
             dbgSerial.print(crcOK ? "ok" : "failed");
             dbgSerial.print(" MsgNo: ");
@@ -187,7 +187,7 @@ void loop()
             }
 
             // sending answer
-
+            UpdateCrc8(answer);
             byte sndStat = CAN0.sendMsgBuf(MASTER_NODE, 0, 8, (byte *)&answer);
             if(sndStat == CAN_OK)
             {

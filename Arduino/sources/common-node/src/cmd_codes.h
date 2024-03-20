@@ -100,6 +100,9 @@
 /// Command device num is ordinal number, 0...(count(PINS_PUMP_SWITCH)-1)
 #define CMD_GET_PUMP_SWITCH          (16)
 
+#define CMD_SET_MAIN_SCENARIO        (17)
+#define CMD_GET_MAIN_SCENARIO        (18)
+
 
 
 /// Next functions should be used carefully.

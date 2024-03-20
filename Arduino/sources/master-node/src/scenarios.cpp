@@ -1,5 +1,6 @@
 #include "scenarios.h"
 #include "cap_implementation.h"
+#include "log.h"
 
 // First step is always special "warm up" step #0.
 // Then steps from scenario follow.
@@ -276,9 +277,18 @@ void ScenarioRunner::processCanCommand(bool reqOpenOrClose)
     }
     case CanCommands::S_NO_DATA: {
         auto &scenarioStepNode = scenario->steps[step - 1].nodes[node];
-        canCommands.sendRequest(scenarioStepNode.address, CMD_SET_WATER_SWITCH,
-                                scenarioStepNode.devNo, reqOpenOrClose ? CVAL_OPENED : CVAL_CLOSED);
-        lastCanMsgNo = canCommands.getRequest().msgno;
+        auto sendRes = canCommands.sendRequest(scenarioStepNode.address, CMD_SET_WATER_SWITCH,
+                                               scenarioStepNode.devNo,
+                                               reqOpenOrClose ? CVAL_OPENED : CVAL_CLOSED);
+        if (sendRes == CAN_OK)
+        {
+            lastCanMsgNo = canCommands.getRequest().msgno;
+        }
+        else
+        {
+            errorFlag = true;
+            node++;
+        }
         break;
     }
     default:
@@ -319,11 +329,16 @@ void serialize(const Scenario &scenario, Stream &stream)
 bool deserialize(Stream &stream, Scenario &scenario)
 {
     scenario.stepCount = 0;
-    while (stream.available() && scenario.stepCount < Scenario::MaxStepCount)
+    while (scenario.stepCount < Scenario::MaxStepCount)
     {
+        if (stream.peek() == '\n')
+        {
+            stream.read();
+            break;
+        }
         auto &step = scenario.steps[scenario.stepCount];
         step.runTimeSec = stream.parseInt();
-        char c = stream.read();
+        int c = stream.read();
         if (c != ':')
         {
             return false;
@@ -341,6 +356,10 @@ bool deserialize(Stream &stream, Scenario &scenario)
             if (c == ';')
             {
                 stream.read();
+            }
+            if (c == '\n')
+            {
+                break;
             }
             step.nodes[i].address = stream.parseInt();
             c = stream.read();

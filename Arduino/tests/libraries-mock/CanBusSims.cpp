@@ -126,10 +126,19 @@ INT8U CanBusSims::setMode(INT8U opMode)
 
 INT8U CanBusSims::sendMsgBuf(INT32U id, INT8U ext, INT8U len, INT8U *buf)
 {
+    if (auto *b = std::get_if<sendMsgBufCustomBehaviour_t>(&sendMsgBufBehavior))
+    {
+        auto res = b->on_event(id, ext, len, buf);
+        if (res != CAN_OK)
+        {
+            return res;
+        }
+    }
+
     std::vector<int8_t> data(buf, buf + len);
     foreachDevice(
         [&](std::shared_ptr<CanDevice> device) { device->onDataReceived(id, ext, data); });
-    return len;
+    return CAN_OK;
 }
 
 INT8U CanBusSims::sendMsgBuf(INT32U id, INT8U len, INT8U *buf)
@@ -156,7 +165,7 @@ INT8U CanBusSims::readMsgBuf(INT32U *id, INT8U *ext, INT8U *len, INT8U *buf)
         digitalWrite(gpioIntPin, HIGH);
     }
 
-    return *len;
+    return CAN_OK;
 }
 
 INT8U CanBusSims::readMsgBuf(INT32U *id, INT8U *len, INT8U *buf)
@@ -308,7 +317,7 @@ void SlaveNodeSims::onDataReceived(int32_t nodeId, int8_t ext, std::vector<int8_
         outp = CanMessage(); // reset to invalid
         break;
     }
-    outp.updateCrc();
+    UpdateCrc8(outp);
 
     pendingPackets.push_back(Task{.timeMs = millis() + exectimeMs, .data = outp});
 }

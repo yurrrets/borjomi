@@ -178,7 +178,7 @@ Command:
 Description:
     Returns state of DC adapter with logical number <num> on the node with address <address>.
 Answer:
-    +WATER=<address>,<num>,<state> or
+    +DCADAPTER=<address>,<num>,<state> or
     ERROR <errcode>
 Params:
     <address> - address of the node, dec format
@@ -226,3 +226,28 @@ Params:
     <address> - address of the node, dec format
     <pin> - analog pin number, 0..7
     <value> - number in range 0..1023
+
+
+
+Command:
+    AT+MAINSCENARIO=<scenario_serialized>
+Description:
+    Deserializes input stream and set it as main scenario. Also stores scenario in EEPROM.
+    Do nothing if deserialization failed.
+Answer:
+    OK or
+    ERROR <errcode>
+Params:
+    <scenario_serialized> - scenario description in text format
+
+
+
+Command:
+    AT+MAINSCENARIO?
+Description:
+    Returns current main scenario serialized to text format.
+Answer:
+    +MAINSCENARIO=<scenario_serialized> or
+    ERROR <errcode>
+Params:
+    <scenario_serialized> - scenario description in text format

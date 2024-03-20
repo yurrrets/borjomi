@@ -4,6 +4,7 @@
 #include "Arduino.h"
 #include "ArduinoSims.h"
 #include "CanBusSims.h"
+#include "log.h"
 
 #include "GmockMatchers.h"
 #include "gmock/gmock.h"
@@ -218,7 +219,7 @@ TEST_F(ScenariosTest, no_scenario)
 
 TEST_F(ScenariosTest, empty_scenario)
 {
-    Scenario scenario{.steps = {}, .stepCount = 0};
+    Scenario scenario{.stepCount = 0, .steps = {}};
 
     runner.start(&scenario);
     EXPECT_EQ(runner.totalSteps(), 2);
@@ -245,9 +246,9 @@ TEST_F(ScenariosTest, empty_scenario)
 TEST_F(ScenariosTest, singlestep_singlenode)
 {
     Scenario scenario{
+        .stepCount = 1,
         .steps = {ScenarioStep{.nodes = {ScenarioStepNode{20, 1}, ScenarioStepNode{NO_NODE, 0}},
-                               .runTimeSec = 15}},
-        .stepCount = 1};
+                               .runTimeSec = 15}}};
     auto slave_node = std::make_shared<SlaveNodeSims>(can_bus, 20);
     can_bus.attachDevice(slave_node);
 
@@ -281,10 +282,10 @@ TEST_F(ScenariosTest, singlestep_singlenode)
 TEST_F(ScenariosTest, singlestep_multinode)
 {
     Scenario scenario{
+        .stepCount = 1,
         .steps = {ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{40, 1},
                                          ScenarioStepNode{60, 2}, ScenarioStepNode{50, 3}},
-                               .runTimeSec = 5 * 60}},
-        .stepCount = 1};
+                               .runTimeSec = 5 * 60}}};
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
         {std::make_shared<SlaveNodeSims>(can_bus, 30), std::make_shared<SlaveNodeSims>(can_bus, 40),
          std::make_shared<SlaveNodeSims>(can_bus, 50),
@@ -339,18 +340,17 @@ TEST_F(ScenariosTest, singlestep_multinode)
 TEST_F(ScenariosTest, multistep_singlenode)
 {
     Scenario scenario{
-        .steps =
-            {
-                ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 20},
-                ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 30},
-                ScenarioStep{.nodes = {ScenarioStepNode{60, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 50},
-                ScenarioStep{.nodes = {ScenarioStepNode{50, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 40},
-            },
-        .stepCount = 4};
+        .stepCount = 4,
+        .steps = {
+            ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 20},
+            ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 30},
+            ScenarioStep{.nodes = {ScenarioStepNode{60, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 50},
+            ScenarioStep{.nodes = {ScenarioStepNode{50, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 40},
+        }};
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
         {std::make_shared<SlaveNodeSims>(can_bus, 30), std::make_shared<SlaveNodeSims>(can_bus, 40),
          std::make_shared<SlaveNodeSims>(can_bus, 50),
@@ -398,17 +398,15 @@ TEST_F(ScenariosTest, multistep_singlenode)
 
 TEST_F(ScenariosTest, multistep_multinode)
 {
-    Scenario scenario{
-        .steps =
-            {
-                ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
-                                       ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 20},
-                ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
-                                       ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 30},
-            },
-        .stepCount = 2};
+    Scenario scenario{.stepCount = 2,
+                      .steps = {
+                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 20},
+                          ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 30},
+                      }};
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
         {std::make_shared<SlaveNodeSims>(can_bus, 30), std::make_shared<SlaveNodeSims>(can_bus, 40),
          std::make_shared<SlaveNodeSims>(can_bus, 50),
@@ -451,23 +449,21 @@ TEST_F(ScenariosTest, multistep_multinode)
     EXPECT_THAT(events, IsSupersequenceOf(expected_events));
 }
 
-TEST_F(ScenariosTest, step_partially_succeded)
+TEST_F(ScenariosTest, step_partially_succeded__no_node_answer)
 {
     // In this test we expect to see error, but other nodes which are involved on the same step
     // should work.
     // Also we're checking that scenario is trying to turn the problematic node on and off.
 
-    Scenario scenario{
-        .steps =
-            {
-                ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
-                                       ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 20},
-                ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
-                                       ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 30},
-            },
-        .stepCount = 2};
+    Scenario scenario{.stepCount = 2,
+                      .steps = {
+                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 20},
+                          ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 30},
+                      }};
 
     // node 40 does not answer (e.g. because it's not connected)
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
@@ -514,22 +510,20 @@ TEST_F(ScenariosTest, step_partially_succeded)
     EXPECT_THAT(events, IsSupersequenceOf(expected_events));
 }
 
-TEST_F(ScenariosTest, whole_step_failed)
+TEST_F(ScenariosTest, whole_step_failed__no_node_answer)
 {
     // In this test whole step fails. There's no sense in waiting while step finishes.
     // We're still checking that scenario is trying to turn the problematic nodes on and off.
 
-    Scenario scenario{
-        .steps =
-            {
-                ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
-                                       ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 20},
-                ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
-                                       ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 30},
-            },
-        .stepCount = 2};
+    Scenario scenario{.stepCount = 2,
+                      .steps = {
+                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 20},
+                          ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 30},
+                      }};
 
     // nodes 30 and 60 do not answer (e.g. because they're not connected)
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
@@ -575,21 +569,145 @@ TEST_F(ScenariosTest, whole_step_failed)
     EXPECT_THAT(events, IsSupersequenceOf(expected_events));
 }
 
+TEST_F(ScenariosTest, step_partially_succeded__can_sending_error)
+{
+    // In this test we expect to see error, but other nodes which are involved on the same step
+    // should work.
+    // Also we're checking that scenario is trying to turn the problematic node on and off.
+
+    Scenario scenario{.stepCount = 2,
+                      .steps = {
+                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 20},
+                          ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 30},
+                      }};
+
+    std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
+        {std::make_shared<SlaveNodeSims>(can_bus, 30),
+         std::make_shared<SlaveNodeSims>(can_bus, 40),
+         std::make_shared<SlaveNodeSims>(can_bus, 50),
+         std::make_shared<SlaveNodeSims>(can_bus, 60)});
+    for (auto node : slave_nodes)
+    {
+        can_bus.attachDevice(node);
+    }
+
+    // error on CAN bus while sending command to node 40
+    can_bus.sendMsgBufBehavior = CanBusSims::sendMsgBufCustomBehaviour_t{
+        .on_event = [&](INT32U id, INT8U ext, INT8U len, INT8U *buf) -> INT8U {
+            return id == 40 ? CAN_FAIL : CAN_OK;
+        }};
+
+    runner.start(&scenario);
+    EXPECT_TRUE(runner.isRunning());
+
+    ctx.run_for(160 * 1000);
+    EXPECT_FALSE(runner.isRunning());
+    EXPECT_TRUE(runner.hasError());
+
+    // time may flow a little due to simulated delays
+    // and relatively high time increment between two loop() calls
+    std::vector<Event> expected_events{
+        DigitalPinChangedEvent{
+            .timeMs = 0, .pin = PINS_PUMP_SWITCH[0], .value = true, .pinMode = OUTPUT},
+        DigitalPinChangedEvent{
+            .timeMs = 0, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = true, .pinMode = OUTPUT},
+
+        SetWaterSwitchEvent{.timeMs = 10001, .nodeId = 30, .devNo = 0, .value = true},
+        SetWaterSwitchEvent{.timeMs = 10006, .nodeId = 60, .devNo = 0, .value = true},
+        SetWaterSwitchEvent{.timeMs = 30000, .nodeId = 30, .devNo = 0, .value = false},
+        SetWaterSwitchEvent{.timeMs = 30005, .nodeId = 60, .devNo = 0, .value = false},
+
+        ErrorFlagChanged{.timeMs = 30011, .value = true},
+        SetWaterSwitchEvent{.timeMs = 30011, .nodeId = 50, .devNo = 0, .value = true},
+        SetWaterSwitchEvent{.timeMs = 60010, .nodeId = 50, .devNo = 0, .value = false},
+
+        DigitalPinChangedEvent{
+            .timeMs = 60016, .pin = PINS_PUMP_SWITCH[0], .value = false, .pinMode = OUTPUT},
+        DigitalPinChangedEvent{
+            .timeMs = 60016, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = false, .pinMode = OUTPUT},
+    };
+    EXPECT_THAT(events, IsSupersequenceOf(expected_events));
+}
+
+TEST_F(ScenariosTest, whole_step_failed__can_sending_error)
+{
+    // In this test whole step fails. There's no sense in waiting while step finishes.
+    // We're still checking that scenario is trying to turn the problematic nodes on and off.
+
+    Scenario scenario{.stepCount = 2,
+                      .steps = {
+                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 20},
+                          ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
+                                                 ScenarioStepNode{NO_NODE, 0}},
+                                       .runTimeSec = 30},
+                      }};
+
+    // nodes 30 and 60 do not answer (e.g. because they're not connected)
+    std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
+        {std::make_shared<SlaveNodeSims>(can_bus, 30),
+         std::make_shared<SlaveNodeSims>(can_bus, 40), std::make_shared<SlaveNodeSims>(can_bus, 50),
+         std::make_shared<SlaveNodeSims>(can_bus, 60)});
+    for (auto node : slave_nodes)
+    {
+        can_bus.attachDevice(node);
+    }
+
+    // error on CAN bus while sending command to nodes 30 and 60
+    can_bus.sendMsgBufBehavior = CanBusSims::sendMsgBufCustomBehaviour_t{
+        .on_event = [&](INT32U id, INT8U ext, INT8U len, INT8U *buf) -> INT8U {
+            return (id == 30 || id == 60) ? CAN_FAIL : CAN_OK;
+        }};
+
+    runner.start(&scenario);
+    EXPECT_TRUE(runner.isRunning());
+
+    ctx.run_for(160 * 1000);
+    EXPECT_FALSE(runner.isRunning());
+    EXPECT_TRUE(runner.hasError());
+
+    // time may flow a little due to simulated delays
+    // and relatively high time increment between two loop() calls
+    std::vector<Event> expected_events{
+        DigitalPinChangedEvent{
+            .timeMs = 0, .pin = PINS_PUMP_SWITCH[0], .value = true, .pinMode = OUTPUT},
+        DigitalPinChangedEvent{
+            .timeMs = 0, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = true, .pinMode = OUTPUT},
+
+        ErrorFlagChanged{.timeMs = 10001, .value = true},
+
+        SetWaterSwitchEvent{.timeMs = 10003, .nodeId = 40, .devNo = 0, .value = true},
+        SetWaterSwitchEvent{.timeMs = 10008, .nodeId = 50, .devNo = 0, .value = true},
+        SetWaterSwitchEvent{.timeMs = 40003, .nodeId = 40, .devNo = 0, .value = false},
+        SetWaterSwitchEvent{.timeMs = 40008, .nodeId = 50, .devNo = 0, .value = false},
+
+        DigitalPinChangedEvent{
+            .timeMs = 40014, .pin = PINS_PUMP_SWITCH[0], .value = false, .pinMode = OUTPUT},
+        DigitalPinChangedEvent{
+            .timeMs = 40014, .pin = PINS_DC_ADAPTER_SWITCH[0], .value = false, .pinMode = OUTPUT},
+    };
+    EXPECT_THAT(events, IsSupersequenceOf(expected_events));
+}
+
 TEST_F(ScenariosTest, scenario_stop)
 {
     Scenario scenario{
-        .steps =
-            {
-                ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 20},
-                ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 30},
-                ScenarioStep{.nodes = {ScenarioStepNode{60, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 50},
-                ScenarioStep{.nodes = {ScenarioStepNode{50, 0}, ScenarioStepNode{NO_NODE, 0}},
-                             .runTimeSec = 40},
-            },
-        .stepCount = 4};
+        .stepCount = 4,
+        .steps = {
+            ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 20},
+            ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 30},
+            ScenarioStep{.nodes = {ScenarioStepNode{60, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 50},
+            ScenarioStep{.nodes = {ScenarioStepNode{50, 0}, ScenarioStepNode{NO_NODE, 0}},
+                         .runTimeSec = 40},
+        }};
     std::vector<std::shared_ptr<SlaveNodeSims>> slave_nodes(
         {std::make_shared<SlaveNodeSims>(can_bus, 30), std::make_shared<SlaveNodeSims>(can_bus, 40),
          std::make_shared<SlaveNodeSims>(can_bus, 50),
@@ -643,19 +761,20 @@ TEST(ScenarioFuncs, SerializeDeserialize)
     };
     std::vector<TestData> test_data =
         {
-            {Scenario{.steps = {}, .stepCount = 0}, ""},
-            {Scenario{.steps = {ScenarioStep{
+            {Scenario{.stepCount = 0, .steps = {}}, ""},
+            {Scenario{.stepCount = 1,
+                      .steps = {ScenarioStep{
                           .nodes = {ScenarioStepNode{20, 1}, ScenarioStepNode{NO_NODE, 0}},
-                          .runTimeSec = 15}},
-                      .stepCount = 1},
+                          .runTimeSec = 15}}},
              "15:20,1"},
             {Scenario{
+                 .stepCount = 1,
                  .steps = {ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{40, 1},
                                                   ScenarioStepNode{60, 2}, ScenarioStepNode{50, 3}},
-                                        .runTimeSec = 5 * 60}},
-                 .stepCount = 1},
+                                        .runTimeSec = 5 * 60}}},
              "300:30,0;40,1;60,2;50,3"},
             {Scenario{
+                 .stepCount = 4,
                  .steps =
                      {
                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0},
@@ -670,10 +789,10 @@ TEST(ScenarioFuncs, SerializeDeserialize)
                          ScenarioStep{.nodes = {ScenarioStepNode{50, 0},
                                                 ScenarioStepNode{NO_NODE, 0}},
                                       .runTimeSec = 40},
-                     },
-                 .stepCount = 4},
+                     }},
              "20:30,0|30:40,0|50:60,0|40:50,0"},
             {Scenario{
+                 .stepCount = 2,
                  .steps =
                      {
                          ScenarioStep{.nodes = {ScenarioStepNode{30, 0}, ScenarioStepNode{60, 0},
@@ -682,20 +801,24 @@ TEST(ScenarioFuncs, SerializeDeserialize)
                          ScenarioStep{.nodes = {ScenarioStepNode{40, 0}, ScenarioStepNode{50, 0},
                                                 ScenarioStepNode{NO_NODE, 0}},
                                       .runTimeSec = 30},
-                     },
-                 .stepCount = 2},
+                     }},
              "20:30,0;60,0|30:40,0;50,0"},
         };
 
     for (auto &item : test_data)
     {
+        LOG_INFO("Testing pattern: ", item.serialized);
+
         Stream stream;
         serialize(item.scenario, stream);
         EXPECT_EQ(stream.str(), item.serialized);
 
         Scenario scenario_deserialized;
+        // deserialize works until \n is found; next chars should be ignored
+        stream.str(item.serialized + "\nabcd2345521");
         stream.seekg(0);
         EXPECT_TRUE(deserialize(stream, scenario_deserialized));
         EXPECT_EQ(item.scenario, scenario_deserialized);
+        EXPECT_EQ(stream.peek(), 'a'); // first symbol after \n
     }
 }

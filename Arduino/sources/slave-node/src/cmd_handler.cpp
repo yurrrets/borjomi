@@ -18,7 +18,6 @@ CanMessage cmdVersion(const CanMessage &msg)
     res.devno = 0;
     res.value = MAKE_VERSION(BORJOMI_VERSION_MJ, BORJOMI_VERSION_MN, BORJOMI_VERSION_REV);
 
-    res.updateCrc();
     return res;
 }
 
@@ -32,7 +31,6 @@ CanMessage cmdCapabilities(const CanMessage &msg)
     res.value |= makeCapability(CB_WATER_SWITCH, NodeConfig.waterSwitchCount);
     res.value |= makeCapability(CB_SOIL_MOISTURE, NodeConfig.soilMoistureCount);
 
-    res.updateCrc();
     return res;
 }
 
@@ -67,7 +65,6 @@ CanMessage cmdSetWaterSwitch(const CanMessage &msg)
 #endif
     }
 
-    res.updateCrc();
     return res;
 }
 
@@ -91,7 +88,6 @@ CanMessage cmdGetWaterSwitch(const CanMessage &msg)
     }
     // digitalRead is called on OUTPUT pin
     // and returns valid value on AVR based boards
-    res.updateCrc();
     return res;
 }
 
@@ -103,7 +99,6 @@ CanMessage cmdPing(const CanMessage &msg)
     res.devno = 0;
     res.value = NodeConfig.nodeId;
 
-    res.updateCrc();
     return res;
 }
 
@@ -126,7 +121,6 @@ CanMessage cmdReadSoilMoisture(const CanMessage &msg)
         res.value = CVAL_ERR_INVALID_DEV_NO;
     }
 
-    res.updateCrc();
     return res;
 }
 
@@ -140,7 +134,6 @@ CanMessage cmdAnalogWrite(const CanMessage &msg)
 
     analogWrite(msg.devno, msg.value);
 
-    res.updateCrc();
     return res;
 }
 
@@ -152,7 +145,6 @@ CanMessage cmdAnalogRead(const CanMessage &msg)
     res.devno = msg.devno;
     res.value = analogRead(msg.devno);
 
-    res.updateCrc();
     return res;
 }
 
@@ -166,7 +158,6 @@ CanMessage cmdDigitalWrite(const CanMessage &msg)
 
     digitalWrite(msg.devno, msg.value);
 
-    res.updateCrc();
     return res;
 }
 
@@ -178,7 +169,6 @@ CanMessage cmdDigitalRead(const CanMessage &msg)
     res.devno = msg.devno;
     res.value = digitalRead(msg.devno);
 
-    res.updateCrc();
     return res;
 }
 
@@ -192,7 +182,6 @@ CanMessage cmdDigitalPinMode(const CanMessage &msg)
 
     pinMode(msg.devno, msg.value);
 
-    res.updateCrc();
     return res;
 }
 

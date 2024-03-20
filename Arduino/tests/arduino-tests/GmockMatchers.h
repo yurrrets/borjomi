@@ -1,32 +1,39 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "log.h"
 
-template <typename ContainerA, typename ContainerB>
-bool IsSupersequenceOfImpl(const ContainerA &a, const ContainerB &b)
+template <typename ContainerA, typename ContainerB, typename Listener>
+bool IsSupersequenceOfImpl(const ContainerA &superseq, const ContainerB &subseq,
+                           Listener *result_listener)
 {
-    auto ita = std::begin(a);
-    auto itb = std::begin(b);
+    auto it_super = std::begin(superseq);
+    auto it_sub = std::begin(subseq);
     while (true)
     {
-        if (itb == std::end(b))
+        if (it_sub == std::end(subseq))
         {
             return true;
         }
-        if (ita == std::end(a))
+        if (it_super == std::end(superseq))
         {
+            if (result_listener)
+            {
+                *result_listener << "item index " << std::distance(std::begin(subseq), it_sub)
+                                 << " with value '" << *it_sub << "' didn't match";
+            }
             return false;
         }
-        if (*ita == *itb)
+        if (*it_super == *it_sub)
         {
-            ita++;
-            itb++;
+            it_super++;
+            it_sub++;
             continue;
         }
-        ita++;
+        it_super++;
     }
 }
 
 MATCHER_P(IsSupersequenceOf, seq, "")
 {
-    return IsSupersequenceOfImpl(arg, seq);
+    return IsSupersequenceOfImpl(arg, seq, result_listener);
 }

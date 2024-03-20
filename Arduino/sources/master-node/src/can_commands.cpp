@@ -42,6 +42,7 @@ void CanCommands::setup()
 void CanCommands::loop()
 {
     status = read();
+    // LOG_DEBUG("status: ", status, ", busy: ", busy);
 
     if (!busy)
     {
@@ -51,7 +52,7 @@ void CanCommands::loop()
     if (status == S_NO_DATA)
     {
         auto execTimeMs = millis() - lastRequestTime;
-        if (getLastRequestAddress() == MULTICAST_NODE)
+        if (getRequest().code == CMD_PING && getLastRequestAddress() == MULTICAST_NODE)
         {
             if (execTimeMs > CMD_PING_MULTICAST_TIMEOUT_MS)
             {
@@ -97,7 +98,12 @@ CanCommands::ReadStatus CanCommands::read()
     long unsigned int rxId;
     unsigned char len = 0;
 
-    CAN0.readMsgBuf(&rxId, &len, (byte *)&answer); // Read data: len = data length
+    // Read data: len = data length
+    auto readResult = CAN0.readMsgBuf(&rxId, &len, (byte *)&answer);
+    if (readResult != CAN_OK)
+    {
+        return S_NO_DATA;
+    }
 
     if (rxId != MASTER_NODE)
     {
@@ -117,7 +123,7 @@ CanCommands::ReadStatus CanCommands::read()
         return S_INVALID_MSG;
     }
 
-    bool crcOK = answer.checkCrc();
+    bool crcOK = CheckCrc8(answer);
 #ifdef DEBUG
     dbgSerial.print(" Answer Crc: ");
     dbgSerial.print(crcOK ? "ok" : "failed");
@@ -152,7 +158,7 @@ uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t 
     request.code = command;
     request.devno = devno;
     request.value = value;
-    request.updateCrc();
+    UpdateCrc8(request);
 
     // send data:  ID = 0x100, Standard CAN Frame, Data length = 8 bytes, 'data' = array of data
     // bytes to send
@@ -163,16 +169,12 @@ uint8_t CanCommands::sendRequest(unsigned long addrId, uint8_t command, uint8_t 
     byte sndStat = CAN0.sendMsgBuf(addrId, 0, 8, (byte *)&request);
     if (sndStat == CAN_OK)
     {
-#ifdef DEBUG
-        dbgSerial.println("Message Sent Successfully!");
-#endif
+        // LOG_DEBUG(F("Message Sent Successfully!"));
     }
     else
     {
-#ifdef DEBUG
-        dbgSerial.print("Error Sending Message: ");
-        dbgSerial.println((int)sndStat);
-#endif
+        busy = false;
+        LOG_INFO(F("Error Sending Message: "), (int)sndStat);
     }
     return sndStat;
 }

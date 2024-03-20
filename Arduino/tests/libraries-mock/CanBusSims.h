@@ -61,6 +61,14 @@ class CanBusSims : public MCP_CAN
     void loop();
     void onEvent(std::function<void(const NodeEvent &)> cb);
 
+  public:
+    struct sendMsgBufSuccessBehavior_t{};
+    struct sendMsgBufCustomBehaviour_t{
+      std::function<INT8U(INT32U id, INT8U ext, INT8U len, INT8U *buf)> on_event;
+    };
+    using sendMsgBufBehavior_t = std::variant<sendMsgBufSuccessBehavior_t, sendMsgBufCustomBehaviour_t>;
+    sendMsgBufBehavior_t sendMsgBufBehavior = sendMsgBufSuccessBehavior_t{};
+
   protected:
     void receiveData(int32_t nodeId, int8_t ext, std::vector<int8_t> data);
     void notifyEvent(const NodeEvent &event);

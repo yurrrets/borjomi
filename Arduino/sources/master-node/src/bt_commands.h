@@ -35,6 +35,9 @@
 /// command execution is not allowed in current conditions (sensor values, switch states, etc.)
 #define BTERR_INVALID_STATE         (8)
 
+/// command is known, however parameters are ill-formed
+#define BTERR_INVALID_CMD_PARAMS    (9)
+
 struct BTCommand
 {
     BTCommand() : errcode(0), cmd(0), devno(0), address(0), value(0) { }
@@ -51,6 +54,7 @@ class BTCommandParser
 {
 public:
     BTCommandParser(StreamExt &stream);
+    StreamExt &getStream();
     bool available();
     BTCommand read();
     void answerError(uint8_t errcode);
@@ -67,6 +71,7 @@ public:
     void answerDCVoltage(unsigned long addrId, uint8_t devNo, float val);
     void answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint16_t val);
     void answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state);
+    void beginAnswerGetMainScenario();
 
 private:
     StreamExt &stream;

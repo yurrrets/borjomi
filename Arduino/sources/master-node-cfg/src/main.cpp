@@ -38,7 +38,7 @@ void setup()
     nodeConfig.pressureCoeffs.A = 1;
     nodeConfig.pressureCoeffs.B = 0;
 
-    nodeConfig.updateCrc();
+    UpdateCrc8(nodeConfig);
 
     EEPROM.put(0, nodeConfig);
 }

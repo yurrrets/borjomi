@@ -5,7 +5,8 @@
 #include "cmd_codes.h"
 #include "cap_implementation.h"
 #include "common.h"
-
+#include "stream_ext.h"
+#include "log.h"
 
 #define CHECK_DEV_NO(devNo) \
     if (btCmd.devno != 0) { \
@@ -54,6 +55,12 @@ void processLocalCommand(const BTCommand &btCmd, BTCommandParser &btCommandIO)
     case CMD_GET_PUMP_SWITCH:
         cmdGetPumpSwitch(btCmd, btCommandIO);
         break;
+    case CMD_SET_MAIN_SCENARIO:
+        cmdSetMainScenario(btCmd, btCommandIO);
+        break;
+    case CMD_GET_MAIN_SCENARIO:
+        cmdGetMainScenario(btCmd, btCommandIO);
+        break;
     case CMD_ANALOG_WRITE:
         cmdAnalogWrite(btCmd, btCommandIO);
         break;
@@ -69,6 +76,7 @@ void processLocalCommand(const BTCommand &btCmd, BTCommandParser &btCommandIO)
     case CMD_DIGITAL_PIN_MODE:
         cmdDigitalPinMode(btCmd, btCommandIO);
         break;
+
     default:
         btCommandIO.answerError(BTERR_CMD_NOT_IMPLEMENTED);
     }
@@ -154,6 +162,28 @@ void cmdGetPumpSwitch(const BTCommand &btCmd, BTCommandParser &btCommandIO)
     CHECK_SWITCH_NO(CS_PUMP, btCmd.devno);
     bool value = getControlSwitchVal(CS_PUMP);
     btCommandIO.answerPumpState(getNodeConfig().nodeId, btCmd.devno, value ? CVAL_ON : CVAL_OFF);
+}
+
+void cmdSetMainScenario(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
+{
+    bool success = deserialize(btCommandIO.getStream(), getMainScenario());
+    if (success)
+    {
+        storeMainScenarioToPermanentStorage();
+        btCommandIO.answerOK();
+    }
+    else
+    {
+        restoreMainScenarioFromPermanentStorage();
+        btCommandIO.answerError(BTERR_INVALID_CMD_PARAMS);
+    }
+}
+
+void cmdGetMainScenario(const BTCommand & /*btCmd*/, BTCommandParser &btCommandIO)
+{
+    btCommandIO.beginAnswerGetMainScenario();
+    serialize(getMainScenario(), btCommandIO.getStream());
+    btCommandIO.getStream().println();
 }
 
 void cmdAnalogWrite(const BTCommand &btCmd, BTCommandParser &btCommandIO)

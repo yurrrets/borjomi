@@ -23,8 +23,10 @@ struct ScenarioStep
 struct Scenario
 {
     static constexpr uint8_t MaxStepCount = 32;
-    ScenarioStep steps[MaxStepCount];
+
+    uint8_t crc = 0;
     uint8_t stepCount = 0;
+    ScenarioStep steps[MaxStepCount];
 };
 
 #pragma pack(pop)

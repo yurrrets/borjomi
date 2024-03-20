@@ -28,7 +28,7 @@ class Print
         print('\n');
     }
 
-    void flush()
+    virtual void flush()
     {
     }
 };

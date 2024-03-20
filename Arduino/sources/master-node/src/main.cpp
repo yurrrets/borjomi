@@ -28,9 +28,8 @@
 #define BT_TX_PIN (10)
 #define CAN_CS_PIN (9)
 #define CAN_INT_PIN (5)
-#define BTN_MAIN_PIN (2) // TODO: define true pin
-
-#define LCD_CS_PIN (6) // TODO: define true pin
+#define BTN_MAIN_PIN (2)
+#define LCD_CS_PIN (6)
 
 #ifdef PC_START
 #define PC_START_PIN (8) // digital pin
@@ -66,6 +65,11 @@ MasterNodeID &getNodeConfig()
     return NodeConfig;
 }
 
+Scenario &getMainScenario()
+{
+    return mainScenario;
+}
+
 void updateLcd();
 
 void setup()
@@ -89,7 +93,7 @@ void setup()
 #endif
 
     EEPROM.get(0, NodeConfig);
-    if (NodeConfig.checkCrc() && NodeConfig.nodeId)
+    if (CheckCrc8(NodeConfig) && NodeConfig.nodeId)
     {
         LOG_INFO(F("I'm the Master Node ID "), NodeConfig.nodeId);
     }
@@ -98,6 +102,8 @@ void setup()
         LOG_WARNING(F("I'm the Master Node with UNDEFINED ID!"));
         NodeConfig.nodeId = UNKNOWN_NODE;
     }
+
+    restoreMainScenarioFromPermanentStorage();
 
     canCommands.setup();
     btCommandProcessor.setup();
@@ -127,7 +133,7 @@ void loop()
     if (getControlSwitchVal(CS_DC_ADAPTER) && !IsDcVoltageCorrect())
         setControlSwitchVal(CS_DC_ADAPTER, false); // turn it off
 
-    // canCommands.loop();
+    canCommands.loop();
     btCommandProcessor.loop();
     mainButton.loop();
     scenarioRunner.loop();

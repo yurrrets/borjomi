@@ -5,32 +5,43 @@
 #include "capabilities.h"
 #include "cmd_handler.h"
 #include "nodes.h"
-
+#include "log.h"
 
 class ReadFinisher
 {
-private:
+  private:
     StreamExt &stream;
-public:
-    ReadFinisher(StreamExt &stream) : stream(stream) { }
-    ~ReadFinisher() {
-//        Serial.print("_last readed (in hex): ");
-//        Serial.print(stream.lastReaded(), 16);
+    bool leaveUnfinished = false;
+
+  public:
+    ReadFinisher(StreamExt &stream) : stream(stream)
+    {
+    }
+    ~ReadFinisher()
+    {
+        if (leaveUnfinished)
+        {
+            return;
+        }
         if (stream.lastReaded() != '\n')
         {
-            /*size_t len = */ stream.readUntil('\n');
-//            Serial.print(" readed next len: ");
-//            Serial.print(len);
+            stream.readUntil('\n');
         }
-//        Serial.println();
-//        while (stream.available())
-//            stream.read();
+    }
+    void LeaveUnfinished()
+    {
+        leaveUnfinished = true;
     }
 };
 
 BTCommandParser::BTCommandParser(StreamExt &stream)
     : stream(stream)
 {
+}
+
+StreamExt &BTCommandParser::getStream()
+{
+    return stream;
 }
 
 bool BTCommandParser::available()
@@ -42,7 +53,7 @@ BTCommand BTCommandParser::read()
 {
 //    Serial.println("BTCommandParser::read");
 
-    BTCommand res;
+    BTCommand res = {};
     if (!stream.available())
     {
         res.errcode = BTERR_NO_CMD;
@@ -153,6 +164,27 @@ BTCommand BTCommandParser::read()
         return res;
     }
 
+    if (!strcmp_P(buf, PSTR("AT+MAINSCENARIO")))
+    {
+        res.address = MASTER_NODE;
+        if (stream.lastReaded() == '?')
+        {
+            res.cmd = CMD_GET_MAIN_SCENARIO;
+            return res;
+        }
+        else if (stream.lastReaded() == '=')
+        {
+            res.cmd = CMD_SET_MAIN_SCENARIO;
+            rdFinisher.LeaveUnfinished();
+            return res;
+        }
+        else
+        {
+            res.errcode = BTERR_UNKNOWN_CMD;
+            return res;
+        }
+    }
+
 #ifdef DEBUG
     Serial.print("BT Received cmd: ");
     Serial.print(buf);
@@ -166,6 +198,8 @@ BTCommand BTCommandParser::read()
     }
     Serial.println();
 #endif
+
+    // LOG_DEBUG(F("unknown cmd: "), buf);
     res.errcode = BTERR_UNKNOWN_CMD;
     return res;
 }
@@ -284,6 +318,11 @@ void BTCommandParser::answerAnalogRead(unsigned long addrId, uint8_t pinNo, uint
 void BTCommandParser::answerDigitalRead(unsigned long addrId, uint8_t pinNo, uint8_t state)
 {
     answerGeneralVal(F("+DIGITAL="), addrId, pinNo, state);
+}
+
+void BTCommandParser::beginAnswerGetMainScenario()
+{
+    stream.print(F("AT+MAINSCENARIO="));
 }
 
 void BTCommandParser::fillSensorCmd(uint8_t cmdCode, BTCommand &res)
@@ -415,13 +454,20 @@ void BTCommandProcessor::loop()
             case CMD_DIGITAL_READ:
             case CMD_DIGITAL_PIN_MODE:
             case CMD_PING:
-                canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
+            {
+                auto sendResult = canCommands.sendRequest(btCmd.address, btCmd.cmd, btCmd.devno, btCmd.value);
                 waitCanMsgno = canCommands.getRequest().msgno;
                 if (btCmd.cmd == CMD_PING && btCmd.address == MULTICAST_NODE)
                 {
                     processLocalCommand(btCmd, btCommandParser);
                 }
+                else if (sendResult != CAN_OK)
+                {
+                    LOG_INFO(F("Error sending can request"));
+                    btCommandParser.answerError(BTERR_INVALID_STATE);
+                }
                 break;
+            }
             default:
                 btCommandParser.answerError(BTERR_CMD_NOT_IMPLEMENTED);
             }

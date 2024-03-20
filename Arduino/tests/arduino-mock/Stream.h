@@ -13,6 +13,7 @@ class Stream : public Print
     size_t write(uint8_t c) override;
 
     std::string str();
+    void str(const std::string &s);
     void seekg(size_t pos);
 
   private:

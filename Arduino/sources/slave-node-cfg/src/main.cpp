@@ -20,7 +20,7 @@ void setup()
     NodeConfig.nodeId = SLAVE_NODE_ID;
     NodeConfig.waterSwitchCount = 1;
     NodeConfig.soilMoistureCount = SOIL_MOISTURE_COUNT;
-    NodeConfig.updateCrc();
+    UpdateCrc8(NodeConfig);
 
     EEPROM.put(0, NodeConfig);
 }

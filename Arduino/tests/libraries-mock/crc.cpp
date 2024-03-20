@@ -2,7 +2,7 @@
 
 using namespace std;
 
-uint8_t crc8(const uint8_t *data, uint8_t len)
+uint8_t crc8(const uint8_t *data, uint16_t len)
 {
     uint8_t crc = 0xff;
     size_t i, j;
