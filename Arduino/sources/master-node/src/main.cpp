@@ -140,7 +140,7 @@ void loop()
 
     if (mainButton.clicked())
     {
-        if (scenarioRunner.isRunning())
+        if (scenarioRunner.currentState() == ScenarioRunnerState::Running)
         {
             scenarioRunner.stop();
         }
@@ -190,20 +190,27 @@ template <typename Printer> inline void printHMS(Printer &printer, uint16_t seco
 
 void updateLcd()
 {
-    // struct Autoflush
-    // {
-    //     ~Autoflush()
-    //     {
-    //         lcd.flush();
-    //     }
-    // } autoflush;
-
-    if (!scenarioRunner.isRunning())
+    if (scenarioRunner.currentState() == ScenarioRunnerState::Ready ||
+        scenarioRunner.currentState() == ScenarioRunnerState::Finished)
     {
         lcd.setCursor(0, 0);
         lcd.print(F("Ready           ")); // update whole row
         lcd.setCursor(0, 1);
-        lcd.print(F("press to start->"));
+        if (scenarioRunner.currentState() == ScenarioRunnerState::Finished)
+        {
+            if (scenarioRunner.hasError())
+            {
+                lcd.print(F("finished w error"));
+            }
+            else
+            {
+                lcd.print(F("finished ok     "));
+            }
+        }
+        else
+        {
+            lcd.print(F("press to start->"));
+        }
         lcd.flush();
         return;
     }
@@ -218,7 +225,8 @@ void updateLcd()
     printMS(lcd, scenarioRunner.timeLeftForCurrentStep());
 
     lcd.setCursor(0, 1);
-    lcd.print(F("left     "));
+    lcd.print(scenarioRunner.hasError() ? "!" : " ");
+    lcd.print(F(" left   "));
     printHMS(lcd, scenarioRunner.totalTimeLeft());
     lcd.flush();
 }

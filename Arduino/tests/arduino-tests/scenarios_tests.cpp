@@ -37,19 +37,20 @@ struct ErrorFlagChanged
 bool operator==(const ErrorFlagChanged &a, const ErrorFlagChanged &b);
 std::ostream &operator<<(std::ostream &os, const ErrorFlagChanged &v);
 
-struct IsRunningChanged
+struct RunnerStateChanged
 {
     unsigned long timeMs;
-    bool value;
+    ScenarioRunnerState state;
 };
-bool operator==(const IsRunningChanged &a, const IsRunningChanged &b);
-std::ostream &operator<<(std::ostream &os, const IsRunningChanged &v);
+bool operator==(const RunnerStateChanged &a, const RunnerStateChanged &b);
+std::ostream &operator<<(std::ostream &os, const ScenarioRunnerState &v);
+std::ostream &operator<<(std::ostream &os, const RunnerStateChanged &v);
 
 bool operator==(const ScenarioStepNode &a, const ScenarioStepNode &b);
 bool operator==(const ScenarioStep &a, const ScenarioStep &b);
 bool operator==(const Scenario &a, const Scenario &b);
 
-using OtherEvent = std::variant<CurrectStepChangedEvent, ErrorFlagChanged, IsRunningChanged>;
+using OtherEvent = std::variant<CurrectStepChangedEvent, ErrorFlagChanged, RunnerStateChanged>;
 using Event = template_concat_t<ArduinoEvent, NodeEvent, OtherEvent>;
 
 class ScenariosTest : public testing::Test
@@ -113,10 +114,10 @@ class ScenariosTest : public testing::Test
             runnerHasError = runner.hasError();
             events.push_back(ErrorFlagChanged{.timeMs = millis(), .value = runnerHasError});
         }
-        if (runner.isRunning() != runnerIsRunning)
+        if (runner.currentState() != runnerState)
         {
-            runnerIsRunning = runner.isRunning();
-            events.push_back(IsRunningChanged{.timeMs = millis(), .value = runnerIsRunning});
+            runnerState = runner.currentState();
+            events.push_back(RunnerStateChanged{.timeMs = millis(), .state = runnerState});
         }
     }
 
@@ -128,7 +129,7 @@ class ScenariosTest : public testing::Test
 
     int8_t runnerCurrentStep = 0;
     bool runnerHasError = false;
-    bool runnerIsRunning = false;
+    ScenarioRunnerState runnerState = ScenarioRunnerState::Ready;
     std::vector<Event> events;
 
     std::function<void()> additional_setup_step;
@@ -157,14 +158,34 @@ std::ostream &operator<<(std::ostream &os, const ErrorFlagChanged &v)
     return os;
 }
 
-bool operator==(const IsRunningChanged &a, const IsRunningChanged &b)
+bool operator==(const RunnerStateChanged &a, const RunnerStateChanged &b)
 {
-    return std::tie(a.timeMs, a.value) == std::tie(b.timeMs, b.value);
+    return std::tie(a.timeMs, a.state) == std::tie(b.timeMs, b.state);
 }
 
-std::ostream &operator<<(std::ostream &os, const IsRunningChanged &v)
+std::ostream &operator<<(std::ostream &os, const ScenarioRunnerState &v)
 {
-    os << "IsRunningChanged(timeMs=" << v.timeMs << ", value=" << v.value << ")" << std::endl;
+    switch (v)
+    {
+    case ScenarioRunnerState::Ready:
+        os << "Ready";
+        break;
+    case ScenarioRunnerState::Running:
+        os << "Running";
+        break;
+    case ScenarioRunnerState::Finished:
+        os << "Finished";
+        break;
+    default:
+        os << "<Unknown state>";
+        break;
+    }
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const RunnerStateChanged &v)
+{
+    os << "RunnerStateChanged(timeMs=" << v.timeMs << ", state=" << v.state << ")" << std::endl;
     return os;
 }
 
@@ -212,9 +233,9 @@ bool operator==(const Scenario &a, const Scenario &b)
 TEST_F(ScenariosTest, no_scenario)
 {
     EXPECT_EQ(runner.totalSteps(), 0);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Ready);
     ctx.run_for(1 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Ready);
 }
 
 TEST_F(ScenariosTest, empty_scenario)
@@ -223,10 +244,10 @@ TEST_F(ScenariosTest, empty_scenario)
 
     runner.start(&scenario);
     EXPECT_EQ(runner.totalSteps(), 2);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(13 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_FALSE(runner.hasError());
 
     std::vector<Event> expected_events{
@@ -254,10 +275,10 @@ TEST_F(ScenariosTest, singlestep_singlenode)
 
     runner.start(&scenario);
     EXPECT_EQ(runner.totalSteps(), 3);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(28 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_FALSE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -297,10 +318,10 @@ TEST_F(ScenariosTest, singlestep_multinode)
 
     runner.start(&scenario);
     EXPECT_EQ(runner.totalSteps(), 3);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for((5 * 60 + 13) * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_FALSE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -362,10 +383,10 @@ TEST_F(ScenariosTest, multistep_singlenode)
 
     runner.start(&scenario);
     EXPECT_EQ(runner.totalSteps(), 6);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(160 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_FALSE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -417,10 +438,10 @@ TEST_F(ScenariosTest, multistep_multinode)
     }
 
     runner.start(&scenario);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(160 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_FALSE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -477,10 +498,10 @@ TEST_F(ScenariosTest, step_partially_succeded__no_node_answer)
     }
 
     runner.start(&scenario);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(160 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_TRUE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -536,10 +557,10 @@ TEST_F(ScenariosTest, whole_step_failed__no_node_answer)
     }
 
     runner.start(&scenario);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(160 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_TRUE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -602,10 +623,10 @@ TEST_F(ScenariosTest, step_partially_succeded__can_sending_error)
         }};
 
     runner.start(&scenario);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(160 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_TRUE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -665,10 +686,10 @@ TEST_F(ScenariosTest, whole_step_failed__can_sending_error)
         }};
 
     runner.start(&scenario);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(160 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_TRUE(runner.hasError());
 
     // time may flow a little due to simulated delays
@@ -727,10 +748,10 @@ TEST_F(ScenariosTest, scenario_stop)
     };
 
     runner.start(&scenario);
-    EXPECT_TRUE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Running);
 
     ctx.run_for(23 * 1000);
-    EXPECT_FALSE(runner.isRunning());
+    EXPECT_EQ(runner.currentState(), ScenarioRunnerState::Finished);
     EXPECT_FALSE(runner.hasError());
 
     // time may flow a little due to simulated delays

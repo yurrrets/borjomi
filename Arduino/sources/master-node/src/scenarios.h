@@ -31,6 +31,10 @@ struct Scenario
 
 #pragma pack(pop)
 
+enum class ScenarioRunnerState : uint8_t
+{
+    Ready, Running, Finished
+};
 
 class ScenarioRunner
 {
@@ -39,7 +43,7 @@ public:
     void loop();
     void start(Scenario *scenario);
     void stop();
-    bool isRunning() const;
+    ScenarioRunnerState currentState() const;
     bool hasError() const;
     int8_t currentStep() const;
     uint8_t totalSteps() const;
@@ -49,7 +53,7 @@ public:
     // void fillCurrentStepDescription();
 private:
     CanCommands &canCommands;
-    bool running;
+    ScenarioRunnerState state;
     bool errorFlag;
     Scenario *scenario;
     int8_t step;

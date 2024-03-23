@@ -17,16 +17,21 @@ constexpr int8_t max_node = INT8_MAX;
 } // namespace
 
 ScenarioRunner::ScenarioRunner(CanCommands &canCommands)
-    : canCommands(canCommands), running(false), errorFlag(false), scenario(nullptr), step(0),
-      stepStartTime(0), lastCanMsgNo(INVALID_CAN_MSG_NO)
+    : canCommands(canCommands), state(ScenarioRunnerState::Ready), errorFlag(false),
+      scenario(nullptr), step(0), stepStartTime(0), lastCanMsgNo(INVALID_CAN_MSG_NO)
 {
 }
 
 void ScenarioRunner::loop()
 {
+    if (totalSteps() == 0)
+    {
+        // prevent state change to Finished
+        return;
+    }
     if (step >= totalSteps())
     {
-        running = false;
+        state = ScenarioRunnerState::Finished;
         return;
     }
     if (step < 0)
@@ -64,10 +69,10 @@ void ScenarioRunner::loop()
 
 void ScenarioRunner::start(Scenario *scenario)
 {
-    if (running)
+    if (state != ScenarioRunnerState::Ready && state != ScenarioRunnerState::Finished)
     {
         // already running
-        // TODO: print error
+        LOG_ERROR(F("can't start scenario, invalid state"));
         return;
     }
     this->scenario = scenario;
@@ -78,7 +83,7 @@ void ScenarioRunner::start(Scenario *scenario)
         return;
     }
 
-    running = true;
+    state = ScenarioRunnerState::Running;
     step = -1;
 
     // loop() will do the rest
@@ -98,9 +103,9 @@ void ScenarioRunner::stop()
     }
 }
 
-bool ScenarioRunner::isRunning() const
+ScenarioRunnerState ScenarioRunner::currentState() const
 {
-    return running;
+    return state;
 }
 
 bool ScenarioRunner::hasError() const
