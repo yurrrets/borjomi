@@ -34,7 +34,12 @@ add_arduino_fw_dir(master-node-cfg master-node-cfg)
 target_link_libraries(master-node-cfg PRIVATE EEPROM common-node)
 
 add_arduino_fw_dir(slave-node slave-node)
+set_board_hw_rev(slave-node 1)
 target_link_libraries(slave-node PRIVATE mcp_can SoftwareSerial EEPROM common-node)
+
+add_arduino_fw_dir(slave-node-rev2 slave-node)
+set_board_hw_rev(slave-node-rev2 2)
+target_link_libraries(slave-node-rev2 PRIVATE mcp_can SoftwareSerial EEPROM common-node)
 
 add_arduino_fw_dir(slave-node-cfg slave-node-cfg)
 target_link_libraries(slave-node-cfg PRIVATE EEPROM common-node)

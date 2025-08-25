@@ -6,6 +6,7 @@
 #include <EEPROM.h>
 
 #include "config.h"
+#include "board.h"
 
 #include "can_message.h"
 #include "cmd_codes.h"
@@ -20,8 +21,7 @@ unsigned char len = 0;
 //unsigned char rxBuf[8];
 //char msg[64];
 
-#define CAN0_INT 5                              // Set INT to pin 2
-MCP_CAN CAN0(9);                               // Set CS to pin 10
+MCP_CAN CAN0(PIN_CAN0_CS);                               // Set CS to pin 10
 
 
 
@@ -81,14 +81,14 @@ void setup()
 
     CAN0.setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 
-    pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
-    pinMode(PINS_WATER_SWITCH[0], OUTPUT);
-    digitalWrite(PINS_WATER_SWITCH[0], LOW);
+    pinMode(PIN_CAN0_INT, INPUT);                            // Configuring pin for /INT input
+    
+    board_setup();
 }
 
 void loop()
 {
-    if(!digitalRead(CAN0_INT))                         // If CAN0_INT pin is low, read receive buffer
+    if(!digitalRead(PIN_CAN0_INT))                         // If CAN0_INT pin is low, read receive buffer
     {
         CAN0.readMsgBuf(&rxId, &len, (byte *)&msg);      // Read data: len = data length
         if (len != sizeof(CanMessage))
