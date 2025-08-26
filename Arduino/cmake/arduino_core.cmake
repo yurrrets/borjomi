@@ -104,5 +104,21 @@ function(add_arduino_fw_dir fwname dir)
     file(GLOB src_files ${dir}/*.cpp ${dir}/*.c ${dir}/*.S
         ${dir}/src/*.cpp ${dir}/src/*.c ${dir}/src/*.S)
     add_executable(${fwname} ${src_files})
+    set_target_properties(${fwname} PROPERTIES fw_dir ${dir})
     mark_as_arduino_avr(${fwname})
+endfunction()
+
+function(set_board_hw_rev fwname rev_no)
+    get_target_property(dir ${fwname} fw_dir)
+    if("dir" STREQUAL "")
+        message( FATAL_ERROR "${fwname} is not target, or it wasn't added using 'add_arduino_fw_dir'" )
+    endif()
+
+    target_include_directories(${fwname} PRIVATE ${dir}/src ${dir}/src/boards/hwrev${rev_no}/)
+    target_compile_definitions(${fwname} PRIVATE BOARD_HW_REV=${rev_no})
+    file(GLOB src_extra_files 
+        ${dir}/src/boards/hwrev${rev_no}/*.cpp
+        ${dir}/src/boards/hwrev${rev_no}/*.c
+        ${dir}/src/boards/hwrev${rev_no}/*.S)
+    target_sources(${fwname} PRIVATE ${src_extra_files})
 endfunction()

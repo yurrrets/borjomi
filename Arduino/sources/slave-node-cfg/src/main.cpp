@@ -18,7 +18,7 @@ void setup()
     }
 
     NodeConfig.nodeId = SLAVE_NODE_ID;
-    NodeConfig.waterSwitchCount = 1;
+    NodeConfig.waterSwitchCount = WATER_SWITCH_COUNT;
     NodeConfig.soilMoistureCount = SOIL_MOISTURE_COUNT;
     UpdateCrc8(NodeConfig);
 

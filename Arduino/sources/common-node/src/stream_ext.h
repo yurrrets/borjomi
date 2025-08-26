@@ -26,9 +26,13 @@ public:
     int peek();
     void flush();
 
+    bool getEchoMode() const { return _echoMode; }
+    void setEchoMode(bool on);
+
 private:
     Stream &wrk;
     int _lastReaded;
+    bool _echoMode = false;
 };
 
 #endif // STREAM_EXT_H

@@ -9,7 +9,7 @@
 
 
 #define CMD_INVALID              (0)
-#define CMD_ERROR                (-1)
+#define CMD_ERROR                (0xFF)
 
 #define CVAL_ERR_NO_ERROR        (0)
 #define CVAL_ERR_INVALID_DEV_NO  (1)

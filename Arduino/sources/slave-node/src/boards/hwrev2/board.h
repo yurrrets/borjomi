@@ -7,7 +7,7 @@
 #define PIN_CAN0_CS  9
 #define PIN_SHIFT_REG_LATCH 2
 #define PIN_SHIFT_REG_DATA  3
-#define PIN_SHIFT_REG_CLOCK SCK
+#define PIN_SHIFT_REG_CLOCK 7
 
 void board_setup();
 

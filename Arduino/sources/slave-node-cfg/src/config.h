@@ -1,8 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SLAVE_NODE_ID          (180)
-#define SOIL_MOISTURE_COUNT    (1)
+#define SLAVE_NODE_ID          (10)
+#define WATER_SWITCH_COUNT     (24)
+#define SOIL_MOISTURE_COUNT    (0)
 
 #endif // CONFIG_H
 

@@ -13,6 +13,8 @@
 #include "nodes.h"
 #include "capabilities.h"
 #include "tools.h"
+#include "stream_ext.h"
+#include "log.h"
 
 #include "cmd_handler.h"
 
@@ -21,10 +23,14 @@ unsigned char len = 0;
 //unsigned char rxBuf[8];
 //char msg[64];
 
+enum SerialCommandType
+{
+    CT_UNKNOWN,
+    CT_SET,
+    CT_GET
+};
+
 MCP_CAN CAN0(PIN_CAN0_CS);                               // Set CS to pin 10
-
-
-
 
 CanMessage msg;
 SlaveNodeID NodeConfig;
@@ -32,6 +38,11 @@ SlaveNodeID NodeConfig;
 #ifdef DEBUG
 Stream &dbgSerial = Serial;
 #endif
+Print &dbgOutput = Serial;
+StreamExt cmdSerial(Serial);
+
+CanMessage processMsg(const CanMessage &msg);
+SerialCommandType fillGetSetCmd(StreamExt &stream, uint8_t cmdSetCode, uint8_t cmdGetCode, CanMessage &res);
 
 void setup()
 {
@@ -47,11 +58,9 @@ void setup()
     EEPROM.get(0, NodeConfig);
     if (CheckCrc8(NodeConfig) && NodeConfig.nodeId) // nodeId != 0
     {
-        NodeConfig.waterSwitchCount = min(NodeConfig.waterSwitchCount, 1);
-        NodeConfig.soilMoistureCount = min(NodeConfig.soilMoistureCount, 1);
 #ifdef DEBUG
         dbgSerial
-                << "I'm the Slave Node ID 0x" << hex(NodeConfig.nodeId)
+                << "I'm the Slave Node ID " << NodeConfig.nodeId
                 << ", water switches = " << NodeConfig.waterSwitchCount
                 << ", soil moistures = " << NodeConfig.soilMoistureCount
                 << endl;
@@ -84,6 +93,9 @@ void setup()
     pinMode(PIN_CAN0_INT, INPUT);                            // Configuring pin for /INT input
     
     board_setup();
+
+    cmdSerial.setTimeout(10000);
+    cmdSerial.setEchoMode(true);
 }
 
 void loop()
@@ -145,46 +157,7 @@ void loop()
                 return;
             }
 
-            CanMessage answer;
-            switch (msg.code) {
-            case CMD_VERSION:
-                answer = cmdVersion(msg);
-                break;
-            case CMD_CAPABILITIES:
-                answer = cmdCapabilities(msg);
-                break;
-            case CMD_SET_WATER_SWITCH:
-                answer = cmdSetWaterSwitch(msg);
-                break;
-            case CMD_GET_WATER_SWITCH:
-                answer = cmdGetWaterSwitch(msg);
-                break;
-            case CMD_PING:
-                if (rxId == MULTICAST_NODE) // need to wait some time to avoid collisions
-                    delay(NodeConfig.nodeId);
-                answer = cmdPing(msg);
-                break;
-            case CMD_READ_SOIL_MOISTURE:
-                answer = cmdReadSoilMoisture(msg);
-                break;
-            case CMD_ANALOG_WRITE:
-                answer = cmdAnalogWrite(msg);
-                break;
-            case CMD_ANALOG_READ:
-                answer = cmdAnalogRead(msg);
-                break;
-            case CMD_DIGITAL_WRITE:
-                answer = cmdDigitalWrite(msg);
-                break;
-            case CMD_DIGITAL_READ:
-                answer = cmdDigitalRead(msg);
-                break;
-            case CMD_DIGITAL_PIN_MODE:
-                answer = cmdDigitalPinMode(msg);
-                break;
-            default:
-                break;
-            }
+            CanMessage answer = processMsg(msg);
 
             // sending answer
             UpdateCrc8(answer);
@@ -208,4 +181,168 @@ void loop()
 //        dbgSerial.println();
 #endif
     }
+
+    // cmdSerial input processing
+    do
+    {
+        if (!cmdSerial.available())
+        {
+            // nothing to process
+            break;
+        }
+
+        auto is_known_command = [](const char *cmd)
+        {
+            // add other commands as well
+            return !strcmp_P(cmd, PSTR("WATER"));
+        };
+
+        char buf[32] = {0};
+        static const char Terminators[] = { '=', '?', '*', '\n', '\r' };
+        char *curr_buf = buf;
+        size_t curr_buf_size = sizeof(buf);
+        while (true)
+        {
+            StreamExt::ReadResult rr = cmdSerial.readBytesUntilOneOf(Terminators, sizeof(Terminators), curr_buf, curr_buf_size);
+            if (rr.terminator < 0 || rr.terminator == '\n' || rr.terminator == '\r' || is_known_command(buf))
+            {
+                break;
+            }
+            // add terminator char to the end as it's not a known command
+            curr_buf[rr.sz] = rr.terminator;
+            curr_buf += rr.sz + 1;
+            curr_buf_size -= rr.sz;
+            if (curr_buf_size) curr_buf_size--;
+        }
+
+        bool cmdNeedProcess = true;
+        SerialCommandType cmdType = CT_UNKNOWN;
+
+        if (!cmdSerial.available() && cmdSerial.lastReaded() == '\r')
+        {
+            cmdSerial.write('\n');
+        }
+
+        if (!strcmp_P(buf, PSTR("?")) || !strcmp_P(buf, PSTR("HELP")))
+        {
+            cmdSerial.println(F("?                     this help"));
+            cmdSerial.println(F("HELP                  this help"));
+            cmdSerial.println(F("WATER=<num>,<state>   set water switch <num> to <state> (0 - off, other - on)"));
+            cmdSerial.println(F("WATER?<num>           get water switch <num> state"));
+            cmdNeedProcess = false;
+        }
+        else if (!strcmp_P(buf, PSTR("")))
+        {
+            // ignore empty lines
+            cmdNeedProcess = false;
+        }
+        else if (!strcmp_P(buf, PSTR("WATER")))
+        {
+            cmdType = fillGetSetCmd(cmdSerial, CMD_SET_WATER_SWITCH, CMD_GET_WATER_SWITCH, msg);
+        }
+        else
+        {
+            cmdSerial.print(F("Unknown command: "));
+            cmdSerial.println(buf);
+            cmdNeedProcess = false;
+        }
+
+        // clear the rest of the buf
+        if (cmdSerial.lastReaded() != '\n' && cmdSerial.lastReaded() != '\r')
+        {
+            cmdSerial.readBytesUntilOneOf(Terminators, sizeof(Terminators), buf, sizeof(buf));
+        }
+
+        if (cmdNeedProcess)
+        {
+            if (!cmdSerial.available() && cmdSerial.lastReaded() == '\r')
+            {
+                cmdSerial.write('\n');
+            }
+
+            if (cmdType == CT_UNKNOWN)
+            {
+                cmdSerial.print(F("Invalid command: "));
+                cmdSerial.println(buf);
+            }
+            else
+            {
+                CanMessage answer = processMsg(msg);
+                if (answer.code == CMD_ERROR)
+                {
+                    cmdSerial.print(F("Error "));
+                    cmdSerial.println(answer.value);
+                }
+                else
+                {
+                    if (cmdType == CT_SET)
+                    {
+                        cmdSerial.println(F("ok"));
+                    }
+                    else
+                    {
+                        cmdSerial.println(answer.value);
+                    }
+                }
+            }
+        }
+    } while (false);
+}
+
+CanMessage processMsg(const CanMessage &msg)
+{
+    switch (msg.code) {
+    case CMD_VERSION:
+        return cmdVersion(msg);
+    case CMD_CAPABILITIES:
+        return cmdCapabilities(msg);
+    case CMD_SET_WATER_SWITCH:
+        return cmdSetWaterSwitch(msg);
+    case CMD_GET_WATER_SWITCH:
+        return cmdGetWaterSwitch(msg);
+    case CMD_PING:
+        if (rxId == MULTICAST_NODE) // need to wait some time to avoid collisions
+            delay(NodeConfig.nodeId);
+        return cmdPing(msg);
+    case CMD_READ_SOIL_MOISTURE:
+        return cmdReadSoilMoisture(msg);
+    case CMD_ANALOG_WRITE:
+        return cmdAnalogWrite(msg);
+    case CMD_ANALOG_READ:
+        return cmdAnalogRead(msg);
+    case CMD_DIGITAL_WRITE:
+        return cmdDigitalWrite(msg);
+    case CMD_DIGITAL_READ:
+        return cmdDigitalRead(msg);
+    case CMD_DIGITAL_PIN_MODE:
+        return cmdDigitalPinMode(msg);
+    default:
+        return CanMessage{};
+    }
+}
+
+SerialCommandType fillGetSetCmd(StreamExt &stream, uint8_t cmdSetCode, uint8_t cmdGetCode, CanMessage &res)
+{
+    res.msgno = 1;
+    if (stream.lastReaded() == '?')
+    {
+        // GET_XXX command
+        // so read an address and return
+        res.code = cmdGetCode;
+        res.devno = stream.parseInt();
+        res.value = 0;
+        return CT_GET;
+    }
+    else if (stream.lastReaded() == '=')
+    {
+        res.code = cmdSetCode;
+        res.devno = stream.parseInt();
+        if (stream.readNext() != ',')
+        {
+            return CT_UNKNOWN;
+        }
+        res.value = stream.parseInt();
+        return CT_SET;
+    }
+    return CT_UNKNOWN;
 }

@@ -56,10 +56,14 @@ int StreamExt::available()
 int StreamExt::read()
 {
     _lastReaded = wrk.read();
-#ifdef DEBUG
-    if (_lastReaded >= 0)
-        Serial.write(_lastReaded);
-#endif
+
+    if (_echoMode && _lastReaded >= 0)
+    {
+        // wrk.print(_lastReaded);
+        // wrk.print(' ');
+        wrk.write(_lastReaded);
+    }
+
     return _lastReaded;
 }
 
@@ -73,4 +77,7 @@ void StreamExt::flush()
     wrk.flush();
 }
 
-#include "stream_ext.h"
+void StreamExt::setEchoMode(bool on)
+{
+    _echoMode = on;
+}

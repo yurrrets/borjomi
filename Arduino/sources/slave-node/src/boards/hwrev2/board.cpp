@@ -1,5 +1,6 @@
 #include "board.h"
 #include "Arduino.h"
+#include "SPI.h"
 
 static uint32_t switches_state = 0;
 
@@ -15,7 +16,7 @@ void board_setup()
 
 void set_switch_state(int switch_no, int state)
 {
-    uint32_t bit_mask = 1 << switch_no;
+    uint32_t bit_mask = (uint32_t)1 << switch_no;
     if (state)
     {
         switches_state |= bit_mask;
@@ -35,6 +36,6 @@ void set_switch_state(int switch_no, int state)
 
 int get_switch_state(int switch_no)
 {
-    uint32_t bit_mask = 1 << switch_no;
+    uint32_t bit_mask = (uint32_t)1 << switch_no;
     return switches_state & bit_mask ? 1 : 0;
 }
